@@ -1,0 +1,66 @@
+{
+  "name": "tkvgen",
+  "version": "1.0.0",
+  "description": "A web-based video editing tool that allows users to upload photos, select royalty-free music, and export videos with cross-device compatibility",
+  "main": "server.js",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "nodemon server.js",
+    "client": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node server.js",
+    "test": "vitest"
+  },
+  "keywords": [
+    "video-editor",
+    "photo-to-video",
+    "music-integration",
+    "ffmpeg",
+    "web-app",
+    "react",
+    "tailwindcss"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "axios": "^1.6.2",
+    "connect-redis": "^9.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^8.0.1",
+    "express-validator": "^7.2.1",
+    "ffmpeg-static": "^5.2.0",
+    "ffprobe-static": "^3.1.0",
+    "file-type": "^21.0.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "framer-motion": "^12.23.12",
+    "helmet": "^8.1.0",
+    "multer": "^1.4.5-lts.1",
+    "qrcode": "^1.5.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.1",
+    "redis": "^5.8.2",
+    "sanitize-filename": "^1.6.3",
+    "sharp": "^0.34.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.39",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.0",
+    "autoprefixer": "^10.4.16",
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.0.2",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6",
+    "vite": "^5.0.5",
+    "vitest": "^1.0.4"
+  }
+}

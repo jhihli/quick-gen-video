@@ -1,0 +1,543 @@
+import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useAppContext } from '../context/AppContext'
+import { useLanguage } from '../context/LanguageContext'
+import ConfirmationDialog from './ConfirmationDialog'
+
+function UploadPhotos() {
+  const { photos, addPhotos, removePhoto: removePhotoFromContext, uploadMode, setUploadMode, hasGeneratedVideo, cleanupAndReset } = useAppContext()
+  const { t } = useLanguage()
+  const [isUploading, setIsUploading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [showError, setShowError] = useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [pendingAction, setPendingAction] = useState(null)
+
+  const showErrorMessage = (message) => {
+    setErrorMessage(message)
+    setShowError(true)
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+      setShowError(false)
+      setTimeout(() => setErrorMessage(''), 500) // Clear message after fade out
+    }, 3000)
+  }
+
+  const uploadPhotosToServer = async (files) => {
+    const formData = new FormData()
+    files.forEach(file => {
+      formData.append('photos', file)
+    })
+    
+    // Add session ID for file tracking
+    const sessionId = sessionStorage.getItem('tkvgen-session-id')
+    if (sessionId) {
+      formData.append('sessionId', sessionId)
+    }
+
+    try {
+      const response = await fetch('/api/upload-photos', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+      
+      if (!response.ok) {
+        // For video duration errors, pass the full error data
+        if (data.invalidFiles) {
+          throw new Error('Upload failed: ' + JSON.stringify(data))
+        }
+        throw new Error(data.error || 'Upload failed')
+      }
+
+      return data.photos
+    } catch (error) {
+      console.error('Upload error:', error)
+      throw error
+    }
+  }
+
+  const checkForDuplicates = (files) => {
+    const duplicates = []
+    const newFiles = []
+    
+    files.forEach(file => {
+      // Check for duplicates based on name and size
+      const isDuplicate = photos.some(existingPhoto => 
+        existingPhoto.originalname === file.name && 
+        existingPhoto.size === file.size
+      )
+      
+      if (isDuplicate) {
+        duplicates.push(file.name)
+      } else {
+        newFiles.push(file)
+      }
+    })
+    
+    return { duplicates, newFiles }
+  }
+
+  const validateFileTypes = (files) => {
+    if (uploadMode === 'photos') {
+      const imageFiles = files.filter(file => file.type.startsWith('image/'))
+      const videoFiles = files.filter(file => file.type.startsWith('video/'))
+      
+      if (videoFiles.length > 0) {
+        return { valid: false, error: 'Photo mode selected. Please upload image files only or switch to Video mode.' }
+      }
+      
+      if (imageFiles.length === 0) {
+        return { valid: false, error: 'No valid image files found.' }
+      }
+      
+      return { valid: true, files: imageFiles }
+    } else {
+      const videoFiles = files.filter(file => file.type.startsWith('video/'))
+      const imageFiles = files.filter(file => file.type.startsWith('image/'))
+      
+      if (imageFiles.length > 0) {
+        return { valid: false, error: 'Video mode selected. Please upload video files only or switch to Photo mode.' }
+      }
+      
+      if (videoFiles.length === 0) {
+        return { valid: false, error: 'No valid video files found.' }
+      }
+      
+      return { valid: true, files: videoFiles }
+    }
+  }
+
+  const processFileUpload = async (files, inputElement) => {
+    // Validate file types
+    const validation = validateFileTypes(files)
+    if (!validation.valid) {
+      showErrorMessage(validation.error)
+      if (inputElement) inputElement.value = '' // Clear the input
+      return
+    }
+
+    // Check for duplicates
+    const { duplicates, newFiles } = checkForDuplicates(validation.files)
+    
+    // If no new files to upload, just clear input and return (no alert needed)
+    if (newFiles.length === 0) {
+      if (inputElement) inputElement.value = ''
+      return
+    }
+
+    setIsUploading(true)
+    try {
+      const uploadedPhotos = await uploadPhotosToServer(newFiles)
+      addPhotos(uploadedPhotos)
+    } catch (error) {
+      // Handle video duration validation errors
+      if (error.message.includes('duration limit') || error.message.includes('3 minute')) {
+        try {
+          const errorData = JSON.parse(error.message.split('Upload failed: ')[1] || '{}');
+          if (errorData.invalidFiles && errorData.validFiles) {
+            // Show detailed error for video duration validation
+            const errorMsg = `❌ ${errorData.message}\n\nInvalid files:\n${errorData.invalidFiles.join('\n')}\n\n${errorData.details}`;
+            showErrorMessage(errorMsg);
+            
+            // Add any valid files that were uploaded
+            if (errorData.validFiles.length > 0) {
+              addPhotos(errorData.validFiles);
+            }
+          } else {
+            showErrorMessage('Failed to upload media: ' + error.message);
+          }
+        } catch (parseError) {
+          showErrorMessage('Failed to upload media: ' + error.message);
+        }
+      } else {
+        showErrorMessage('Failed to upload media: ' + error.message)
+      }
+    } finally {
+      setIsUploading(false)
+      // Clear the input
+      if (inputElement) inputElement.value = ''
+    }
+  }
+
+  const handleFileSelect = async (e) => {
+    const files = Array.from(e.target.files)
+    if (files.length === 0) return
+
+    // Check if user has generated a video and show confirmation
+    if (hasGeneratedVideo) {
+      setPendingAction(() => () => processFileUpload(files, e.target))
+      setShowConfirmDialog(true)
+      return
+    }
+
+    // If no video generated, proceed normally
+    await processFileUpload(files, e.target)
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.currentTarget.classList.add('dragover')
+  }
+
+  const handleDragLeave = (e) => {
+    e.preventDefault()
+    e.currentTarget.classList.remove('dragover')
+  }
+
+  const processDrop = async (files) => {
+    const mediaFiles = files.filter(file => file.type.startsWith('image/') || file.type.startsWith('video/'))
+    
+    if (mediaFiles.length === 0) {
+      showErrorMessage(uploadMode === 'photos' ? t('pleaseDropImageFilesOnly') : t('pleaseDropVideoFilesOnly'))
+      return
+    }
+
+    await processFileUpload(mediaFiles, null)
+  }
+
+  const handleDrop = async (e) => {
+    e.preventDefault()
+    e.currentTarget.classList.remove('dragover')
+    const files = Array.from(e.dataTransfer.files)
+    
+    // Check if user has generated a video and show confirmation
+    if (hasGeneratedVideo) {
+      setPendingAction(() => () => processDrop(files))
+      setShowConfirmDialog(true)
+      return
+    }
+
+    // If no video generated, proceed normally
+    await processDrop(files)
+  }
+
+  const removePhoto = (id) => {
+    removePhotoFromContext(id)
+  }
+
+  const clearAllFiles = () => {
+    photos.forEach(photo => removePhotoFromContext(photo.id))
+  }
+
+  const handleClearAll = () => {
+    if (hasGeneratedVideo) {
+      setPendingAction(() => clearAllFiles)
+      setShowConfirmDialog(true)
+      return
+    }
+    clearAllFiles()
+  }
+
+  const handleModeChange = (newMode) => {
+    if (hasGeneratedVideo) {
+      setPendingAction(() => () => {
+        if (photos.length > 0) {
+          clearAllFiles()
+        }
+        setUploadMode(newMode)
+      })
+      setShowConfirmDialog(true)
+      return
+    }
+    
+    if (photos.length > 0) {
+      clearAllFiles()
+    }
+    setUploadMode(newMode)
+  }
+
+  const handleConfirmAction = async () => {
+    setShowConfirmDialog(false)
+    if (pendingAction) {
+      await cleanupAndReset() // Clear all data including video
+      await pendingAction()
+      setPendingAction(null)
+    }
+  }
+
+  const handleCancelAction = () => {
+    setShowConfirmDialog(false)
+    setPendingAction(null)
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Modern Toggle Switch */}
+      <motion.div 
+        className="inline-flex bg-gray-800/80 rounded-full p-1 border border-gray-700"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <button
+          onClick={() => handleModeChange('photos')}
+          className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+            uploadMode === 'photos'
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg'
+              : 'text-gray-400 hover:text-gray-300'
+          }`}
+        >
+          📸 {t('photos')}
+        </button>
+        <button
+          onClick={() => handleModeChange('videos')}
+          className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+            uploadMode === 'videos'
+              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+              : 'text-gray-400 hover:text-gray-300'
+          }`}
+        >
+          🎥 {t('videos')}
+        </button>
+      </motion.div>
+
+      {/* Error Message Display */}
+      <AnimatePresence>
+        {showError && errorMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
+            className="bg-red-500/20 border border-red-500/50 rounded-xl p-4 text-red-300"
+          >
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0">
+                <span className="text-xl">⚠️</span>
+              </div>
+              <div className="flex-1">
+                <pre className="text-sm font-medium whitespace-pre-wrap">{errorMessage}</pre>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Preview Photos/Videos - At Top */}
+      <AnimatePresence>
+        {photos.length > 0 && (
+          <motion.div 
+            className="mt-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Preview Grid Only */}
+            <div className="bg-gray-900/40 backdrop-blur-xl border border-white/10 rounded-2xl p-4 overflow-hidden">
+              <div className={`grid ${photos.length === 1 ? 'grid-cols-1 max-w-xs mx-auto' : photos.length === 2 ? 'grid-cols-2' : 'grid-cols-3'} gap-4`}>
+                {photos.map((photo, index) => (
+                  <motion.div 
+                    key={photo.id} 
+                    className="relative group cursor-pointer"
+                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                    transition={{ duration: 0.4, delay: index * 0.1, type: "spring" }}
+                    whileHover={{ y: -8 }}
+                  >
+                    {/* Media Container */}
+                    <div className="relative overflow-hidden rounded-xl bg-gray-800 shadow-2xl">
+                      {photo.originalname && (photo.originalname.toLowerCase().includes('.mp4') || photo.originalname.toLowerCase().includes('.mov') || photo.originalname.toLowerCase().includes('.webm') || photo.originalname.toLowerCase().includes('.avi')) ? (
+                        <div className="relative aspect-video">
+                          <video 
+                            src={photo.url}
+                            className="w-full h-full object-cover"
+                            muted
+                            preload="metadata"
+                            onError={(e) => {
+                              console.error('Failed to load video:', photo.url);
+                            }}
+                          />
+                          {/* Video Indicator Badge */}
+                          <div className="absolute top-3 right-3">
+                            <div className="flex items-center space-x-1 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-full border border-white/20">
+                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z"/>
+                              </svg>
+                              <span className="text-white text-xs font-medium">VIDEO</span>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="relative aspect-video">
+                          <motion.img 
+                            src={photo.url} 
+                            alt="Uploaded media" 
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              console.error('Failed to load image:', photo.url);
+                              e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZjNmNGY2Ii8+CiAgICA8dGV4dCB4PSI1MCIgeT0iNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY3Nzk4YSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk1lZGlhPC90ZXh0Pgo8L3N2Zz4K';
+                            }}
+                          />
+                          {/* Image Overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      )}
+
+                      {/* Hover Effects Border */}
+                      <motion.div
+                        className="absolute inset-0 border-2 border-transparent rounded-xl"
+                        whileHover={{
+                          borderColor: "rgba(34, 197, 94, 0.5)",
+                          boxShadow: "0 0 20px rgba(34, 197, 94, 0.3)"
+                        }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    </div>
+
+                    {/* Remove Button */}
+                    <motion.button
+                      onClick={() => removePhoto(photo.id)}
+                      className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                      </svg>
+                    </motion.button>
+
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Media Gallery Header - In middle */}
+      <AnimatePresence>
+        {photos.length > 0 && (
+          <motion.div 
+            className="mt-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <motion.div
+                  className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center"
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+                  </svg>
+                </motion.div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">{t('mediaGallery')}</h3>
+                  <p className="text-xs text-cyan-300">
+                    {photos.length} {uploadMode === 'photos' 
+                      ? (photos.length === 1 ? t('photoUploaded') : t('photosUploaded'))
+                      : (photos.length === 1 ? t('videoUploaded') : t('videosUploaded'))
+                    }
+                  </p>
+                </div>
+              </div>
+              <motion.button
+                onClick={handleClearAll}
+                className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 hover:text-red-300 rounded-lg text-xs font-medium transition-all duration-200"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {t('clearAll')}
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Upload Area - At bottom */}
+      <motion.div 
+        className={`relative border-2 border-dashed border-cyan-400/50 rounded-xl p-4 text-center cursor-pointer transition-all duration-300 hover:border-cyan-400 hover:bg-cyan-400/5 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        onClick={() => !isUploading && document.getElementById('photo-input').click()}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        whileHover={!isUploading ? { scale: 1.02 } : {}}
+        whileTap={!isUploading ? { scale: 0.98 } : {}}
+      >
+        <AnimatePresence mode="wait">
+          {isUploading ? (
+            <motion.div 
+              key="uploading"
+              className="flex flex-col items-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div 
+                className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              />
+              <motion.p 
+                className="mt-4 text-sm text-cyan-300"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                Uploading photos...
+              </motion.p>
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="upload-prompt"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                animate={{ y: [0, -5, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <svg className="mx-auto h-10 w-10 text-cyan-400 mb-2" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </motion.div>
+              <p className="text-white text-sm font-medium">
+                {uploadMode === 'photos' ? t('clickToUpload') : t('clickToUploadVideos')}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      <input 
+        id="photo-input"
+        type="file"
+        multiple
+        accept={uploadMode === 'photos' ? 'image/*' : 'video/*'}
+        onChange={handleFileSelect}
+        disabled={isUploading}
+        className="hidden"
+      />
+
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={showConfirmDialog}
+        onConfirm={handleConfirmAction}
+        onCancel={handleCancelAction}
+        type="warning"
+        title="Clear Current Data?"
+        message="You have a generated video that will be lost. This action will clear all your current photos, music, and generated video.
+
+Are you sure you want to continue?"
+        confirmText="Yes, Clear Data"
+        cancelText="Cancel"
+      />
+
+    </div>
+  )
+}
+
+export default UploadPhotos

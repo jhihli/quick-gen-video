@@ -1,0 +1,14 @@
+{
+  "sessionId": "test-session",
+  "comments": [
+    {
+      "id": "comment-1755570510717-qdhvklb4x",
+      "text": "This is a test comment for the new comment system!",
+      "timestamp": 1755570510717
+    }
+  ],
+  "createdAt": 1755570510717,
+  "lastUpdated": 1755570510717,
+  "expiresAt": 1756175310717,
+  "lastSubmission": 1755570510717
+}

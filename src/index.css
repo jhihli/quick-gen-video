@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #0f172a;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
+
+/* Improve file input styling */
+input[type="file"]::-webkit-file-upload-button {
+  border-radius: 9999px;
+  border: none;
+  padding: 12px 24px;
+  background: linear-gradient(45deg, #8b5cf6, #ec4899);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px 0 rgba(139, 92, 246, 0.3);
+}
+
+input[type="file"]::-webkit-file-upload-button:hover {
+  background: linear-gradient(45deg, #7c3aed, #db2777);
+  box-shadow: 0 6px 20px 0 rgba(139, 92, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Custom drag over effects */
+.dragover {
+  border-color: #06b6d4 !important;
+  background-color: rgba(6, 182, 212, 0.05) !important;
+  transform: scale(1.02);
+}
