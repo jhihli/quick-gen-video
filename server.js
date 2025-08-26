@@ -35,17 +35,11 @@ dotenv.config();
 // Redis disabled - using in-memory rate limiting only
 console.log('🔄 Redis disabled, using in-memory rate limiting');
 
-// Get base URL for QR codes - can be configured via environment variable
+// Get base URL for QR codes and API calls
 const getBaseUrl = (req) => {
-  // Priority: 1. Environment variable, 2. User-provided header, 3. Request host
-  if (process.env.QR_BASE_URL) {
-    return process.env.QR_BASE_URL;
-  }
-  
-  // Check if client provided a custom base URL via header
-  const customBaseUrl = req.get('x-custom-base-url');
-  if (customBaseUrl) {
-    return customBaseUrl;
+  // Use environment variable for base URL (production domain or localhost)
+  if (process.env.BASE_URL) {
+    return process.env.BASE_URL;
   }
   
   // Fallback to request host
@@ -83,25 +77,17 @@ app.use(helmet({
         "blob:",
         "https://purecatamphetamine.github.io", // Flag icons primary source
         "https://cdn.jsdelivr.net", // Flag icons fallback
-        "*.ngrok.io", // Development ngrok domains
-        "*.ngrok-free.app", // Development ngrok-free domains
         "https:"
       ],
       mediaSrc: [
         "'self'",
         "blob:",
-        "data:",
-        "*.ngrok.io",
-        "*.ngrok-free.app"
+        "data:"
       ],
       connectSrc: [
         "'self'",
-        "*.ngrok.io",
-        "*.ngrok-free.app",
         "http://localhost:*", // Development server connections
-        "ws://localhost:*", // WebSocket connections for dev
-        "wss://*.ngrok.io", // WebSocket over ngrok
-        "wss://*.ngrok-free.app"
+        "ws://localhost:*" // WebSocket connections for dev
       ],
       objectSrc: ["'none'"],
       frameSrc: ["'self'"],
@@ -129,16 +115,15 @@ app.use(cors());
 app.use(express.json({ limit: '1mb' })); // Limit JSON payload size
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-// Add comprehensive ngrok-skip-browser-warning headers to bypass ngrok warning page
+// Add CORS and security headers
 app.use((req, res, next) => {
-  // Multiple ngrok bypass headers for maximum compatibility
-  res.setHeader('ngrok-skip-browser-warning', 'true');
-  res.setHeader('ngrok-skip-browser-warning', 'any');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Range, ngrok-skip-browser-warning, X-Requested-With, Content-Type');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  // CORS headers
+  const allowedOrigins = process.env.CORS_ORIGIN || '*';
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigins);
+  res.setHeader('Access-Control-Allow-Headers', 'Range, X-Requested-With, Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
   
-  // Additional headers for iOS Safari compatibility
+  // Security headers
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   
@@ -151,7 +136,6 @@ app.use((req, res, next) => {
   if (isMobile && (req.query.ios === 'true' || req.query.android === 'true' || req.query.mobile === 'true')) {
     const deviceType = isAndroid ? 'Android' : 'iOS';
     console.log(`📱 ${deviceType} request detected: ${req.method} ${req.originalUrl}`);
-    console.log(`🔍 Headers: ngrok-skip-browser-warning = ${req.get('ngrok-skip-browser-warning')}`);
     console.log(`🤖 User-Agent: ${userAgent.substring(0, 100)}...`);
   }
   
@@ -170,14 +154,13 @@ app.get('/public/temp-videos/:filename', (req, res) => {
   
   // Check if video exists
   if (!fs.existsSync(videoPath)) {
-    res.setHeader('ngrok-skip-browser-warning', 'true');
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
     return res.status(404).send(`
       <!DOCTYPE html>
       <html>
       <head>
         <title>Video Not Found</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="ngrok-skip-browser-warning" content="true">
       </head>
       <body style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
         <h1>Video Not Found</h1>
@@ -211,10 +194,10 @@ app.get('/public/temp-videos/:filename', (req, res) => {
     const range = req.headers.range;
     
     // Set headers for video download
-    res.setHeader('ngrok-skip-browser-warning', 'true');
     res.setHeader('Content-Type', 'video/mp4');
     res.setHeader('Content-Disposition', `attachment; filename="tkvgen-video.mp4"`);
     res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*');
     
     // Handle range requests
     if (range) {
@@ -226,8 +209,7 @@ app.get('/public/temp-videos/:filename', (req, res) => {
       res.writeHead(206, {
         'Content-Range': `bytes ${start}-${end}/${fileSize}`,
         'Content-Length': chunksize,
-        'ngrok-skip-browser-warning': 'true',
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': process.env.CORS_ORIGIN || '*'
       });
       
       const stream = fs.createReadStream(videoPath, { start, end });
@@ -246,19 +228,15 @@ app.get('/public/temp-videos/:filename', (req, res) => {
   
   console.log(`📄 Serving download page for ${filename} (${fileSize} MB)`);
   
-  res.setHeader('ngrok-skip-browser-warning', 'true');
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*');
   
-  // Enhanced HTML page optimized for iOS Safari with comprehensive ngrok bypass
+  // Mobile-optimized HTML page for video download
   res.send(`<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="ngrok-skip-browser-warning" content="true">
-  <meta name="ngrok-skip-browser-warning" content="any">
-  <meta http-equiv="ngrok-skip-browser-warning" content="true">
-  <meta http-equiv="ngrok-skip-browser-warning" content="any">
   <meta name="format-detection" content="telephone=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -337,13 +315,13 @@ app.get('/public/temp-videos/:filename', (req, res) => {
   </div>
   
   <script>
-    // Enhanced script for iOS ngrok bypass and debug info
+    // Mobile download optimization script
     try {
       // Set debug info
       document.getElementById('ua').textContent = 'UA: ' + navigator.userAgent.substring(0, 40) + '...';
       console.log('Page loaded successfully for: ${filename}');
       
-      // Mobile device detection and ngrok bypass mechanisms
+      // Mobile device detection
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       const isAndroid = /Android/.test(navigator.userAgent);
       const isMobile = isIOS || isAndroid;
@@ -353,92 +331,46 @@ app.get('/public/temp-videos/:filename', (req, res) => {
       const isSamsung = /SamsungBrowser/.test(navigator.userAgent);
       
       if (isMobile) {
-        console.log(\`Mobile device detected: \${isIOS ? 'iOS' : 'Android'}, applying ngrok bypass mechanisms\`);
+        console.log(\`Mobile device detected: \${isIOS ? 'iOS' : 'Android'}\`);
         
-        // Method 1: Force page reload without ngrok warning if we detect we might be on a warning page
-        if (window.location.search.includes('ngrok-skip-browser-warning=true') === false) {
-          console.log('Adding ngrok bypass parameter to current URL');
-          const currentUrl = new URL(window.location);
-          currentUrl.searchParams.set('ngrok-skip-browser-warning', 'true');
-          currentUrl.searchParams.set('mobile', isAndroid ? 'android' : 'ios');
-          if (window.location.href !== currentUrl.href) {
-            window.location.replace(currentUrl.href);
-            return;
-          }
-        }
-        
-        // Method 2: Set additional headers for all requests from this page
-        const originalFetch = window.fetch;
-        window.fetch = function(...args) {
-          if (args[1]) {
-            args[1].headers = args[1].headers || {};
-            args[1].headers['ngrok-skip-browser-warning'] = 'true';
-            args[1].headers['X-Requested-With'] = 'TKVGen-Mobile';
-          } else {
-            args[1] = { 
-              headers: { 
-                'ngrok-skip-browser-warning': 'true',
-                'X-Requested-With': 'TKVGen-Mobile'
-              } 
-            };
-          }
-          return originalFetch.apply(this, args);
-        };
-        
-        // Method 3: Enhanced auto-redirect mechanism for mobile browsers
+        // Enhanced mobile download handling
         setTimeout(() => {
           const downloadBtn = document.querySelector('.download-btn');
           if (downloadBtn && !isInStandaloneMode) {
             const deviceType = isAndroid ? 'Android' : 'iOS';
-            console.log(\`\${deviceType} detected, preparing auto-bypass\`);
+            console.log(\`\${deviceType} detected, optimizing download\`);
             
-            // Add click handler to ensure bypass headers are sent
+            // Add click handler for better mobile download experience
             downloadBtn.addEventListener('click', function(e) {
-              e.preventDefault();
               const deviceParam = isAndroid ? 'android=true' : 'ios=true';
               const downloadUrl = this.href + 
                 (this.href.includes('?') ? '&' : '?') + 
-                \`ngrok-skip-browser-warning=true&\${deviceParam}&mobile=true\`;
+                \`\${deviceParam}&mobile=true\`;
               
               console.log(\`\${deviceType} download URL:\`, downloadUrl);
               
-              // Android-specific handling
+              // Device-specific handling for better compatibility
               if (isAndroid) {
                 if (isChrome || isSamsung) {
-                  // For Chrome and Samsung Browser on Android
                   window.location.href = downloadUrl;
                 } else if (isFirefox) {
-                  // For Firefox on Android
                   window.open(downloadUrl, '_self');
                 } else {
-                  // For other Android browsers
                   window.open(downloadUrl, '_blank');
                 }
               } else {
-                // iOS handling (existing logic)
+                // iOS handling
                 window.open(downloadUrl, '_blank');
               }
             });
           }
         }, 500);
         
-        // Method 4: Android-specific bypass mechanisms
+        // Mobile viewport optimization
         if (isAndroid) {
-          console.log('Applying Android-specific ngrok bypass');
-          
-          // Set viewport meta for better Android compatibility
           const viewport = document.querySelector('meta[name="viewport"]');
           if (viewport) {
             viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover');
-          }
-          
-          // Android Chrome specific bypass
-          if (isChrome) {
-            console.log('Android Chrome detected');
-            // Force HTTPS if not already
-            if (window.location.protocol === 'http:' && window.location.hostname.includes('ngrok')) {
-              window.location.protocol = 'https:';
-            }
           }
           
           // Samsung Browser specific handling
@@ -472,8 +404,7 @@ app.get('/download-video/:filename', (req, res) => {
   const range = req.headers.range;
   
   // Set headers for proper video download
-  res.setHeader('ngrok-skip-browser-warning', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*');
   res.setHeader('Access-Control-Allow-Headers', 'Range');
   res.setHeader('Accept-Ranges', 'bytes');
   
@@ -510,12 +441,11 @@ app.get('/download-video/:filename', (req, res) => {
   }
 });
 
-// Serve other static files from public directory with ngrok bypass header
+// Serve static files from public directory
 app.use('/public', (req, res, next) => {
-  // These headers are already set by the global middleware, but ensuring consistency
-  res.setHeader('ngrok-skip-browser-warning', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Range, ngrok-skip-browser-warning');
+  // Set CORS headers for static file serving
+  res.setHeader('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Range, X-Requested-With, Content-Type');
   
   // For video files, set proper headers
   if (req.path.endsWith('.mp4') || req.path.endsWith('.webm') || req.path.endsWith('.avi')) {
@@ -1181,8 +1111,7 @@ app.get('/api/video/:tempUrlId', (req, res) => {
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache',
       'Expires': '0',
-      'ngrok-skip-browser-warning': 'true',
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': process.env.CORS_ORIGIN || '*'
     };
     res.writeHead(206, head);
     file.pipe(res);
@@ -1194,8 +1123,7 @@ app.get('/api/video/:tempUrlId', (req, res) => {
       'Pragma': 'no-cache',
       'Expires': '0',
       'Content-Disposition': `inline; filename="${tempVideo.filename}"`,
-      'ngrok-skip-browser-warning': 'true',
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': process.env.CORS_ORIGIN || '*'
     };
     res.writeHead(200, head);
     fs.createReadStream(tempVideo.videoPath).pipe(res);
@@ -1493,12 +1421,12 @@ app.post('/api/csp-violation', express.json({ limit: '1mb' }), (req, res) => {
 // Get QR code configuration
 app.get('/api/qr-config', (req, res) => {
   res.json({
-    baseUrl: process.env.QR_BASE_URL || null,
+    baseUrl: process.env.BASE_URL || null,
     defaultBaseUrl: getBaseUrl(req),
     instructions: {
-      environment: "Set QR_BASE_URL environment variable (e.g., https://your-domain.com or https://abc123.ngrok.io)",
-      header: "Or send 'x-custom-base-url' header with each QR generation request",
-      example: "For ngrok: QR_BASE_URL=https://abc123.ngrok.io npm run dev"
+      environment: "Set BASE_URL environment variable (e.g., https://wgenv.com for production or http://localhost:5003 for development)",
+      howToSet: "Add BASE_URL=https://wgenv.com to your .env file",
+      example: "For production: BASE_URL=https://wgenv.com npm start"
     }
   });
 });
@@ -1709,12 +1637,12 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`📍 Local: http://localhost:${PORT}/api/health`);
   console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
   
-  if (process.env.QR_BASE_URL) {
-    console.log(`📱 QR Base URL: ${process.env.QR_BASE_URL}`);
+  if (process.env.BASE_URL) {
+    console.log(`📱 Base URL: ${process.env.BASE_URL}`);
   } else {
-    console.log(`📱 QR codes will use request host (configure via QR_BASE_URL env var or UI)`);
+    console.log(`📱 Using request host for QR codes and API calls`);
   }
-  console.log(`💡 For mobile access, use ngrok: 'ngrok http ${PORT}' then set QR_BASE_URL\n`);
+  console.log(`💡 For production, configure BASE_URL environment variable to https://wgenv.com\n`);
   
   // Start enhanced periodic cleanup (every 2 minutes for abandoned sessions, fallback 30 min for age-based)
   setInterval(performPeriodicCleanup, 2 * 60 * 1000);

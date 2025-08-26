@@ -1,0 +1,176 @@
+version: '3.8'
+
+services:
+  # Redis service for production caching and rate limiting
+  redis:
+    image: redis:7-alpine
+    container_name: tkvgen-redis-prod
+    restart: always
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_prod_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - tkvgen-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
+
+  # Backend service for production
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      target: production
+    container_name: tkvgen-backend-prod
+    restart: always
+    ports:
+      - "127.0.0.1:5003:5003"
+    environment:
+      - NODE_ENV=production
+      - PORT=5003
+      - BASE_URL=https://wgenv.com
+      - REACT_APP_BASE_URL=https://wgenv.com
+      - CORS_ORIGIN=https://wgenv.com
+      - REDIS_URL=redis://redis:6379
+      - REDIS_DISABLED=false
+      - MAX_FILE_SIZE=10485760
+      - MAX_FILES_COUNT=10
+      - VIDEO_QUALITY=high
+      - VIDEO_FORMAT=mp4
+      - DEFAULT_VIDEO_DURATION=30
+      - UPLOAD_DIR=public/uploads
+      - VIDEO_OUTPUT_DIR=public/videos
+      - FORCE_HTTPS=true
+    volumes:
+      # Persistent storage for uploads and generated content
+      - backend_prod_uploads:/app/public/uploads
+      - backend_prod_videos:/app/public/temp-videos
+      - backend_prod_temp_clips:/app/public/videos/temp_clips
+      - backend_prod_music:/app/public/local-music
+      # Logs
+      - backend_prod_logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - tkvgen-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5003/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+    security_opt:
+      - no-new-privileges:true
+
+  # Frontend service for production
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      target: production
+    container_name: tkvgen-frontend-prod
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_BASE_URL=https://wgenv.com
+    volumes:
+      # SSL certificates (if using custom certificates)
+      - ./ssl:/etc/nginx/ssl:ro
+      # Nginx logs
+      - frontend_prod_logs:/var/log/nginx
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - tkvgen-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+    security_opt:
+      - no-new-privileges:true
+
+  # Nginx reverse proxy with SSL termination (optional)
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: tkvgen-nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - frontend_prod_logs:/var/log/nginx
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - tkvgen-network
+    profiles:
+      - proxy
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+        reservations:
+          memory: 32M
+          cpus: '0.05'
+
+# Named volumes for persistent production data
+volumes:
+  redis_prod_data:
+    driver: local
+  backend_prod_uploads:
+    driver: local
+  backend_prod_videos:
+    driver: local
+  backend_prod_temp_clips:
+    driver: local
+  backend_prod_music:
+    driver: local
+  backend_prod_logs:
+    driver: local
+  frontend_prod_logs:
+    driver: local
+
+# Network for secure inter-service communication
+networks:
+  tkvgen-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

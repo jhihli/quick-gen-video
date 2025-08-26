@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  # Redis service for caching and rate limiting
+  redis:
+    image: redis:7-alpine
+    container_name: tkvgen-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - tkvgen-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # Backend service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      target: development
+    container_name: tkvgen-backend-dev
+    restart: unless-stopped
+    ports:
+      - "5003:5003"
+    environment:
+      - NODE_ENV=development
+      - PORT=5003
+      - BASE_URL=http://localhost:5003
+      - REACT_APP_BASE_URL=http://localhost:5003
+      - CORS_ORIGIN=*
+      - REDIS_URL=redis://redis:6379
+      - REDIS_DISABLED=false
+      - MAX_FILE_SIZE=10485760
+      - MAX_FILES_COUNT=10
+      - VIDEO_QUALITY=high
+      - VIDEO_FORMAT=mp4
+      - DEFAULT_VIDEO_DURATION=30
+      - UPLOAD_DIR=public/uploads
+      - VIDEO_OUTPUT_DIR=public/videos
+    volumes:
+      # Source code for hot reload
+      - .:/app
+      - /app/node_modules
+      # Persistent storage for uploads and generated content
+      - backend_uploads:/app/public/uploads
+      - backend_videos:/app/public/temp-videos
+      - backend_temp_clips:/app/public/videos/temp_clips
+      - backend_music:/app/public/local-music
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - tkvgen-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5003/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend service
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      target: development
+    container_name: tkvgen-frontend-dev
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:5003
+      - REACT_APP_BASE_URL=http://localhost:5003
+    volumes:
+      # Source code for hot reload
+      - .:/app
+      - /app/node_modules
+      - /app/dist
+    depends_on:
+      - backend
+    networks:
+      - tkvgen-network
+    stdin_open: true
+    tty: true
+
+# Named volumes for persistent data
+volumes:
+  redis_data:
+    driver: local
+  backend_uploads:
+    driver: local
+  backend_videos:
+    driver: local
+  backend_temp_clips:
+    driver: local
+  backend_music:
+    driver: local
+
+# Network for inter-service communication
+networks:
+  tkvgen-network:
+    driver: bridge

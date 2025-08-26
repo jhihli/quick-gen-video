@@ -42,7 +42,7 @@ function VideoExport({ onNewVideo }) {
     try {
       const response = await fetch(`/api/rate-limit-status?sessionId=${sessionId}`, {
         headers: {
-          'ngrok-skip-browser-warning': 'true'
+          'Content-Type': 'application/json'
         }
       });
       
@@ -125,8 +125,7 @@ function VideoExport({ onNewVideo }) {
       const response = await fetch('/api/generate-video', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           photos: photos,
@@ -170,7 +169,7 @@ function VideoExport({ onNewVideo }) {
           try {
             const progressResponse = await fetch(`/api/video-progress/${data.jobId}`, {
               headers: {
-                'ngrok-skip-browser-warning': 'true'
+                'Content-Type': 'application/json'
               }
             })
             const progressData = await progressResponse.json()
@@ -194,21 +193,12 @@ function VideoExport({ onNewVideo }) {
                 setTimeout(() => {
                   setShowSuccessMessage(false)
                 }, 5000)
-                // Generate QR code for mobile users using the ngrok URL
+                // Generate QR code for mobile users
                 if (progressData.videoData && progressData.videoData.tempUrl) {
-                  // Force use ngrok URL for QR codes, fallback to current origin
-                  // Get ngrok URL from environment variable if available, otherwise use localhost
-                  const ngrokUrl = import.meta.env.VITE_NGROK_URL || window.location.origin
+                  // Use environment variable for base URL or fallback to current origin
+                  const baseUrl = import.meta.env.REACT_APP_BASE_URL || window.location.origin
                   
-                  // Auto-detect if we're already on ngrok or use environment variable
-                  let baseUrl;
-                  if (window.location.hostname.includes('ngrok')) {
-                    baseUrl = window.location.origin
-                    console.log('Auto-detected ngrok URL:', baseUrl)
-                  } else {
-                    baseUrl = window.location.hostname === 'localhost' ? ngrokUrl : window.location.origin
-                  }
-                  const fullTempUrl = `${baseUrl}${progressData.videoData.tempUrl}?ngrok-skip-browser-warning=true&mobile=true&qr=true&t=${Date.now()}`
+                  const fullTempUrl = `${baseUrl}${progressData.videoData.tempUrl}?mobile=true&qr=true&t=${Date.now()}`
                   
                   console.log('QR Code URL:', fullTempUrl) // Debug log
                   setTempUrl(fullTempUrl)
@@ -271,8 +261,7 @@ function VideoExport({ onNewVideo }) {
         await fetch('/api/cleanup', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': 'true'
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             photos: photos,
@@ -342,7 +331,7 @@ function VideoExport({ onNewVideo }) {
         try {
           const response = await fetch(videoData.url, {
             headers: {
-              'ngrok-skip-browser-warning': 'true'
+              'Content-Type': 'application/json'
             }
           })
           if (response.ok) {
@@ -370,8 +359,7 @@ function VideoExport({ onNewVideo }) {
       // Method 2: Fetch as blob and create download
       const response = await fetch(videoData.url, {
         headers: {
-          'Range': 'bytes=0-',  // Important for mobile video downloads
-          'ngrok-skip-browser-warning': 'true'
+          'Range': 'bytes=0-'  // Important for mobile video downloads
         }
       })
       
@@ -461,7 +449,7 @@ function VideoExport({ onNewVideo }) {
     try {
       const response = await fetch(`/api/qr-code/${tempUrlId}`, {
         headers: {
-          'ngrok-skip-browser-warning': 'true'
+          'Content-Type': 'application/json'
         }
       })
       const data = await response.json()
@@ -822,19 +810,10 @@ function VideoExport({ onNewVideo }) {
               onDownload={downloadVideo}
               onGenerateQR={async () => {
                 if (!tempUrl && videoData && videoData.tempUrl) {
-                  // Force use ngrok URL for QR codes, fallback to current origin
-                  // Get ngrok URL from environment variable if available, otherwise use localhost
-                  const ngrokUrl = import.meta.env.VITE_NGROK_URL || window.location.origin
+                  // Use environment variable for base URL or fallback to current origin
+                  const baseUrl = import.meta.env.REACT_APP_BASE_URL || window.location.origin
                   
-                  // Auto-detect if we're already on ngrok or use environment variable
-                  let baseUrl;
-                  if (window.location.hostname.includes('ngrok')) {
-                    baseUrl = window.location.origin
-                    console.log('Auto-detected ngrok URL:', baseUrl)
-                  } else {
-                    baseUrl = window.location.hostname === 'localhost' ? ngrokUrl : window.location.origin
-                  }
-                  const fullTempUrl = `${baseUrl}${videoData.tempUrl}?ngrok-skip-browser-warning=true&mobile=true&qr=true&t=${Date.now()}`
+                  const fullTempUrl = `${baseUrl}${videoData.tempUrl}?mobile=true&qr=true&t=${Date.now()}`
                   
                   console.log('Manual QR Code URL:', fullTempUrl) // Debug log
                   setTempUrl(fullTempUrl)
