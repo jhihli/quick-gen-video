@@ -77,7 +77,8 @@ services:
       - "3002:3002"
     environment:
       - NODE_ENV=development
-      - VITE_API_URL=http://localhost:5003
+      - DOCKER_ENV=true
+      - VITE_API_URL=http://backend:5003
       - REACT_APP_BASE_URL=http://localhost:5003
     volumes:
       # Source code for hot reload

@@ -14,11 +14,11 @@ export default defineConfig(({ mode }) => {
       },
       proxy: {
         '/api': {
-          target: 'http://localhost:5003',
+          target: process.env.DOCKER_ENV === 'true' ? 'http://backend:5003' : 'http://localhost:5003',
           changeOrigin: true
         },
         '/public': {
-          target: 'http://localhost:5003',
+          target: process.env.DOCKER_ENV === 'true' ? 'http://backend:5003' : 'http://localhost:5003',
           changeOrigin: true
         }
       }
