@@ -147,7 +147,6 @@ public/comments/*
 
 # Verification scripts
 verify-config.js
-start-ngrok.bat
 test-output.mp4
 
 # Design files

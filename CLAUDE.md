@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-TKVGen is a web-based video editing tool that allows users to upload multiple photos/videos, add their own music, and create slideshow videos. The application uses React frontend with a Node.js/Express backend and leverages FFmpeg for video processing. The system is designed for mobile-first experience with ngrok support and QR code sharing.
+TKVGen is a web-based video editing tool that allows users to upload multiple photos/videos, add their own music, and create slideshow videos. The application uses React frontend with a Node.js/Express backend and leverages FFmpeg for video processing. The system is designed for mobile-first experience with QR code sharing.
 
 ## Development Commands
 
@@ -30,7 +30,7 @@ TKVGen is a web-based video editing tool that allows users to upload multiple ph
   - `VideoExport`: Video generation with progress tracking and QR sharing
 
 ### Backend (Node.js + Express)
-- **server.js**: Comprehensive server with mobile optimization and ngrok support
+- **server.js**: Comprehensive server with mobile optimization and QR code sharing
 - **Core API Endpoints**:
   - `POST /api/upload-photos` - Multi-file photo/video upload (max 10 files, 10MB each)
   - `POST /api/upload-music` - Music file upload with validation
@@ -54,7 +54,7 @@ TKVGen is a web-based video editing tool that allows users to upload multiple ph
 
 ### Mobile-First Design
 - **Resolution**: 1080x1920 (portrait) with black letterboxing to preserve image aspect ratios
-- **ngrok Integration**: Comprehensive headers and bypass mechanisms for mobile browser compatibility
+- **Mobile Optimization**: Comprehensive headers and bypass mechanisms for mobile browser compatibility
 - **QR Code Sharing**: Temporary URLs with 5-minute expiration for mobile downloads
 - **Progressive Enhancement**: Multi-device download pages with device-specific optimizations
 
@@ -94,12 +94,11 @@ TKVGen is a web-based video editing tool that allows users to upload multiple ph
 
 - `PORT`: Server port (default: 5003)
 - `NODE_ENV`: Environment setting
-- `QR_BASE_URL`: Base URL for QR code generation (for ngrok/production)
-- `VITE_NGROK_URL`: Frontend ngrok URL configuration
+- `BASE_URL`: Base URL for QR code generation (production domain)
 
 ## Vite Configuration
 
-- **Dev Server**: Port 3002 with ngrok compatibility headers
+- **Dev Server**: Port 3002 with mobile compatibility headers
 - **Proxy Setup**: `/api` and `/public` routes proxied to backend (port 5003)
 - **Build Output**: `dist/` directory with sourcemaps enabled
 
@@ -126,7 +125,7 @@ TKVGen is a web-based video editing tool that allows users to upload multiple ph
 
 ### Mobile Compatibility
 - Device detection and browser-specific handling
-- ngrok bypass mechanisms for development
+- Mobile browser compatibility mechanisms
 - Responsive design with touch-friendly interfaces
 
 ## File Structure Notes
@@ -136,13 +135,13 @@ TKVGen is a web-based video editing tool that allows users to upload multiple ph
 - **Path Resolution**: Comprehensive path normalization for cross-platform compatibility
 - **Temporary File Management**: Structured cleanup with expiration tracking
 
-## ngrok Development Setup
+## Production Deployment
 
-For mobile testing and cross-device sharing:
-1. Run `ngrok http 3002` to expose local development server
-2. Copy the forwarding URL to `.env` as `VITE_NGROK_URL`
-3. The application automatically handles ngrok headers and browser warnings
-4. QR codes use the ngrok URL for mobile device access
+For production deployment with QR code functionality:
+1. Set `BASE_URL` environment variable to your production domain (e.g., `https://your-domain.com`)
+2. Deploy using Docker with the provided production configuration
+3. QR codes will automatically use your production domain for mobile downloads
+4. Mobile users can scan QR codes to download videos directly from your server
 
 ## Node.js Requirements
 

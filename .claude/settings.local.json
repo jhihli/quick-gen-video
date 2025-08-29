@@ -25,7 +25,14 @@
       "Bash(del nul)",
       "Bash(git remote add:*)",
       "Bash(git push:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(git commit:*)",
+      "Bash(docker-compose build:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker:*)",
+      "Bash(winget install:*)",
+      "Bash(git rm:*)",
+      "Bash(del:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

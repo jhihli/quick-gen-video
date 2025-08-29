@@ -19,8 +19,7 @@ export const useSessionHeartbeat = () => {
       const response = await fetch('/api/heartbeat', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           sessionId: sessionIdRef.current

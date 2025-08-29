@@ -202,10 +202,10 @@ let translationsCache = {
     hideQRSettings: 'Hide',
     configureQRSettings: 'Configure',
     qrCodeSettings: 'QR Code Settings',
-    forMobileAccess: 'For mobile access, set your public URL (e.g., ngrok tunnel):',
+    forMobileAccess: 'For mobile access, set your public URL:'
     setButton: 'Set',
     settingButton: 'Setting...',
-    tipUseNgrok: '💡 Tip: Use ngrok, localtunnel, or deploy to make your local server accessible to mobile devices',
+    tipUseNgrok: '💡 Tip: Deploy your application to make it accessible to mobile devices',
     selected: 'selected',
 
     // Advertisement
@@ -385,10 +385,10 @@ let translationsCache = {
     hideQRSettings: 'Ocultar',
     configureQRSettings: 'Configurar',
     qrCodeSettings: 'Configuración de Código QR',
-    forMobileAccess: 'Para acceso móvil, establece tu URL pública (ej. túnel ngrok):',
+    forMobileAccess: 'Para acceso móvil, establece tu URL pública:'
     setButton: 'Establecer',
     settingButton: 'Estableciendo...',
-    tipUseNgrok: '💡 Consejo: Usa ngrok, localtunnel, o despliega para hacer tu servidor local accesible a dispositivos móviles',
+    tipUseNgrok: '💡 Consejo: Despliega tu aplicación para hacerla accesible a dispositivos móviles',
     selected: 'seleccionada',
 
     // Error messages
@@ -558,10 +558,10 @@ let translationsCache = {
     hideQRSettings: 'Ocultar',
     configureQRSettings: 'Configurar',
     qrCodeSettings: 'Configurações do Código QR',
-    forMobileAccess: 'Para acesso móvel, defina sua URL pública (ex. túnel ngrok):',
+    forMobileAccess: 'Para acesso móvel, defina sua URL pública:'
     setButton: 'Definir',
     settingButton: 'Definindo...',
-    tipUseNgrok: '💡 Dica: Use ngrok, localtunnel, ou faça deploy para tornar seu servidor local acessível a dispositivos móveis',
+    tipUseNgrok: '💡 Dica: Faça deploy da sua aplicação para torná-la acessível a dispositivos móveis',
     selected: 'selecionada',
 
     // MusicSelector additional translations

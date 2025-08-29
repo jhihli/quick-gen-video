@@ -420,7 +420,6 @@ app.get('/download-video/:filename', (req, res) => {
       'Content-Length': chunksize,
       'Content-Type': 'video/mp4',
       'Content-Disposition': `attachment; filename="tkvgen-video.mp4"`,
-      'ngrok-skip-browser-warning': 'true',
       'Access-Control-Allow-Origin': '*'
     });
     
@@ -432,7 +431,6 @@ app.get('/download-video/:filename', (req, res) => {
       'Content-Type': 'video/mp4',
       'Content-Length': fileSize,
       'Content-Disposition': `attachment; filename="tkvgen-video.mp4"`,
-      'ngrok-skip-browser-warning': 'true',
       'Access-Control-Allow-Origin': '*'
     });
     
