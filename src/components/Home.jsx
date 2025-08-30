@@ -160,13 +160,9 @@ const Home = () => {
               className="flex items-center space-x-4"
             >
               <LogoIcon size={8} className="hidden sm:block" />
-              <AnimatedTitle
-                variant="glow"
-                className="text-2xl lg:text-3xl"
-                particles={true}
-              >
+              <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
                 QWGenv
-              </AnimatedTitle>
+              </h1>
             </motion.div>
 
             <nav className="flex items-center space-x-2 sm:space-x-4 md:space-x-6">
@@ -179,7 +175,7 @@ const Home = () => {
                 className="text-white font-medium border-b-2 border-purple-400 pb-1 text-sm sm:text-base cursor-pointer"
               >
                 <span className="hidden sm:inline">{t('home')}</span>
-                <span className="sm:hidden">🏠</span>
+                <span className="sm:hidden font-bold">HOME</span>
               </a>
               <a
                 href="/generator"
@@ -187,7 +183,7 @@ const Home = () => {
                 className="text-gray-300 hover:text-white transition-colors font-medium text-sm sm:text-base cursor-pointer"
               >
                 <span className="hidden sm:inline">{t('generator')}</span>
-                <span className="sm:hidden">⚙️</span>
+                <span className="sm:hidden font-bold">TOOL</span>
               </a>
               <LanguageSelector />
             </nav>
@@ -196,7 +192,7 @@ const Home = () => {
         </div>
       </motion.header>
 
-      {/* Body Section */}
+{/* Body Section */}
       <motion.main
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
         variants={containerVariants}
@@ -549,47 +545,7 @@ const Home = () => {
           </div>
         </motion.section>
 
-        {/* AdSense Placeholder */}
-        <motion.section variants={itemVariants} className="mb-16">
-          <div className="relative overflow-hidden bg-gradient-to-r from-orange-900/20 via-amber-800/15 to-yellow-900/20 backdrop-blur-xl border border-orange-300/20 rounded-3xl p-8 text-center shadow-2xl">
-            {/* Animated background elements */}
-            <div className="absolute inset-0 opacity-15">
-              <motion.div
-                className="absolute top-0 left-1/4 w-36 h-36 bg-amber-400/20 rounded-full blur-2xl"
-                animate={{
-                  scale: [1, 1.2, 1],
-                  x: [0, 50, 0],
-                }}
-                transition={{
-                  duration: 12,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-              <motion.div
-                className="absolute bottom-0 right-1/4 w-28 h-28 bg-orange-400/20 rounded-full blur-xl"
-                animate={{
-                  scale: [1, 0.8, 1],
-                  x: [0, -40, 0],
-                }}
-                transition={{
-                  duration: 9,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-            </div>
-
-            <div className="relative z-10">
-              <div className="bg-gradient-to-r from-amber-800/30 to-orange-800/30 rounded-2xl p-12 border border-amber-400/20">
-                <p className="text-amber-200 text-lg font-medium">📢 {t('advertisementSpace')}</p>
-                <p className="text-amber-300/70 text-sm mt-2">{t('adSenseLeaderboard')}</p>
-              </div>
-            </div>
-          </div>
-        </motion.section>
-
-        {/* Comments Section */}
+{/* Comments Section */}
         <motion.section ref={feedbackSectionRef} variants={itemVariants} className="mb-16">
           <div className="relative overflow-hidden bg-gradient-to-br from-violet-900/30 via-purple-800/20 to-fuchsia-900/30 backdrop-blur-xl border border-violet-300/20 rounded-3xl p-8 shadow-2xl">
             {/* Animated background elements */}
@@ -650,7 +606,7 @@ const Home = () => {
         </motion.section>
       </motion.main>
 
-      {/* Footer */}
+{/* Footer */}
       <motion.footer
         className="bg-white/5 backdrop-blur-sm border-t border-white/10 py-12"
         variants={itemVariants}

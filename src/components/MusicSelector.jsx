@@ -125,8 +125,16 @@ function MusicSelector() {
   }
 
   const processMusicSelect = (music) => {
+    // Use the same robust selection check as isSelected
+    const isMusicSelected = selectedMusic && (
+      selectedMusic.id === music.id ||
+      selectedMusic.filename === music.filename ||
+      selectedMusic.url === music.url ||
+      (selectedMusic.originalname && selectedMusic.originalname === music.filename)
+    );
+    
     // If the music is already selected, remove it (deselect)
-    if (selectedMusic?.id === music.id) {
+    if (isMusicSelected) {
       selectMusic(null)
     } else {
       // Otherwise, select the new music
@@ -147,14 +155,29 @@ function MusicSelector() {
   }
 
   const handleRowClick = (track) => {
-    // If clicking the same track that's currently playing, close the player
+    // If clicking the same track that's currently playing, just toggle the player
     if (currentPlayingTrack?.id === track.id && showGlobalPlayer) {
       setShowGlobalPlayer(false)
       setCurrentPlayingTrack(null)
+      // Keep the music selected - don't unselect it
     } else {
-      // Otherwise, play the new track
+      // Otherwise, play the new track and auto-select it
       setCurrentPlayingTrack(track)
       setShowGlobalPlayer(true)
+      
+      // Auto-select the music when user starts playing it (only if not already selected)
+      if (selectedMusic?.id !== track.id) {
+        if (hasGeneratedVideo) {
+          // If user has generated video, show confirmation for music change
+          setPendingAction(() => () => {
+            selectMusic(track)
+          })
+          setShowConfirmDialog(true)
+        } else {
+          // No video generated, select music directly
+          selectMusic(track)
+        }
+      }
     }
   }
 
@@ -217,7 +240,7 @@ function MusicSelector() {
   }
 
   const tabs = [
-    { id: 'local', label: t('musicLibrary'), icon: '🎵' },
+    { id: 'local', label: 'Library', icon: '🎵' },
     { id: 'upload', label: t('uploadMusic'), icon: '📁' }
   ]
 
@@ -290,7 +313,7 @@ function MusicSelector() {
                   <div className="px-4 py-3 border-b border-white/10 bg-gray-800/40">
                     <h4 className="text-lg font-semibold text-white flex items-center">
                       <span className="mr-2">🎶</span>
-                      {t('musicLibrary')}
+                      Musics
                     </h4>
                   </div>
                   

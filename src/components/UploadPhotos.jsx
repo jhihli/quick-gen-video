@@ -133,8 +133,16 @@ function UploadPhotos() {
       const uploadedPhotos = await uploadPhotosToServer(newFiles)
       addPhotos(uploadedPhotos)
     } catch (error) {
+      // Check if it's a file validation error (extension, type, etc.)
+      if (error.message.includes('extension mismatch') || 
+          error.message.includes('File type') || 
+          error.message.includes('not allowed') ||
+          error.message.includes('validation') ||
+          error.message.includes('invalid')) {
+        showErrorMessage('The file extension is invalid')
+      }
       // Handle video duration validation errors
-      if (error.message.includes('duration limit') || error.message.includes('3 minute')) {
+      else if (error.message.includes('duration limit') || error.message.includes('3 minute')) {
         try {
           const errorData = JSON.parse(error.message.split('Upload failed: ')[1] || '{}');
           if (errorData.invalidFiles && errorData.validFiles) {
@@ -147,13 +155,13 @@ function UploadPhotos() {
               addPhotos(errorData.validFiles);
             }
           } else {
-            showErrorMessage('Failed to upload media: ' + error.message);
+            showErrorMessage('The file extension is invalid');
           }
         } catch (parseError) {
-          showErrorMessage('Failed to upload media: ' + error.message);
+          showErrorMessage('The file extension is invalid');
         }
       } else {
-        showErrorMessage('Failed to upload media: ' + error.message)
+        showErrorMessage('The file extension is invalid')
       }
     } finally {
       setIsUploading(false)

@@ -17,6 +17,7 @@ function VideoExport({ onNewVideo }) {
   const [error, setError] = useState(null)
   const [showError, setShowError] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+  const [showReadyMessage, setShowReadyMessage] = useState(true)
 
   const showErrorMessage = (message) => {
     setError(message)
@@ -71,6 +72,7 @@ function VideoExport({ onNewVideo }) {
       setError(null)
       setShowError(false)
       setShowSuccessMessage(false) // Don't show success message when restoring from global state
+      setShowReadyMessage(false) // Don't show ready message when restoring from global state
     } else if (!generatedVideo && videoData) {
       // Global video was cleared (likely from confirmation dialog), reset local state
       setVideoData(null)
@@ -82,11 +84,22 @@ function VideoExport({ onNewVideo }) {
       setVideoId(null)
       setShowError(false)
       setShowSuccessMessage(false)
+      setShowReadyMessage(true) // Show ready message again when resetting
     }
   }, [generatedVideo, videoData])
 
   // Check if we have the required inputs and music
   const canGenerate = photos.length > 0 && selectedMusic
+  
+  // Auto-hide ready message after 5 seconds
+  useEffect(() => {
+    if (canGenerate && !videoData && showReadyMessage) {
+      const timer = setTimeout(() => {
+        setShowReadyMessage(false)
+      }, 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [canGenerate, videoData, showReadyMessage])
     
   // Debug logging
   console.log('Generate button state:', {
@@ -107,6 +120,7 @@ function VideoExport({ onNewVideo }) {
     setProgress(0)
     setError(null)
     setVideoData(null)
+    setShowReadyMessage(false) // Hide ready message when starting generation
 
     try {
       console.log('Starting video generation...')
@@ -522,7 +536,7 @@ function VideoExport({ onNewVideo }) {
 
       {/* Combined Status Dialog */}
       <AnimatePresence>
-        {((canGenerate && !videoData) || showSuccessMessage) && (() => {
+        {((canGenerate && !videoData && showReadyMessage) || showSuccessMessage) && (() => {
           const minTimePerPhoto = 3;
           const maxTotalDuration = 30;
           const calculatedDuration = Math.min(photos.length * minTimePerPhoto, maxTotalDuration);
@@ -714,7 +728,6 @@ function VideoExport({ onNewVideo }) {
               animate={{ scale: 1 }}
               transition={{ duration: 0.3, delay: 0.1 }}
             >
-              <p className="text-sm text-gray-300 mb-3 text-center font-medium">Video Preview</p>
               
               {/* Modern iPhone Frame */}
               <div className="flex justify-center items-center">
@@ -771,29 +784,26 @@ function VideoExport({ onNewVideo }) {
             <AnimatePresence>
               {showQrCode && qrCodeData && (
                 <motion.div 
-                  className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 text-center mb-4"
+                  className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 text-center mb-4"
                   initial={{ opacity: 0, scale: 0.8, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.8, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className="flex items-center justify-center space-x-2 mb-4">
-                    <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center justify-center space-x-2 mb-3">
+                    <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4z"/>
                       <path d="M15 19h2v2h-2zM19 19h2v2h-2zM17 17h2v2h-2zM15 15h2v2h-2zM17 21h2v2h-2z"/>
                     </svg>
-                    <h4 className="font-semibold text-white">{t('mobileQRCode')}</h4>
+                    <h4 className="font-semibold text-white text-sm">{t('mobileQRCode')}</h4>
                   </div>
-                  <div className="bg-white rounded-xl p-4 inline-block">
+                  <div className="bg-white rounded-lg p-2 inline-block">
                     <img 
                       src={qrCodeData.qrCodeDataUrl} 
                       alt={t('qrCodeForVideo')} 
-                      className="w-48 h-48 mx-auto"
+                      className="w-32 h-32 mx-auto"
                     />
                   </div>
-                  <p className="text-sm text-gray-300 mt-4">
-                    {t('scanWithPhone')}
-                  </p>
                   <p className="text-xs text-gray-400 mt-2">
                     {t('expires')}: {new Date(qrCodeData.expiresAt).toLocaleString()}
                   </p>
@@ -846,6 +856,7 @@ function VideoExport({ onNewVideo }) {
                   setShowQrCode(false)
                   setTempUrl(null)
                   setVideoId(null)
+                  setShowReadyMessage(true) // Show ready message again when creating new video
                   
                   // Navigate back to step 1 if callback is provided
                   if (onNewVideo) {

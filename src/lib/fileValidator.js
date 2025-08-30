@@ -73,11 +73,20 @@ export async function validateFileType(fileBuffer, expectedMimeType, originalnam
       };
     }
 
-    // Validate file extension matches
+    // Validate file extension matches (normalize JPEG extensions)
     const fileExtension = path.extname(originalname).toLowerCase();
     const expectedExtension = `.${detectedType.ext}`;
     
-    if (fileExtension !== expectedExtension) {
+    // Normalize JPEG extensions (.jpeg and .jpg are the same)
+    const normalizeExtension = (ext) => {
+      if (ext === '.jpeg') return '.jpg';
+      return ext;
+    };
+    
+    const normalizedFileExt = normalizeExtension(fileExtension);
+    const normalizedExpectedExt = normalizeExtension(expectedExtension);
+    
+    if (normalizedFileExt !== normalizedExpectedExt) {
       return {
         isValid: false,
         error: `File extension mismatch: Expected ${expectedExtension}, got ${fileExtension}`,

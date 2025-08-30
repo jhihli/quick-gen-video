@@ -16,7 +16,7 @@ export const AppProvider = ({ children }) => {
   const [generatedVideo, setGeneratedVideo] = useState(null);
   const [uploadMode, setUploadMode] = useState('photos'); // 'photos' or 'videos', default to photos
   const [hasGeneratedVideo, setHasGeneratedVideo] = useState(false); // Track if user has generated a video
-  const [musicActiveTab, setMusicActiveTab] = useState('upload'); // MusicSelector tab state
+  const [musicActiveTab, setMusicActiveTab] = useState('local'); // MusicSelector tab state
   const [currentPlayingTrack, setCurrentPlayingTrack] = useState(null); // Currently playing track
 
   const addPhotos = (newPhotos) => {
