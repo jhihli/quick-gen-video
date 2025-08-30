@@ -149,5 +149,5 @@ docker-setup.md
 *.key
 *.crt
 *kamatera*
-*deploy*
+deploy-to-kamatera*
 *server*info*
