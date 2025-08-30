@@ -137,3 +137,17 @@ temp/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Deployment and server information (SENSITIVE - DO NOT COMMIT)
+DEPLOYMENT-REFERENCE.md
+TROUBLESHOOTING-CHECKLIST.md
+deploy-to-kamatera.sh
+deploy-to-kamatera.bat
+ssl-setup-guide.md
+docker-setup.md
+*.pem
+*.key
+*.crt
+*kamatera*
+*deploy*
+*server*info*
