@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://wgenv.com/sitemap.xml
+
+# Allow access to static resources
+Allow: /local-img/
+Allow: /local-music/
+
+# Disallow temporary and upload directories
+Disallow: /uploads/
+Disallow: /temp-videos/
+Disallow: /videos/
+Disallow: /comments/
+
+# Popular crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Crawl delay to prevent overload
+Crawl-delay: 1
