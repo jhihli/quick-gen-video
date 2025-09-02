@@ -185,6 +185,13 @@ const Home = () => {
                 <span className="hidden sm:inline">{t('generator')}</span>
                 <span className="sm:hidden font-bold">TOOL</span>
               </a>
+              <Link
+                to="/blog"
+                className="text-gray-300 hover:text-white transition-colors font-medium text-sm sm:text-base"
+              >
+                <span className="hidden sm:inline">Blog</span>
+                <span className="sm:hidden font-bold">BLOG</span>
+              </Link>
               <LanguageSelector />
             </nav>
           </div>
@@ -266,11 +273,11 @@ const Home = () => {
                       </div>
                     </div>
 
-                    <div className="mt-4 p-3 sm:p-4 bg-gradient-to-r from-orange-500/10 to-yellow-500/10 rounded-xl border border-orange-400/30">
+                    <div className="mt-3 sm:mt-4 p-2 sm:p-3 md:p-4 bg-gradient-to-r from-orange-500/10 to-yellow-500/10 rounded-xl border border-orange-400/30">
                       <div className="text-center">
                         {/* Mobile-optimized shorter CTA text */}
                         <div className="block sm:hidden">
-                          <p className="text-orange-100 font-medium text-base mb-2">
+                          <p className="text-orange-100 font-medium text-sm mb-1.5">
                             ✨ {t('readyToCreateVideo')}
                           </p>
                         </div>
@@ -283,7 +290,7 @@ const Home = () => {
                         <a
                           href="/generator"
                           onClick={handleNavigateToGenerator}
-                          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold text-lg rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-yellow-300 hover:border-yellow-200 cursor-pointer"
+                          className="inline-flex items-center px-4 sm:px-6 py-1.5 sm:py-3 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold text-sm sm:text-lg rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-yellow-300 hover:border-yellow-200 cursor-pointer"
                         >
                           <span className="mr-2">🚀</span>
                           {t('tryItNow')}
@@ -293,18 +300,18 @@ const Home = () => {
                     </div>
 
                     {/* Feedback Section */}
-                    <div className="mt-4 p-3 sm:p-4 bg-gradient-to-r from-purple-500/10 to-violet-500/10 rounded-xl border border-purple-400/30">
+                    <div className="mt-2 sm:mt-4 p-2 sm:p-3 md:p-4 bg-gradient-to-r from-purple-500/10 to-violet-500/10 rounded-xl border border-purple-400/30">
                       <div className="text-center">
                         {/* Mobile-optimized shorter feedback text */}
                         <div className="block sm:hidden">
-                          <p className="text-purple-100 font-medium text-base mb-2">
-                            💬 {t('shareYourThoughtsMobile')}
+                          <p className="text-purple-100 font-medium text-sm mb-1.5">
+                            💬 Share your thoughts!
                           </p>
                         </div>
                         {/* Desktop full feedback text */}
                         <div className="hidden sm:block">
                           <p className="text-purple-100 font-medium text-base mb-3">
-                            💬 {t('shareYourThoughts')} {' '} {t('feedbackHelps')}
+                            💬 Share your thoughts about QWGenv and help us improve!
                           </p>
                         </div>
                         <button
@@ -316,12 +323,38 @@ const Home = () => {
                               })
                             }
                           }}
-                          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-400 to-violet-500 hover:from-purple-500 hover:to-violet-600 text-white font-bold text-lg rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-purple-300 hover:border-purple-200"
+                          className="inline-flex items-center px-4 sm:px-6 py-1.5 sm:py-3 bg-gradient-to-r from-purple-400 to-violet-500 hover:from-purple-500 hover:to-violet-600 text-white font-bold text-sm sm:text-lg rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-purple-300 hover:border-purple-200"
                         >
                           <span className="mr-2">💭</span>
-                          {t('giveFeedback')}
+                          Give Feedback
                           <span className="ml-2">↓</span>
                         </button>
+                      </div>
+                    </div>
+
+                    {/* Blog Section */}
+                    <div className="mt-1 sm:mt-4 p-2 sm:p-3 md:p-4 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl border border-cyan-400/30">
+                      <div className="text-center">
+                        {/* Mobile-optimized shorter blog text */}
+                        <div className="block sm:hidden">
+                          <p className="text-cyan-100 font-medium text-sm mb-1.5">
+                            📚 Learn expert tips!
+                          </p>
+                        </div>
+                        {/* Desktop full blog text */}
+                        <div className="hidden sm:block">
+                          <p className="text-cyan-100 font-medium text-base mb-3">
+                            📚 Learn expert video creation strategies and tips!
+                          </p>
+                        </div>
+                        <Link
+                          to="/blog"
+                          className="inline-flex items-center px-4 sm:px-6 py-1.5 sm:py-3 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-500 hover:to-blue-600 text-white font-bold text-sm sm:text-lg rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-cyan-300 hover:border-cyan-200"
+                        >
+                          <span className="mr-2">📖</span>
+                          Read Blog
+                          <span className="ml-2">→</span>
+                        </Link>
                       </div>
                     </div>
                   </div>

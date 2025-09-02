@@ -201,6 +201,13 @@ const Generator = () => {
                 <span className="hidden sm:inline">{t('generator')}</span>
                 <span className="sm:hidden font-bold">TOOL</span>
               </Link>
+              <Link
+                to="/blog"
+                className="text-gray-300 hover:text-white transition-colors font-medium text-sm sm:text-base"
+              >
+                <span className="hidden sm:inline">Blog</span>
+                <span className="sm:hidden font-bold">BLOG</span>
+              </Link>
               <Suspense fallback={<div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}>
                 <LanguageSelector />
               </Suspense>
