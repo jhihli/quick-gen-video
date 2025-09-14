@@ -255,26 +255,36 @@ export async function createReliableSlideshow(options) {
           onProgress({ percent: clipProgress });
           
           await new Promise((resolveClip, rejectClip) => {
-            ffmpeg(imagePath)
-              .inputOptions(['-loop', '1', '-t', timePerImage.toString()])
-              .videoFilters([
-                'scale=1080:1920:force_original_aspect_ratio=decrease',
-                'pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=black',
-                'setsar=1'
-              ])
+            // Check if this is a video file
+            const isVideo = isVideoFile(imagePath);
+
+            // Use simplified FFmpeg command for better compatibility
+            let ffmpegCommand = ffmpeg(imagePath);
+
+            if (isVideo) {
+              // For video files, don't use loop, just trim to desired duration
+              ffmpegCommand = ffmpegCommand.duration(timePerImage);
+            } else {
+              // For image files, use loop
+              ffmpegCommand = ffmpegCommand.loop(timePerImage);
+            }
+
+            ffmpegCommand = ffmpegCommand
+              .videoFilter('scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black')
               .outputOptions([
                 '-c:v', 'libx264',
-                '-preset', 'medium', // Better quality for mobile
-                '-crf', '18', // High quality
-                '-pix_fmt', 'yuv420p',
-                '-profile:v', 'high', // High profile for better compression
-                '-level', '4.0', // Supports up to 1080p
-                '-r', fps.toString()
+                '-preset', 'fast', // Faster preset for reliability
+                '-crf', '23', // Good quality, more compatible
+                '-pix_fmt', 'yuv420p'
               ])
               .format('mp4')
+              .on('start', (commandLine) => {
+                console.log('📹 FFmpeg command for clip ' + (i + 1) + ':', commandLine);
+              })
               .on('error', (err) => {
-                console.error(`Error creating clip ${i + 1}:`, err);
-                rejectClip(err);
+                console.error(`❌ Error creating clip ${i + 1}:`, err.message);
+                console.error('Full error:', err);
+                rejectClip(new Error(`Failed to create clip ${i + 1}: ${err.message}`));
               })
               .on('progress', (progress) => {
                 // Each clip represents a portion of the first 50% of total progress
@@ -572,15 +582,34 @@ export async function createSlideshowDirectly(options) {
   return new Promise(async (resolve, reject) => {
     try {
       const ffmpegBinary = ffmpegStatic || ffmpegPath.path || 'ffmpeg';
-      const timePerItem = duration / normalizedImages.length;
       const tempDir = path.join(path.dirname(normalizedOutputPath), 'temp_clips');
-      
+
       // Create temp directory
       if (!fs.existsSync(tempDir)) {
         fs.mkdirSync(tempDir, { recursive: true });
       }
 
-      console.log(`Creating slideshow: ${normalizedImages.length} items × ${timePerItem.toFixed(1)}s each`);
+      // Calculate actual duration for mixed content
+      let actualTotalDuration = 0;
+      const itemDurations = [];
+
+      for (let i = 0; i < normalizedImages.length; i++) {
+        if (isVideoFile(normalizedImages[i])) {
+          // For video files, get actual duration
+          const videoDuration = await getVideoDuration(normalizedImages[i]);
+          itemDurations.push(videoDuration);
+          actualTotalDuration += videoDuration;
+          console.log(`📹 Video ${i + 1}: ${path.basename(normalizedImages[i])} - ${videoDuration.toFixed(1)}s`);
+        } else {
+          // For images, use default duration per item
+          const imageTime = duration / normalizedImages.length;
+          itemDurations.push(imageTime);
+          actualTotalDuration += imageTime;
+          console.log(`🖼️ Image ${i + 1}: ${path.basename(normalizedImages[i])} - ${imageTime.toFixed(1)}s`);
+        }
+      }
+
+      console.log(`🎬 Creating slideshow: ${normalizedImages.length} items, total duration: ${actualTotalDuration.toFixed(1)}s`);
       console.log(`🎯 Video resolution: 1080x1920 (Mobile Portrait) with letterboxing`);
 
       // Step 1: Create individual video clips (from original images or trim existing videos)
@@ -594,10 +623,9 @@ export async function createSlideshowDirectly(options) {
           let command = ffmpeg();
           
           if (isVideoFile(normalizedImages[i])) {
-            // For video files, trim to the desired duration and force exact size
+            // For video files, use full video duration (no trimming)
             command = command
               .input(normalizedImages[i])
-              .duration(timePerItem)
               .videoFilters([
                 'scale=1080:1920:force_original_aspect_ratio=decrease',
                 'pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=black',
@@ -617,7 +645,7 @@ export async function createSlideshowDirectly(options) {
             command = command
               .input(normalizedImages[i])
               .inputOptions(['-loop', '1'])
-              .duration(timePerItem)
+              .duration(itemDurations[i])
               .videoFilters([
                 'scale=1080:1920:force_original_aspect_ratio=decrease',
                 'pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=black',
@@ -663,8 +691,8 @@ export async function createSlideshowDirectly(options) {
 
       // Get audio duration to determine if we need to loop it
       const audioDuration = await getAudioDuration(normalizedAudioPath);
-      const totalVideoDuration = duration; // This is the calculated duration from all clips
-      
+      const totalVideoDuration = actualTotalDuration; // Use the calculated actual duration from all clips
+
       console.log(`Total video duration: ${formatDuration(totalVideoDuration)}, Audio duration: ${formatDuration(audioDuration)}`);
       
       let finalArgs;
@@ -1338,12 +1366,189 @@ export async function checkFFmpegAvailability() {
   });
 }
 
+/**
+ * Get FFmpeg binary path without using fluent-ffmpeg
+ */
+function getFFmpegBinaryPath() {
+  // Try ffmpeg-static first (most reliable)
+  if (ffmpegStatic && fs.existsSync(ffmpegStatic)) {
+    return ffmpegStatic;
+  }
+  
+  // Try @ffmpeg-installer as fallback
+  if (ffmpegPath && ffmpegPath.path && fs.existsSync(ffmpegPath.path)) {
+    return ffmpegPath.path;
+  }
+  
+  // Try system FFmpeg as last resort
+  return 'ffmpeg';
+}
+
+/**
+ * Simple video creation using pure FFmpeg spawn (Windows compatible)
+ * @param {Object} options - Video creation options
+ */
+export async function createSimpleVideo(options) {
+  const { images, audioPath, outputPath, settings = {}, onProgress = () => {} } = options;
+
+  // Calculate actual duration based on content type
+  let actualTotalDuration = 0;
+
+  for (let i = 0; i < images.length; i++) {
+    if (isVideoFile(images[i])) {
+      // For video files, get actual duration
+      const videoDuration = await getVideoDuration(images[i]);
+      actualTotalDuration += videoDuration;
+      console.log(`📹 Video ${i + 1}: ${path.basename(images[i])} - ${videoDuration.toFixed(1)}s`);
+    } else {
+      // For images, use 3 seconds per image (or from settings)
+      const imageTime = 3;
+      actualTotalDuration += imageTime;
+      console.log(`🖼️ Image ${i + 1}: ${path.basename(images[i])} - ${imageTime}s`);
+    }
+  }
+
+  const duration = Math.max(10, actualTotalDuration); // Use actual duration, minimum 10 seconds
+
+  console.log(`🎬 Creating simple video with ${images.length} files, total duration: ${duration.toFixed(1)}s`);
+  
+  return new Promise((resolve, reject) => {
+    // Get FFmpeg binary without fluent-ffmpeg dependency
+    const ffmpegBinary = getFFmpegBinaryPath();
+    console.log('🔧 Using FFmpeg binary:', ffmpegBinary);
+    
+    // Validate inputs
+    if (!fs.existsSync(images[0])) {
+      return reject(new Error(`File not found: ${images[0]}`));
+    }
+    if (!fs.existsSync(audioPath)) {
+      return reject(new Error(`Audio file not found: ${audioPath}`));
+    }
+    
+    // Ensure output directory exists
+    const outputDir = path.dirname(outputPath);
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+    
+    // Check if input is a video file or image
+    const isVideo = isVideoFile(images[0]);
+    console.log(`📁 Input type: ${isVideo ? 'video' : 'image'} file`);
+    
+    let args;
+    
+    if (isVideo) {
+      // For video files: use video duration but extend/loop audio to match
+      const videoDuration = actualTotalDuration;
+      args = [
+        '-y', // Overwrite output
+        '-stream_loop', '-1', // Loop audio stream indefinitely
+        '-i', audioPath, // Audio input (put first to loop it)
+        '-i', images[0], // Video file as input
+        '-t', videoDuration.toString(), // Use calculated video duration
+        '-c:v', 'libx264', // Video codec
+        '-c:a', 'aac', // Audio codec
+        '-pix_fmt', 'yuv420p', // Pixel format for compatibility
+        '-vf', 'scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black', // Scale and pad
+        '-preset', 'fast', // Fast encoding for reliability
+        '-crf', '23', // Good quality, compatible
+        '-movflags', '+faststart', // Web optimization
+        '-t', duration.toString(), // Duration for final output (trim audio to match video)
+        outputPath
+      ];
+    } else {
+      // For image files: use -loop to create video from static image, trim audio to match video duration
+      args = [
+        '-y', // Overwrite output
+        '-loop', '1', // Loop input (only for images)
+        '-t', duration.toString(), // Duration for video
+        '-i', images[0], // Image file as input
+        '-i', audioPath, // Audio input
+        '-t', duration.toString(), // Duration for final output (trim audio to match video)
+        '-c:v', 'libx264', // Video codec
+        '-c:a', 'aac', // Audio codec
+        '-pix_fmt', 'yuv420p', // Pixel format for compatibility
+        '-vf', 'scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black', // Scale and pad
+        '-preset', 'fast', // Fast encoding for reliability
+        '-crf', '23', // Good quality, compatible
+        '-movflags', '+faststart', // Web optimization
+        outputPath
+      ];
+    }
+
+    console.log('🔧 FFmpeg command:', ffmpegBinary, args.join(' '));
+    
+    // Spawn FFmpeg process directly
+    const ffmpegProcess = spawn(ffmpegBinary, args, {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      shell: false, // Don't use shell to avoid Windows issues
+    });
+
+    let stderr = '';
+    let stdout = '';
+
+    ffmpegProcess.stdout.on('data', (data) => {
+      stdout += data.toString();
+    });
+
+    ffmpegProcess.stderr.on('data', (data) => {
+      const chunk = data.toString();
+      stderr += chunk;
+      
+      // Parse progress from FFmpeg output
+      const timeMatch = chunk.match(/time=(\d{2}):(\d{2}):(\d{2}\.\d{2})/);
+      if (timeMatch) {
+        const hours = parseInt(timeMatch[1]);
+        const minutes = parseInt(timeMatch[2]);
+        const seconds = parseFloat(timeMatch[3]);
+        const currentTime = hours * 3600 + minutes * 60 + seconds;
+        const progress = Math.min(100, Math.round((currentTime / duration) * 100));
+        if (progress > 0) {
+          onProgress({ percent: progress });
+        }
+      }
+    });
+
+    ffmpegProcess.on('error', (error) => {
+      console.error('❌ FFmpeg process error:', error);
+      reject(new Error(`FFmpeg process failed: ${error.message}`));
+    });
+
+    ffmpegProcess.on('close', (code) => {
+      console.log(`🏁 FFmpeg process exited with code: ${code}`);
+      
+      if (code === 0) {
+        console.log('✅ Video created successfully');
+        onProgress({ percent: 100 });
+        resolve({ success: true, outputPath });
+      } else {
+        console.error(`❌ FFmpeg failed with exit code: ${code}`);
+        console.error('stderr output:', stderr.slice(-500));
+        console.error('stdout output:', stdout.slice(-500));
+        reject(new Error(`FFmpeg exited with code ${code}`));
+      }
+    });
+
+    // Set a timeout to prevent hanging
+    const timeout = setTimeout(() => {
+      console.error('⏰ FFmpeg process timeout');
+      ffmpegProcess.kill('SIGTERM');
+      reject(new Error('FFmpeg process timed out'));
+    }, 120000); // 2 minutes
+
+    ffmpegProcess.on('close', () => {
+      clearTimeout(timeout);
+    });
+  });
+}
+
 export default {
   createVideoFromImages,
   createSimpleSlideshow,
   createReliableSlideshow,
   createSlideshowDirectly,
   createVideoWithAudio,
+  createSimpleVideo,
   getVideoInfo,
   getVideoDuration,
   getAudioDuration,

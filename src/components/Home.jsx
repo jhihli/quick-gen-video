@@ -44,6 +44,7 @@ const Home = () => {
   const [activeModal, setActiveModal] = useState(null)
   const [hoveredImage, setHoveredImage] = useState(null)
   const [imageDialogPosition, setImageDialogPosition] = useState({ x: 0, y: 0 })
+  const [expandedFAQ, setExpandedFAQ] = useState(null)
 
   // Generate session ID for UserComments
   useEffect(() => {
@@ -69,6 +70,49 @@ const Home = () => {
     }
   }, [location.state])
 
+  // FAQ data
+  const faqData = [
+    {
+      id: 1,
+      question: "What photo and video formats does QWGenv support?",
+      answer: "QWGenv supports popular image formats including JPEG, PNG, WebP, and video formats like MP4, AVI, MOV. Each file must be under 10MB, and you can upload up to 10 files per project."
+    },
+    {
+      id: 2,
+      question: "Is there a limit to how many photos I can use in one video?",
+      answer: "Yes, you can upload up to 10 photos or videos per project. This limit ensures optimal processing speed and video quality while keeping file sizes manageable for easy sharing."
+    },
+    {
+      id: 3,
+      question: "Can I use my own music in the videos?",
+      answer: "Absolutely! You can either choose from our curated music library with pre-loaded tracks, or upload your own music files. Supported audio formats include MP3, WAV, and M4A."
+    },
+    {
+      id: 4,
+      question: "How long does it take to generate a video?",
+      answer: "Video generation typically takes 1-3 minutes depending on the number of photos, video length, and processing complexity. You'll see real-time progress updates during generation."
+    },
+    {
+      id: 5,
+      question: "What video quality and formats are available for download?",
+      answer: "All videos are generated in high-quality 1080x1920 portrait format (mobile-optimized) in MP4 format with 192k AAC audio. This ensures compatibility across all devices and social media platforms."
+    },
+    {
+      id: 6,
+      question: "Is QWGenv free to use?",
+      answer: "Yes! QWGenv is completely free to use. You can create unlimited videos, upload your own music, and download your creations without any cost or subscription fees."
+    },
+    {
+      id: 7,
+      question: "Can I edit the video after it's generated?",
+      answer: "Currently, QWGenv generates videos in a single process. If you'd like changes, you can create a new video with different photos, music, or settings. We're working on editing features for future updates."
+    }
+  ]
+
+  // Toggle FAQ expansion
+  const toggleFAQ = (faqId) => {
+    setExpandedFAQ(expandedFAQ === faqId ? null : faqId)
+  }
 
   const handleImageHover = (index, event) => {
     const rect = event.currentTarget.getBoundingClientRect()
@@ -578,64 +622,996 @@ const Home = () => {
           </div>
         </motion.section>
 
-{/* Comments Section */}
-        <motion.section ref={feedbackSectionRef} variants={itemVariants} className="mb-16">
-          <div className="relative overflow-hidden bg-gradient-to-br from-violet-900/30 via-purple-800/20 to-fuchsia-900/30 backdrop-blur-xl border border-violet-300/20 rounded-3xl p-8 shadow-2xl">
-            {/* Animated background elements */}
-            <div className="absolute inset-0 opacity-15">
-              <motion.div
-                className="absolute top-0 right-0 w-40 h-40 bg-violet-400/20 rounded-full blur-2xl"
-                animate={{
-                  x: [0, -80, 0],
-                  y: [0, 60, 0],
-                  scale: [1, 1.3, 1],
-                }}
-                transition={{
-                  duration: 15,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-              <motion.div
-                className="absolute bottom-0 left-0 w-32 h-32 bg-fuchsia-400/20 rounded-full blur-xl"
-                animate={{
-                  x: [0, 90, 0],
-                  y: [0, -40, 0],
-                  rotate: [0, 270, 360],
-                }}
-                transition={{
-                  duration: 11,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-              <motion.div
-                className="absolute top-1/2 left-1/2 w-24 h-24 bg-purple-400/15 rounded-full blur-lg"
-                animate={{
-                  x: [0, -30, 30, 0],
-                  y: [0, 20, -20, 0],
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
+        {/* Quick Way Video Generator Section */}
+        <motion.section variants={itemVariants} className="mb-16">
+          <div className="relative overflow-hidden bg-gradient-to-br from-slate-100/95 via-white/90 to-gray-100/95 backdrop-blur-xl border border-gray-200/40 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-2xl">
+            {/* Section Header */}
+            <div className="text-center mb-8 sm:mb-10 lg:mb-12">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-black leading-tight">
+                Quick Way Video Generator
+              </h2>
             </div>
 
-            <div className="relative z-10">
+            {/* Section 1: Generate videos with zero complexity */}
+            <div className="mb-8 sm:mb-12 lg:mb-16">
+              {/* Mobile Layout */}
+              <div className="lg:hidden">
+                {/* Mobile: Title */}
+                <motion.div
+                  className="px-2 mb-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                >
+                  <h3 className="text-xl sm:text-2xl font-bold text-black mb-3 leading-tight">
+                    Generate videos with zero complexity
+                  </h3>
+                  <p className="text-sm sm:text-base text-black leading-relaxed">
+                    Type your idea, add the specifics—like length, platform, voiceover accent, and get AI-generated 
+                    high-quality videos that put your ideas into focus.
+                  </p>
+                </motion.div>
+                
+                {/* Mobile: Mockup */}
+                <motion.div
+                  className="px-2 mb-4"
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                >
+                  <div className="relative bg-gray-900 rounded-xl overflow-hidden shadow-2xl mx-auto max-w-sm">
+                    <div className="aspect-video bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-800 relative">
+                      <div className="absolute inset-0 flex items-center justify-center p-4">
+                        <div className="text-center text-white">
+                          <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
+                            <div className="w-0 h-0 border-l-4 border-t-2 border-b-2 border-l-white border-t-transparent border-b-transparent ml-0.5"></div>
+                          </div>
+                          <p className="text-xs opacity-80 px-2">5 min YouTube video of a man traveling through time</p>
+                        </div>
+                      </div>
+                      <div className="absolute top-2 left-2 right-2">
+                        <div className="bg-black/50 backdrop-blur-sm rounded-md px-2 py-1.5 flex items-center justify-between">
+                          <span className="text-white text-xs truncate mr-2">5 min YouTube video of a man traveling through time</span>
+                          <button className="bg-blue-600 text-white px-2 py-0.5 rounded text-xs font-medium flex-shrink-0">
+                            Generate
+                          </button>
+                        </div>
+                      </div>
+                      <div className="absolute bottom-2 left-2 right-2">
+                        <div className="bg-black/50 backdrop-blur-sm rounded-md px-2 py-1.5">
+                          <div className="flex items-center space-x-2">
+                            <button className="text-white text-sm">⏸️</button>
+                            <div className="flex-1 bg-white/20 rounded-full h-0.5">
+                              <div className="bg-white rounded-full h-0.5 w-1/3"></div>
+                            </div>
+                            <span className="text-white text-xs">01:45 / 05:00</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+                
+                {/* Mobile: Features & Button */}
+                <motion.div
+                  className="px-2"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.6 }}
+                >
+                  <div className="space-y-2 mb-6">
+                    <div className="flex items-center">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2 flex-shrink-0"></div>
+                      <span className="text-sm text-gray-700">No video editing experience required</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2 flex-shrink-0"></div>
+                      <span className="text-sm text-gray-700">AI-powered content generation</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2 flex-shrink-0"></div>
+                      <span className="text-sm text-gray-700">Professional quality output</span>
+                    </div>
+                  </div>
+                  <a
+                    href="/generator"
+                    onClick={handleNavigateToGenerator}
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
+                  >
+                    Create now
+                    <span className="ml-2">→</span>
+                  </a>
+                </motion.div>
+              </div>
+              
+              {/* Desktop Layout */}
+              <div className="hidden lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
+                {/* Left Column - Text Content */}
+                <motion.div
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                >
+                  <h3 className="text-3xl xl:text-4xl font-bold text-black mb-6 leading-tight">
+                    Generate videos with zero complexity
+                  </h3>
+                  <p className="text-lg text-black mb-6 leading-relaxed">
+                    Type your idea, add the specifics—like length, platform, voiceover accent, and get AI-generated 
+                    high-quality videos that put your ideas into focus.
+                  </p>
+                  <div className="space-y-3 mb-8">
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-base text-gray-700">No video editing experience required</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-base text-gray-700">AI-powered content generation</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-base text-gray-700">Professional quality output</span>
+                    </div>
+                  </div>
+                  <a
+                    href="/generator"
+                    onClick={handleNavigateToGenerator}
+                    className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium text-base rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
+                  >
+                    Create now
+                    <span className="ml-2">→</span>
+                  </a>
+                </motion.div>
 
-              {/* Modern UserComments Component */}
-              {sessionId && (
-                <UserComments
-                  sessionId={sessionId}
-                  onCommentSubmit={(comments) => {
-                    console.log('💬 Home page comments updated:', comments.length, 'total comments');
-                  }}
-                />
-              )}
+                {/* Right Column - Video Preview Mockup */}
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                >
+                  <div className="relative bg-gray-900 rounded-2xl overflow-hidden shadow-2xl">
+                    {/* Video Player Mockup */}
+                    <div className="aspect-video bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-800 relative">
+                      {/* Video Content Placeholder */}
+                      <div className="absolute inset-0 flex items-center justify-center p-4">
+                        <div className="text-center text-white">
+                          <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-4 mx-auto">
+                            <div className="w-0 h-0 border-l-8 border-t-4 border-b-4 border-l-white border-t-transparent border-b-transparent ml-1"></div>
+                          </div>
+                          <p className="text-sm opacity-80 px-2">5 min YouTube video of a man traveling through time</p>
+                        </div>
+                      </div>
+                      
+                      {/* Top Prompt Bar */}
+                      <div className="absolute top-4 left-4 right-4">
+                        <div className="bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 flex items-center justify-between">
+                          <span className="text-white text-sm truncate mr-2">5 min YouTube video of a man traveling through time</span>
+                          <button className="bg-blue-600 text-white px-4 py-1 rounded-md text-sm font-medium flex-shrink-0">
+                            Generate
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Video Controls */}
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <div className="bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2">
+                          <div className="flex items-center space-x-3">
+                            <button className="text-white text-base">⏸️</button>
+                            <div className="flex-1 bg-white/20 rounded-full h-1">
+                              <div className="bg-white rounded-full h-1 w-1/3"></div>
+                            </div>
+                            <span className="text-white text-sm">01:45 / 05:00</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Animated Divider */}
+            <motion.div 
+              className="flex items-center justify-center my-8 sm:my-10 lg:my-12"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+            >
+              <motion.div 
+                className="flex-1 h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-blue-600"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 1, delay: 0.7 }}
+              ></motion.div>
+              <motion.div 
+                className="mx-6 relative"
+                animate={{ 
+                  rotate: [0, 360],
+                  scale: [1, 1.2, 1]
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full shadow-lg"></div>
+                <div className="absolute inset-0 w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-ping opacity-75"></div>
+              </motion.div>
+              <motion.div 
+                className="flex-1 h-0.5 bg-gradient-to-r from-purple-600 to-transparent"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 1, delay: 0.7 }}
+              ></motion.div>
+            </motion.div>
+
+            {/* Section 2: Edit videos with prefer musics */}
+            <div className="mb-8 sm:mb-12 lg:mb-16">
+              {/* Mobile Layout */}
+              <div className="lg:hidden">
+                {/* Mobile: Title */}
+                <motion.div
+                  className="px-2 mb-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.6 }}
+                >
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 leading-tight">
+                    Edit videos with prefer musics
+                  </h3>
+                  <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
+                    Edit your videos with the magic box on QWGenv. Give simple commands like change the accent, 
+                    delete scenes or add a funky intro and watch your videos come to life.
+                  </p>
+                </motion.div>
+                
+                {/* Mobile: Mockup */}
+                <motion.div
+                  className="px-2 mb-4"
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.8 }}
+                >
+                  <div className="relative bg-gray-900 rounded-xl overflow-hidden shadow-2xl mx-auto max-w-sm">
+                    <div className="aspect-video bg-gradient-to-br from-green-600 via-emerald-600 to-teal-800 relative">
+                      <div className="absolute inset-2 bg-black/30 rounded-md">
+                        <div className="h-full flex items-center justify-center p-2">
+                          <div className="text-center text-white">
+                            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
+                              <span className="text-lg">🎵</span>
+                            </div>
+                            <p className="text-xs opacity-80 px-1">A video about luxury travel to Europe</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="absolute bottom-2 left-2 right-2">
+                        <div className="bg-white/95 backdrop-blur-sm rounded-md p-2">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-gray-800 font-medium text-xs truncate mr-2">A video about luxury travel to Europe</span>
+                            <button className="bg-green-600 text-white px-2 py-0.5 rounded text-xs flex-shrink-0">Generate</button>
+                          </div>
+                          <div className="space-y-1 text-xs text-gray-700">
+                            <div>• Narrate the video in a British accent</div>
+                            <div>• Add scenes, delete scenes</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="absolute right-2 top-2 space-y-1">
+                        <div className="w-8 h-6 bg-blue-500 rounded-sm"></div>
+                        <div className="w-8 h-6 bg-purple-500 rounded-sm"></div>
+                        <div className="w-8 h-6 bg-pink-500 rounded-sm"></div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+                
+                {/* Mobile: Features & Button */}
+                <motion.div
+                  className="px-2"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 1.0 }}
+                >
+                  <div className="space-y-2 mb-6">
+                    <div className="flex items-center">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 flex-shrink-0"></div>
+                      <span className="text-sm text-gray-700">Extensive music library</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 flex-shrink-0"></div>
+                      <span className="text-sm text-gray-700">Upload your own tracks</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 flex-shrink-0"></div>
+                      <span className="text-sm text-gray-700">Perfect sync with video timing</span>
+                    </div>
+                  </div>
+                  <a
+                    href="/generator"
+                    onClick={handleNavigateToGenerator}
+                    className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium text-sm rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
+                  >
+                    Create now
+                    <span className="ml-2">→</span>
+                  </a>
+                </motion.div>
+              </div>
+              
+              {/* Desktop Layout */}
+              <div className="hidden lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
+                {/* Left Column - Text Content */}
+                <motion.div
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.6 }}
+                >
+                  <h3 className="text-3xl xl:text-4xl font-bold text-white mb-6 leading-tight">
+                    Edit videos with prefer musics
+                  </h3>
+                  <p className="text-lg text-gray-300 mb-6 leading-relaxed">
+                    Edit your videos with the magic box on QWGenv. Give simple commands like change the accent, 
+                    delete scenes or add a funky intro and watch your videos come to life.
+                  </p>
+                  <div className="space-y-3 mb-8">
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-base text-gray-700">Extensive music library</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-base text-gray-700">Upload your own tracks</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-base text-gray-700">Perfect sync with video timing</span>
+                    </div>
+                  </div>
+                  <a
+                    href="/generator"
+                    onClick={handleNavigateToGenerator}
+                    className="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium text-base rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
+                  >
+                    Create now
+                    <span className="ml-2">→</span>
+                  </a>
+                </motion.div>
+
+                {/* Right Column - Music Editing Interface Mockup */}
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.8 }}
+                >
+                  <div className="relative bg-gray-900 rounded-2xl overflow-hidden shadow-2xl">
+                    {/* Video with Music Interface */}
+                    <div className="aspect-video bg-gradient-to-br from-green-600 via-emerald-600 to-teal-800 relative">
+                      {/* Main Video Area */}
+                      <div className="absolute inset-4 bg-black/30 rounded-lg">
+                        <div className="h-full flex items-center justify-center">
+                          <div className="text-center text-white">
+                            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-3 mx-auto">
+                              <span className="text-2xl">🎵</span>
+                            </div>
+                            <p className="text-sm opacity-80">A video about luxury travel to Europe</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Music Control Panel */}
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <div className="bg-white/95 backdrop-blur-sm rounded-lg p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-gray-800 font-medium text-sm">A video about luxury travel to Europe</span>
+                            <button className="bg-green-600 text-white px-3 py-1 rounded-md text-sm">Generate</button>
+                          </div>
+                          <div className="space-y-2 text-sm text-gray-700">
+                            <div>• Narrate the video in a British accent</div>
+                            <div>• Add three more scenes with summer destinations</div>
+                            <div>• Delete the second scene</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Music Thumbnails */}
+                      <div className="absolute right-4 top-4 space-y-2">
+                        <div className="w-16 h-12 bg-blue-500 rounded-md"></div>
+                        <div className="w-16 h-12 bg-purple-500 rounded-md"></div>
+                        <div className="w-16 h-12 bg-pink-500 rounded-md"></div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Animated Divider */}
+            <motion.div 
+              className="flex items-center justify-center my-8 sm:my-10 lg:my-12"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 1.0 }}
+            >
+              <motion.div 
+                className="flex-1 h-0.5 bg-gradient-to-r from-transparent via-green-400 to-green-600"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 1, delay: 1.2 }}
+              ></motion.div>
+              <motion.div 
+                className="mx-6 relative"
+                animate={{ 
+                  rotate: [0, 360],
+                  scale: [1, 1.2, 1]
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 0.5
+                }}
+              >
+                <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-purple-500 rounded-full shadow-lg"></div>
+                <div className="absolute inset-0 w-3 h-3 bg-gradient-to-r from-green-400 to-purple-400 rounded-full animate-ping opacity-75"></div>
+              </motion.div>
+              <motion.div 
+                className="flex-1 h-0.5 bg-gradient-to-r from-purple-600 to-transparent"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 1, delay: 1.2 }}
+              ></motion.div>
+            </motion.div>
+
+            {/* Section 3: Instantly produced images and videos */}
+            <div>
+              {/* Mobile Layout */}
+              <div className="lg:hidden">
+                {/* Mobile: Title */}
+                <motion.div
+                  className="px-2 mb-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 1.0 }}
+                >
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 leading-tight">
+                    Instantly produced images and videos
+                  </h3>
+                  <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
+                    Get professional-quality videos in minutes, not hours. Our advanced processing engine 
+                    ensures fast rendering without compromising on quality.
+                  </p>
+                </motion.div>
+                
+                {/* Mobile: Mockup */}
+                <motion.div
+                  className="px-2 mb-4"
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 1.2 }}
+                >
+                  <div className="relative mx-auto max-w-sm">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="col-span-2 bg-gray-900 rounded-lg overflow-hidden shadow-xl">
+                        <div className="aspect-video bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 relative">
+                          <div className="absolute inset-0 flex items-center justify-center p-2">
+                            <div className="text-center text-white">
+                              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
+                                <span className="text-lg">⚡</span>
+                              </div>
+                              <p className="text-xs opacity-80">Generated in 2 minutes</p>
+                            </div>
+                          </div>
+                          <div className="absolute bottom-2 left-2 right-2">
+                            <div className="bg-black/50 backdrop-blur-sm rounded-md px-2 py-1">
+                              <div className="flex items-center justify-between text-white text-xs">
+                                <span>Rendering complete ✓</span>
+                                <span>00:45 / 00:45</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="bg-gray-800 rounded-md aspect-video flex items-center justify-center">
+                        <span className="text-white text-xs">HD 1080p</span>
+                      </div>
+                      <div className="bg-gray-800 rounded-md aspect-video flex items-center justify-center">
+                        <span className="text-white text-xs">Mobile</span>
+                      </div>
+                    </div>
+                    <div className="absolute -top-2 -right-2 bg-purple-600 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
+                      ⚡ 2 min
+                    </div>
+                  </div>
+                </motion.div>
+                
+                {/* Mobile: Features & Button */}
+                <motion.div
+                  className="px-2"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 1.4 }}
+                >
+                  <div className="space-y-2 mb-6">
+                    <div className="flex items-center">
+                      <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-2 flex-shrink-0"></div>
+                      <span className="text-sm text-gray-700">Lightning-fast processing</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-2 flex-shrink-0"></div>
+                      <span className="text-sm text-gray-700">HD quality output</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-2 flex-shrink-0"></div>
+                      <span className="text-sm text-gray-700">Multiple format support</span>
+                    </div>
+                  </div>
+                  <a
+                    href="/generator"
+                    onClick={handleNavigateToGenerator}
+                    className="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium text-sm rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
+                  >
+                    Create now
+                    <span className="ml-2">→</span>
+                  </a>
+                </motion.div>
+              </div>
+              
+              {/* Desktop Layout */}
+              <div className="hidden lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
+                {/* Left Column - Text Content */}
+                <motion.div
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 1.0 }}
+                >
+                  <h3 className="text-3xl xl:text-4xl font-bold text-white mb-6 leading-tight">
+                    Instantly produced images and videos
+                  </h3>
+                  <p className="text-lg text-gray-300 mb-6 leading-relaxed">
+                    Get professional-quality videos in minutes, not hours. Our advanced processing engine 
+                    ensures fast rendering without compromising on quality.
+                  </p>
+                  <div className="space-y-3 mb-8">
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-base text-gray-700">Lightning-fast processing</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-base text-gray-700">HD quality output</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full mr-3 flex-shrink-0"></div>
+                      <span className="text-base text-gray-700">Multiple format support</span>
+                    </div>
+                  </div>
+                  <a
+                    href="/generator"
+                    onClick={handleNavigateToGenerator}
+                    className="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium text-base rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
+                  >
+                    Create now
+                    <span className="ml-2">→</span>
+                  </a>
+                </motion.div>
+
+                {/* Right Column - Output Showcase Mockup */}
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 1.2 }}
+                >
+                  <div className="relative">
+                    {/* Multiple Video Outputs */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Main Video */}
+                      <div className="col-span-2 bg-gray-900 rounded-xl overflow-hidden shadow-xl">
+                        <div className="aspect-video bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 relative">
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="text-center text-white">
+                              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-3 mx-auto">
+                                <span className="text-2xl">⚡</span>
+                              </div>
+                              <p className="text-sm opacity-80">Generated in 2 minutes</p>
+                            </div>
+                          </div>
+                          {/* Progress Bar */}
+                          <div className="absolute bottom-3 left-3 right-3">
+                            <div className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2">
+                              <div className="flex items-center justify-between text-white text-sm">
+                                <span>Rendering complete ✓</span>
+                                <span>00:45 / 00:45</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Thumbnail Outputs */}
+                      <div className="bg-gray-800 rounded-lg aspect-video flex items-center justify-center">
+                        <span className="text-white text-xs">HD 1080p</span>
+                      </div>
+                      <div className="bg-gray-800 rounded-lg aspect-video flex items-center justify-center">
+                        <span className="text-white text-xs">Mobile</span>
+                      </div>
+                    </div>
+                    
+                    {/* Speed Badge */}
+                    <div className="absolute -top-3 -right-3 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                      ⚡ 2 min
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
             </div>
           </div>
+        </motion.section>
+
+      </motion.main>
+
+        {/* How to turn your photos and music into videos Section */}
+        <motion.section variants={itemVariants} className="w-full">
+          <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-black backdrop-blur-xl shadow-2xl">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              {/* Main Content Area */}
+              <div className="flex flex-col lg:flex-row min-h-[500px]">
+                {/* Left Side - Dark Background with Main Content */}
+                <div className="flex-1 bg-gradient-to-br from-gray-900 via-slate-900 to-black p-8 sm:p-10 lg:p-12 rounded-l-3xl">
+                  <div className="max-w-xl">
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+                    How to turn your photos and music into videos with Qwgenv
+                  </h2>
+                  <p className="text-gray-300 text-lg mb-8 leading-relaxed">
+                    Transform your photos and music into professional videos with our simple 4-step process. No technical skills required.
+                  </p>
+                  <motion.button
+                    className="bg-white text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors duration-300"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/generator')}
+                  >
+                    START FOR FREE
+                  </motion.button>
+                  </div>
+                </div>
+
+                {/* Right Side - Dark Background with Steps */}
+                <div className="flex-1 bg-gradient-to-br from-gray-900 via-slate-900 to-black p-8 sm:p-10 lg:p-12 rounded-r-3xl flex flex-col justify-center">
+                <div className="space-y-8">
+                  {/* Step 01 */}
+                  <motion.div 
+                    className="flex items-start space-x-4"
+                    whileHover={{ x: 10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                      <span className="text-white font-bold text-xl">01</span>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-2">Start with an idea</h3>
+                      <p className="text-gray-300">Upload your photos or videos using our drag-and-drop interface. Mix and match your media files.</p>
+                    </div>
+                  </motion.div>
+
+                  {/* Step 02 */}
+                  <motion.div 
+                    className="flex items-start space-x-4"
+                    whileHover={{ x: 10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                      <span className="text-white font-bold text-xl">02</span>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-2">Build your cast & settings</h3>
+                      <p className="text-gray-300">Choose from our curated music library or upload your own soundtrack to set the perfect mood.</p>
+                    </div>
+                  </motion.div>
+
+                  {/* Step 03 */}
+                  <motion.div 
+                    className="flex items-start space-x-4"
+                    whileHover={{ x: 10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
+                      <span className="text-white font-bold text-xl">03</span>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-2">Perfect your motion</h3>
+                      <p className="text-gray-300">Let our AI generate a professional slideshow video with smooth transitions in just minutes.</p>
+                    </div>
+                  </motion.div>
+
+                  {/* Step 04 */}
+                  <motion.div 
+                    className="flex items-start space-x-4"
+                    whileHover={{ x: 10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+                      <span className="text-white font-bold text-xl">04</span>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-2">Share your project</h3>
+                      <p className="text-gray-300">Download your video or share it instantly via QR code for easy mobile access and social sharing.</p>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* FAQs Section */}
+        <motion.section variants={itemVariants} className="w-full">
+          <div className="relative overflow-hidden bg-gradient-to-br from-gray-50/95 via-white/90 to-slate-50/95 backdrop-blur-xl shadow-2xl">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+              {/* Section Header */}
+            <div className="text-center mb-8">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3">
+                FAQs
+              </h2>
+            </div>
+
+            {/* FAQ Items */}
+            <div className="max-w-4xl mx-auto space-y-4">
+              {faqData.map((faq, index) => (
+                <motion.div 
+                  key={faq.id}
+                  className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <motion.button
+                    className="w-full text-left p-6 flex items-center justify-between hover:bg-gray-50 transition-colors duration-200"
+                    whileHover={{ backgroundColor: "#f9fafb" }}
+                    onClick={() => toggleFAQ(faq.id)}
+                  >
+                    <span className="text-lg font-semibold text-black pr-4">
+                      {faq.question}
+                    </span>
+                    <motion.div
+                      className="w-6 h-6 flex items-center justify-center bg-blue-100 text-blue-600 rounded-full flex-shrink-0"
+                      whileHover={{ scale: 1.1 }}
+                      animate={{ rotate: expandedFAQ === faq.id ? 45 : 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                    </motion.div>
+                  </motion.button>
+                  
+                  <AnimatePresence>
+                    {expandedFAQ === faq.id && (
+                      <motion.div
+                        className="px-6 pb-6"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                      >
+                        <div className="pt-2 border-t border-gray-100">
+                          <p className="text-black leading-relaxed">
+                            {faq.answer}
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))}
+            </div>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* Explore Related Posts Section */}
+        <motion.section variants={itemVariants} className="w-full">
+          <div className="relative overflow-hidden bg-gradient-to-br from-slate-50/95 via-white/90 to-gray-50/95 backdrop-blur-xl shadow-2xl">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+              {/* Section Header */}
+            <div className="text-center mb-6">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 leading-tight">
+                Explore related posts
+              </h2>
+              <p className="text-sm text-gray-600 max-w-xl mx-auto">
+                Discover expert tips and strategies to enhance your video creation journey
+              </p>
+            </div>
+
+            {/* Card Carousel */}
+            <div className="relative">
+              {/* Navigation Arrows */}
+              <button 
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hidden sm:flex"
+                onClick={() => {
+                  const container = document.getElementById('posts-carousel');
+                  container.scrollBy({ left: -300, behavior: 'smooth' });
+                }}
+              >
+                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              
+              <button 
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hidden sm:flex"
+                onClick={() => {
+                  const container = document.getElementById('posts-carousel');
+                  container.scrollBy({ left: 300, behavior: 'smooth' });
+                }}
+              >
+                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              {/* Scrollable Card Container */}
+              <div 
+                id="posts-carousel"
+                className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-12"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {/* Card 1: Pick Smarter Video Topics */}
+                <motion.div
+                  className="flex-shrink-0 w-72 sm:w-80 bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
+                  whileHover={{ y: -5 }}
+                  onClick={() => navigate('/blog#video-topics')}
+                >
+                  <div className="aspect-[4/3] bg-gradient-to-br from-blue-400 to-purple-500 p-6 flex items-center justify-center">
+                    <img 
+                      src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop&crop=center"
+                      alt="Video topics strategy"
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMDAgMTUwTDE2MCAyMDBIMjQwTDIwMCAxNTBaIiBmaWxsPSIjOTlBM0FFIi8+CjxwYXRoIGQ9Ik0yMDAgMTUwTDE2MCAyMDBIMjQwTDIwMCAxNTBaIiBmaWxsPSIjOTlBM0FFIi8+CjxjaXJjbGUgY3g9IjE3MCIgY3k9IjEzMCIgcj0iMTAiIGZpbGw9IiM5OUEzQUUiLz4KPHN2Zz4K";
+                      }}
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-white mb-2">Pick Smarter Video Topics</h3>
+                    <p className="text-blue-100 text-sm">Learn strategies to choose engaging topics that resonate with your audience</p>
+                  </div>
+                </motion.div>
+
+                {/* Card 2: Video Editing Tips */}
+                <motion.div
+                  className="flex-shrink-0 w-72 sm:w-80 bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
+                  whileHover={{ y: -5 }}
+                  onClick={() => navigate('/blog#generate-edit')}
+                >
+                  <div className="aspect-[4/3] bg-gradient-to-br from-green-400 to-teal-500 p-6 flex items-center justify-center">
+                    <img 
+                      src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=300&fit=crop&crop=center"
+                      alt="Video editing workspace"
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxyZWN0IHg9IjEwMCIgeT0iMTAwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzk5QTNBRSIvPgo8L3N2Zz4K";
+                      }}
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-white mb-2">Video Editing Tips for Beginners</h3>
+                    <p className="text-green-100 text-sm">Master essential editing techniques to create professional-looking videos</p>
+                  </div>
+                </motion.div>
+
+                {/* Card 3: Music Selection */}
+                <motion.div
+                  className="flex-shrink-0 w-72 sm:w-80 bg-gradient-to-br from-pink-500 via-rose-600 to-red-700 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
+                  whileHover={{ y: -5 }}
+                  onClick={() => navigate('/blog#audio-quality')}
+                >
+                  <div className="aspect-[4/3] bg-gradient-to-br from-pink-400 to-red-500 p-6 flex items-center justify-center">
+                    <img 
+                      src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop&crop=center"
+                      alt="Audio waveform and music"
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjIwMCIgY3k9IjE1MCIgcj0iNDAiIGZpbGw9IiM5OUEzQUUiLz4KPHN2Zz4K";
+                      }}
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-white mb-2">Music Selection for Videos</h3>
+                    <p className="text-pink-100 text-sm">Choose the perfect soundtrack to enhance your video's emotional impact</p>
+                  </div>
+                </motion.div>
+
+                {/* Card 4: Thumbnail Creation */}
+                <motion.div
+                  className="flex-shrink-0 w-72 sm:w-80 bg-gradient-to-br from-orange-500 via-amber-600 to-yellow-700 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
+                  whileHover={{ y: -5 }}
+                  onClick={() => navigate('/blog#better-media')}
+                >
+                  <div className="aspect-[4/3] bg-gradient-to-br from-orange-400 to-yellow-500 p-6 flex items-center justify-center">
+                    <img 
+                      src="https://images.unsplash.com/photo-1586717799252-bd134ad00e26?w=400&h=300&fit=crop&crop=center"
+                      alt="Thumbnail design examples"
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxyZWN0IHg9IjgwIiB5PSI4MCIgd2lkdGg9IjI0MCIgaGVpZ2h0PSIxNDAiIGZpbGw9IiM5OUEzQUUiLz4KPHN2Zz4K";
+                      }}
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-white mb-2">Creating Engaging Thumbnails</h3>
+                    <p className="text-orange-100 text-sm">Design eye-catching thumbnails that boost your video click-through rates</p>
+                  </div>
+                </motion.div>
+
+                {/* Card 5: Video Marketing */}
+                <motion.div
+                  className="flex-shrink-0 w-72 sm:w-80 bg-gradient-to-br from-indigo-500 via-blue-600 to-cyan-700 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
+                  whileHover={{ y: -5 }}
+                  onClick={() => navigate('/blog#share-promote')}
+                >
+                  <div className="aspect-[4/3] bg-gradient-to-br from-indigo-400 to-cyan-500 p-6 flex items-center justify-center">
+                    <img 
+                      src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop&crop=center"
+                      alt="Marketing analytics dashboard"
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgMjAwTDE2MCAyMDBMMjAwIDE1MEwyNDAgMTgwTDMwMCAxMDAiIHN0cm9rZT0iIzk5QTNBRSIgc3Ryb2tlLXdpZHRoPSIzIiBmaWxsPSJub25lIi8+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjIwMCIgcj0iNCIgZmlsbD0iIzk5QTNBRSIvPgo8Y2lyY2xlIGN4PSIxNjAiIGN5PSIyMDAiIHI9IjQiIGZpbGw9IiM5OUEzQUUiLz4KPHN2Zz4K";
+                      }}
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-white mb-2">Video Marketing Strategies</h3>
+                    <p className="text-indigo-100 text-sm">Proven tactics to promote your videos and grow your audience effectively</p>
+                  </div>
+                </motion.div>
+
+                {/* Card 6: Social Media Formats */}
+                <motion.div
+                  className="flex-shrink-0 w-72 sm:w-80 bg-gradient-to-br from-violet-500 via-purple-600 to-fuchsia-700 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
+                  whileHover={{ y: -5 }}
+                  onClick={() => navigate('/blog#lighting-content')}
+                >
+                  <div className="aspect-[4/3] bg-gradient-to-br from-violet-400 to-fuchsia-500 p-6 flex items-center justify-center">
+                    <img 
+                      src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=300&fit=crop&crop=center"
+                      alt="Social media platforms interface"
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxyZWN0IHg9IjUwIiB5PSI1MCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiM5OUEzQUUiLz4KPHJlY3QgeD0iMjUwIiB5PSI1MCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiM5OUEzQUUiLz4KPHJlY3QgeD0iMTUwIiB5PSIxNTAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjOTlBM0FFIi8+CjxjaXJjbGUgY3g9IjIwMCIgY3k9IjIwMCIgcj0iMjAiIGZpbGw9IiM5OUEzQUUiLz4KPHN2Zz4K";
+                      }}
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-white mb-2">Social Media Video Formats</h3>
+                    <p className="text-violet-100 text-sm">Optimize your videos for different social platforms and audiences</p>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Mobile Scroll Indicator */}
+            <div className="flex justify-center mt-6 sm:hidden">
+              <div className="flex space-x-2">
+                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+              </div>
+            </div>
+            </div>
+          </div>
+        </motion.section>
+
+      <motion.main
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+
+        {/* Comments/Feedback Section */}
+        <motion.section variants={itemVariants} className="mb-16">
+          <UserComments sessionId={sessionId} />
         </motion.section>
       </motion.main>
 

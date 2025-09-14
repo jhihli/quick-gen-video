@@ -49,7 +49,7 @@ const getBaseUrl = (req) => {
 };
 
 const app = express();
-const PORT = process.env.PORT || 5003;
+const PORT = process.env.SERVER_PORT || process.env.PORT || 5003;
 
 // Security middleware with comprehensive CSP
 app.use(helmet({
@@ -879,8 +879,8 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
     // Generate unique job ID for progress tracking
     const jobId = `job-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-    // Import video processor
-    const { createSlideshowDirectly, validateVideosDuration } = await import('./src/lib/videoProcessor.js');
+    // Import video processor functions
+    const { createSimpleVideo, createReliableSlideshow, validateVideosDuration } = await import('./src/lib/videoProcessor.js');
 
     // Prepare file paths - URLs are like '/public/uploads/filename.jpg' for uploaded files
     const imagePaths = photos.map(photo => path.join(__dirname, photo.url.slice(1))); // Remove leading slash
@@ -949,17 +949,34 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
           }
         };
 
-        await createSlideshowDirectly({
-          images: imagePaths,
-          audioPath: audioPath,
-          outputPath: outputPath,
-          settings: {
-            duration: settings.duration || 30,
-            fps: settings.fps || 25,
-            resolution: settings.resolution || '1280x720'
-          },
-          onProgress: onProgress
-        });
+        // Choose video creation method based on number of images
+        if (imagePaths.length === 1) {
+          // Single file - use simple video creation
+          await createSimpleVideo({
+            images: imagePaths,
+            audioPath: audioPath,
+            outputPath: outputPath,
+            settings: {
+              duration: settings.duration || 30,
+              fps: settings.fps || 25,
+              resolution: settings.resolution || '1280x720'
+            },
+            onProgress: onProgress
+          });
+        } else {
+          // Multiple files - use slideshow creation
+          await createReliableSlideshow({
+            images: imagePaths,
+            audioPath: audioPath,
+            outputPath: outputPath,
+            settings: {
+              duration: settings.duration || 30,
+              fps: settings.fps || 25,
+              resolution: settings.resolution || '1280x720'
+            },
+            onProgress: onProgress
+          });
+        }
 
         // Verify the output file was created
         if (!fs.existsSync(outputPath)) {

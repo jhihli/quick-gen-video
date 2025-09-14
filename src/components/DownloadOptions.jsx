@@ -1,46 +1,21 @@
-import React, { useState, Suspense } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React from 'react'
+import { motion } from 'framer-motion'
 import { useLanguage } from '../context/LanguageContext'
 
-// Lazy load QR code display since it's only used when explicitly requested
-const QRCodeDisplay = React.lazy(() => import('./QRCodeDisplay'))
-
-function DownloadOptions({ videoData, tempUrl, qrCodeDataUrl, expiresAt, onDownload, onGenerateQR, loadingQR }) {
+function DownloadOptions({ videoData, tempUrl, qrCodeDataUrl, expiresAt, onDownload, onGenerateQR, loadingQR, showQR }) {
   const { t } = useLanguage()
-  const [showQR, setShowQR] = useState(false)
 
   if (!videoData) return null
 
   const handleQRToggle = async () => {
-    if (!showQR && !qrCodeDataUrl && onGenerateQR) {
+    if (onGenerateQR) {
       await onGenerateQR()
     }
-    setShowQR(!showQR)
   }
 
 
   return (
     <div className="space-y-4">
-
-      {/* QR Code Display */}
-      <AnimatePresence>
-        {showQR && qrCodeDataUrl && (
-          <Suspense fallback={
-            <div className="flex items-center justify-center p-8">
-              <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
-              <span className="ml-3 text-white/70">{t('loadingQRCode')}</span>
-            </div>
-          }>
-            <QRCodeDisplay 
-              tempUrl={tempUrl}
-              qrCodeDataUrl={qrCodeDataUrl}
-              expiresAt={expiresAt}
-              onClose={() => setShowQR(false)}
-            />
-          </Suspense>
-        )}
-      </AnimatePresence>
-
       {/* Action Buttons */}
       <motion.div 
         className="grid grid-cols-1 sm:grid-cols-2 gap-3"

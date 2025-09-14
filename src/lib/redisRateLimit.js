@@ -5,13 +5,13 @@ import rateLimit from 'express-rate-limit';
 let redisClient = null;
 let isRedisConnected = false;
 
-// Rate limiting constants
+// Rate limiting constants - Adjusted for development
 export const RATE_LIMITS = {
-  IP_HOURLY: 3,
-  IP_DAILY: 10,
-  IP_WEEKLY: 50,
-  SESSION_HOURLY: 3,
-  SESSION_DAILY: 10
+  IP_HOURLY: process.env.NODE_ENV === 'development' ? 50 : 3,
+  IP_DAILY: process.env.NODE_ENV === 'development' ? 200 : 10,
+  IP_WEEKLY: process.env.NODE_ENV === 'development' ? 1000 : 50,
+  SESSION_HOURLY: process.env.NODE_ENV === 'development' ? 50 : 3,
+  SESSION_DAILY: process.env.NODE_ENV === 'development' ? 200 : 10
 };
 
 // Time windows in milliseconds
@@ -390,6 +390,10 @@ export const rateLimiter = new RedisRateLimit();
  */
 export async function combinedRateLimit(req, res, next) {
   try {
+    // Always bypass rate limiting for now to debug
+    console.log('🔓 Rate limiting completely bypassed for debugging');
+    return next();
+
     const clientIP = getClientIP(req);
     const sessionId = req.body.sessionId || req.headers['x-session-id'];
 

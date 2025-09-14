@@ -2,10 +2,14 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
+  // Load environment variables
+  const env = loadEnv(mode, process.cwd(), '');
+  
   return {
     plugins: [react()],
     server: {
-      port: 3002,
+      port: parseInt(env.VITE_PORT) || 3002,
+      strictPort: true,
       open: true,
       host: true,
       headers: {
@@ -14,11 +18,11 @@ export default defineConfig(({ mode }) => {
       },
       proxy: {
         '/api': {
-          target: process.env.DOCKER_ENV === 'true' ? 'http://backend:5003' : 'http://localhost:5003',
+          target: env.DOCKER_ENV === 'true' ? `http://backend:${env.SERVER_PORT || 5003}` : `http://localhost:${env.SERVER_PORT || 5003}`,
           changeOrigin: true
         },
         '/public': {
-          target: process.env.DOCKER_ENV === 'true' ? 'http://backend:5003' : 'http://localhost:5003',
+          target: env.DOCKER_ENV === 'true' ? `http://backend:${env.SERVER_PORT || 5003}` : `http://localhost:${env.SERVER_PORT || 5003}`,
           changeOrigin: true
         }
       }

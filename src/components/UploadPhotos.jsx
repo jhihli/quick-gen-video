@@ -349,7 +349,7 @@ function UploadPhotos() {
                   >
                     {/* Media Container */}
                     <div className="relative overflow-hidden rounded-xl bg-gray-800 shadow-2xl">
-                      {photo.originalname && (photo.originalname.toLowerCase().includes('.mp4') || photo.originalname.toLowerCase().includes('.mov') || photo.originalname.toLowerCase().includes('.webm') || photo.originalname.toLowerCase().includes('.avi')) ? (
+                      {(photo.originalname && (photo.originalname.toLowerCase().includes('.mp4') || photo.originalname.toLowerCase().includes('.mov') || photo.originalname.toLowerCase().includes('.webm') || photo.originalname.toLowerCase().includes('.avi') || photo.originalname.toLowerCase().includes('.mkv') || photo.originalname.toLowerCase().includes('.flv'))) || (photo.url && photo.url.includes('videos')) || (photo.validationResult && photo.validationResult.typeValidation && photo.validationResult.typeValidation.detectedType && typeof photo.validationResult.typeValidation.detectedType === 'string' && photo.validationResult.typeValidation.detectedType.startsWith('video/')) ? (
                         <div className="relative aspect-video">
                           <video 
                             src={photo.url}
@@ -372,13 +372,51 @@ function UploadPhotos() {
                         </div>
                       ) : (
                         <div className="relative aspect-video">
-                          <motion.img 
-                            src={photo.url} 
-                            alt="Uploaded media" 
+                          <motion.img
+                            src={photo.url}
+                            alt="Uploaded media"
                             className="w-full h-full object-cover"
                             onError={(e) => {
-                              console.error('Failed to load image:', photo.url);
-                              e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZjNmNGY2Ii8+CiAgICA8dGV4dCB4PSI1MCIgeT0iNTAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY3Nzk4YSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk1lZGlhPC90ZXh0Pgo8L3N2Zz4K';
+                              console.error('Image load error:', photo.url, 'Trying as video...');
+                              // If image fails, try as video
+                              const videoElement = document.createElement('video');
+                              videoElement.src = photo.url;
+                              videoElement.className = 'w-full h-full object-cover';
+                              videoElement.muted = true;
+                              videoElement.preload = 'metadata';
+
+                              // Add video indicator
+                              const indicator = document.createElement('div');
+                              indicator.className = 'absolute top-3 right-3';
+                              indicator.innerHTML = `
+                                <div class="flex items-center space-x-1 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-full border border-white/20">
+                                  <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                  </svg>
+                                  <span class="text-white text-xs font-medium">VIDEO</span>
+                                </div>
+                              `;
+
+                              // Replace the img with video
+                              const container = e.target.parentNode;
+                              container.innerHTML = '';
+                              container.appendChild(videoElement);
+                              container.appendChild(indicator);
+
+                              // Fallback if video also fails
+                              videoElement.onerror = () => {
+                                console.error('Both image and video failed for:', photo.url);
+                                container.innerHTML = `
+                                  <div class="w-full h-full flex items-center justify-center bg-gray-800">
+                                    <div class="text-center text-gray-400">
+                                      <svg class="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM13 17h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                                      </svg>
+                                      <p class="text-sm">Media Preview Unavailable</p>
+                                    </div>
+                                  </div>
+                                `;
+                              };
                             }}
                           />
                           {/* Image Overlay */}
