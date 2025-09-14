@@ -19,6 +19,12 @@ export const AppProvider = ({ children }) => {
   const [musicActiveTab, setMusicActiveTab] = useState('local'); // MusicSelector tab state
   const [currentPlayingTrack, setCurrentPlayingTrack] = useState(null); // Currently playing track
 
+  // Video generation state - persistent across component mounts
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState(0);
+  const [currentJobId, setCurrentJobId] = useState(null);
+  const [generationError, setGenerationError] = useState(null);
+
   const addPhotos = (newPhotos) => {
     setPhotos(prevPhotos => [...prevPhotos, ...newPhotos]);
   };
@@ -51,6 +57,14 @@ export const AppProvider = ({ children }) => {
     setHasGeneratedVideo(false);
   };
 
+  // Clear generation state
+  const clearGenerationState = () => {
+    setIsProcessing(false);
+    setGenerationProgress(0);
+    setCurrentJobId(null);
+    setGenerationError(null);
+  };
+
   const cleanupAndReset = async () => {
     // Cleanup files before clearing state
     try {
@@ -67,13 +81,13 @@ export const AppProvider = ({ children }) => {
         },
         body: JSON.stringify(filesToCleanup)
       });
-      
+
       console.log('Files cleaned up before reset');
     } catch (error) {
       console.error('Cleanup before reset failed:', error);
     }
 
-    // Clear all state
+    // Clear all state including generation state
     setPhotos([]);
     setSelectedMusic(null);
     setGeneratedVideo(null);
@@ -81,6 +95,7 @@ export const AppProvider = ({ children }) => {
     setUploadMode('photos'); // Reset to default mode
     setMusicActiveTab('upload');
     setCurrentPlayingTrack(null);
+    clearGenerationState();
   };
 
   const value = {
@@ -92,7 +107,13 @@ export const AppProvider = ({ children }) => {
     hasGeneratedVideo,
     musicActiveTab,
     currentPlayingTrack,
-    
+
+    // Video generation state
+    isProcessing,
+    generationProgress,
+    currentJobId,
+    generationError,
+
     // Actions
     addPhotos,
     removePhoto,
@@ -104,7 +125,14 @@ export const AppProvider = ({ children }) => {
     cleanupAndReset,
     setUploadMode,
     setMusicActiveTab,
-    setCurrentPlayingTrack
+    setCurrentPlayingTrack,
+
+    // Generation actions
+    setIsProcessing,
+    setGenerationProgress,
+    setCurrentJobId,
+    setGenerationError,
+    clearGenerationState
   };
 
   return (

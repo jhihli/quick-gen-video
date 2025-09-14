@@ -74,7 +74,7 @@ export default {
   photosDisplayed: 'Your photos will be displayed sequentially',
   secondsEach: 'seconds each',
   withMusic: 'with your music.',
-  music: 'Music',
+  music: 'Add music',
   duration: 'Duration',
   resolution: 'Resolution',
   fileSize: 'File',
@@ -230,7 +230,7 @@ export default {
   photosDisplayed: 'Your photos will be displayed sequentially',
   secondsEach: 'seconds each',
   withMusic: 'with your music.',
-  music: 'Music',
+  music: 'Add music',
   
   // File info
   filename: 'Filename',
@@ -266,5 +266,19 @@ export default {
   contactModalContent: 'If you have any questions, suggestions, or just want to share your experience with our video generator, please feel free to leave your feedback. Your thoughts are incredibly valuable to us and help us make QWGenv even better for everyone.',
   
   // Coming soon modal
-  excitingNewFeatures: 'Exciting new features are on their way to make your video creation even more amazing!'
+  excitingNewFeatures: 'Exciting new features are on their way to make your video creation even more amazing!',
+  
+  // New UI redesign translations
+  addPhotosAndMusicToStart: 'Add photos and music to start creating your video',
+  noPhotosSelected: 'No photos selected',
+  videoGenerating: 'Video is generating...',
+  musicAdded: 'Music added',
+  selectedTrack: 'Selected track',
+  photosVideos: 'Photos/Videos',
+  avatar: 'Add avatar',
+  generate: 'Generate',
+  addPhotosToStart: 'Add photos to get started',
+  addMusicToContinue: 'Add music to continue',
+  readyToGenerate: 'Ready to generate your video!',
+  completeStepsToGenerate: 'Complete all steps to generate video'
 };
