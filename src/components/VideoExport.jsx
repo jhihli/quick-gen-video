@@ -734,7 +734,7 @@ function VideoExport({ onNewVideo }) {
                 <div className="relative">
                   {/* iPhone 15 Pro Frame */}
                   <div className="bg-gradient-to-b from-zinc-800 via-zinc-900 to-black rounded-[3rem] p-1 shadow-2xl border border-zinc-700/50">
-                    <div className="bg-black rounded-[2.75rem] overflow-hidden relative w-64 h-[32rem] sm:w-80 sm:h-[40rem] md:w-72 md:h-[36rem]">
+                    <div className="bg-black rounded-[2rem] overflow-hidden relative w-64 h-[32rem] sm:w-80 sm:h-[40rem] md:w-72 md:h-[36rem]">
                       {/* Dynamic Island */}
                       <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-24 h-6 sm:w-28 sm:h-7 bg-black rounded-full z-20 border border-zinc-800"></div>
                       

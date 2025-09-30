@@ -19,6 +19,22 @@ export const AppProvider = ({ children }) => {
   const [musicActiveTab, setMusicActiveTab] = useState('local'); // MusicSelector tab state
   const [currentPlayingTrack, setCurrentPlayingTrack] = useState(null); // Currently playing track
 
+  // Per-slide Avatar state - Virtual Duet Mode
+  const [slideAvatars, setSlideAvatars] = useState({}); // Per-slide avatar data: { slideIndex: avatarData }
+  const [slideAvatarPositions, setSlideAvatarPositions] = useState({}); // Per-slide positions: { slideIndex: {x, y} }
+  const [slideAvatarSettings, setSlideAvatarSettings] = useState({}); // Per-slide settings: { slideIndex: {scale, animation, syncToMusic} }
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0); // Currently viewing slide index
+
+  // Legacy compatibility - current slide avatar data
+  const selectedAvatar = slideAvatars[currentSlideIndex] || null;
+  const avatarPosition = slideAvatarPositions[currentSlideIndex] || { x: 50, y: 70 };
+  const avatarSettings = slideAvatarSettings[currentSlideIndex] || {
+    scale: 2.0,
+    animation: 'idle',
+    syncToMusic: true
+  };
+
+
   // Video generation state - persistent across component mounts
   const [isProcessing, setIsProcessing] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
@@ -38,9 +54,7 @@ export const AppProvider = ({ children }) => {
   };
 
   const selectMusic = (music) => {
-    console.log('🎼 AppContext: selectMusic called with:', music);
     setSelectedMusic(music);
-    console.log('🎼 AppContext: Music selection updated');
   };
 
   const clearMusic = () => {
@@ -82,7 +96,6 @@ export const AppProvider = ({ children }) => {
         body: JSON.stringify(filesToCleanup)
       });
 
-      console.log('Files cleaned up before reset');
     } catch (error) {
       console.error('Cleanup before reset failed:', error);
     }
@@ -95,8 +108,91 @@ export const AppProvider = ({ children }) => {
     setUploadMode('photos'); // Reset to default mode
     setMusicActiveTab('upload');
     setCurrentPlayingTrack(null);
+    clearAllAvatars(); // Reset all avatar state
+    // Reset emoji state removed
+    setCurrentSlideIndex(0); // Reset to first slide
     clearGenerationState();
   };
+
+  // Per-slide Avatar functions
+  const selectAvatar = (avatarData, slideIndex = currentSlideIndex) => {
+
+    if (avatarData) {
+      setSlideAvatars(prev => ({
+        ...prev,
+        [slideIndex]: avatarData
+      }));
+
+      // Set default position if not already set
+      if (!slideAvatarPositions[slideIndex]) {
+        setSlideAvatarPositions(prev => ({
+          ...prev,
+          [slideIndex]: { x: 50, y: 70 }
+        }));
+      }
+
+      // Set default settings if not already set
+      if (!slideAvatarSettings[slideIndex]) {
+        setSlideAvatarSettings(prev => ({
+          ...prev,
+          [slideIndex]: {
+            scale: 2.0,
+            animation: 'idle',
+            syncToMusic: true
+          }
+        }));
+      }
+    } else {
+      // Clear avatar for this slide
+      clearAvatar(slideIndex);
+    }
+  };
+
+  const clearAvatar = (slideIndex = currentSlideIndex) => {
+    setSlideAvatars(prev => {
+      const newAvatars = { ...prev };
+      delete newAvatars[slideIndex];
+      return newAvatars;
+    });
+    setSlideAvatarPositions(prev => {
+      const newPositions = { ...prev };
+      delete newPositions[slideIndex];
+      return newPositions;
+    });
+    setSlideAvatarSettings(prev => {
+      const newSettings = { ...prev };
+      delete newSettings[slideIndex];
+      return newSettings;
+    });
+  };
+
+  const clearAllAvatars = () => {
+    setSlideAvatars({});
+    setSlideAvatarPositions({});
+    setSlideAvatarSettings({});
+  };
+
+  const updateAvatarPosition = (position, slideIndex = currentSlideIndex) => {
+    setSlideAvatarPositions(prev => ({
+      ...prev,
+      [slideIndex]: position
+    }));
+  };
+
+  const updateAvatarSettings = (settings, slideIndex = currentSlideIndex) => {
+    setSlideAvatarSettings(prev => ({
+      ...prev,
+      [slideIndex]: { ...prev[slideIndex], ...settings }
+    }));
+  };
+
+  const setCurrentSlide = (index) => {
+    setCurrentSlideIndex(index);
+  };
+
+  // Check if any slide has avatars (for auto-slideshow control)
+  const hasAnyAvatars = Object.keys(slideAvatars).length > 0;
+
 
   const value = {
     // State
@@ -107,6 +203,19 @@ export const AppProvider = ({ children }) => {
     hasGeneratedVideo,
     musicActiveTab,
     currentPlayingTrack,
+
+    // Per-slide Avatar state
+    slideAvatars,
+    slideAvatarPositions,
+    slideAvatarSettings,
+    currentSlideIndex,
+    hasAnyAvatars,
+
+    // Legacy compatibility
+    selectedAvatar,
+    avatarPosition,
+    avatarSettings,
+
 
     // Video generation state
     isProcessing,
@@ -126,6 +235,15 @@ export const AppProvider = ({ children }) => {
     setUploadMode,
     setMusicActiveTab,
     setCurrentPlayingTrack,
+
+    // Per-slide Avatar actions
+    selectAvatar,
+    clearAvatar,
+    clearAllAvatars,
+    updateAvatarPosition,
+    updateAvatarSettings,
+    setCurrentSlide,
+
 
     // Generation actions
     setIsProcessing,

@@ -198,6 +198,7 @@ export default {
   loading: 'Loading...',
   loadingLanguage: 'Loading language...',
   loadingMusicLibrary: 'Loading music library...',
+  loadingAvatars: 'Loading avatars...',
 
   // Additional common UI
   photo: 'photo',

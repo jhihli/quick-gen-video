@@ -195,7 +195,7 @@ const BottomButtonBar = ({
           label={t('avatar')}
           onClick={onAvatarClick}
           completed={hasAvatar}
-          disabled={true}
+          disabled={isGenerating || !hasPhotos || !hasMusic}
         />
 
         <ActionButton

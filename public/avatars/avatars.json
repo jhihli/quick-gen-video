@@ -1,0 +1,309 @@
+{
+  "avatars": [
+    {
+      "id": "trump-webm",
+      "name": "Trump Avatar",
+      "category": "Animated Avatar",
+      "description": "Animated character",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/trump.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/trump.webm",
+        "dance": "/avatars/cheering-robot/trump.webm",
+        "clap": "/avatars/cheering-robot/trump.webm",
+        "lipsync": "/avatars/cheering-robot/trump.webm"
+      },
+      "defaultAnimation": "dance",
+      "syncAnimations": [
+        "dance",
+        "clap"
+      ],
+      "color": "#ef4444",
+      "metadata": {
+        "name": "Trump Avatar",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "among-us-webm",
+      "name": "Among Us Avatar",
+      "category": "Animated Avatar",
+      "description": "Animated character",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/Among Us.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/Among Us.webm",
+        "dance": "/avatars/cheering-robot/Among Us.webm",
+        "clap": "/avatars/cheering-robot/Among Us.webm",
+        "lipsync": "/avatars/cheering-robot/Among Us.webm"
+      },
+      "defaultAnimation": "dance",
+      "syncAnimations": [
+        "dance",
+        "clap"
+      ],
+      "color": "#10b981",
+      "metadata": {
+        "name": "Among Us Avatar",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "chef-dancing-webm",
+      "name": "3D Chef Dancing",
+      "category": "Animated Avatar",
+      "description": "Animated chef dancing",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/3D Chef Dancing.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/3D Chef Dancing.webm",
+        "dance": "/avatars/cheering-robot/3D Chef Dancing.webm",
+        "clap": "/avatars/cheering-robot/3D Chef Dancing.webm",
+        "lipsync": "/avatars/cheering-robot/3D Chef Dancing.webm"
+      },
+      "defaultAnimation": "dance",
+      "syncAnimations": ["dance"],
+      "color": "#f59e0b",
+      "metadata": {
+        "name": "3D Chef Dancing",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "drawing-love-webm",
+      "name": "Drawing a Love",
+      "category": "Animated Avatar",
+      "description": "Cute character drawing love",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/Drawing a Love.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/Drawing a Love.webm",
+        "dance": "/avatars/cheering-robot/Drawing a Love.webm",
+        "clap": "/avatars/cheering-robot/Drawing a Love.webm",
+        "lipsync": "/avatars/cheering-robot/Drawing a Love.webm"
+      },
+      "defaultAnimation": "idle",
+      "syncAnimations": ["dance"],
+      "color": "#ec4899",
+      "metadata": {
+        "name": "Drawing a Love",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "exploding-ribbon-webm",
+      "name": "Exploding Ribbon and Confetti",
+      "category": "Animated Avatar",
+      "description": "Festive exploding ribbon and confetti animation",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/Exploding Ribbon and Confetti.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/Exploding Ribbon and Confetti.webm",
+        "dance": "/avatars/cheering-robot/Exploding Ribbon and Confetti.webm",
+        "clap": "/avatars/cheering-robot/Exploding Ribbon and Confetti.webm",
+        "lipsync": "/avatars/cheering-robot/Exploding Ribbon and Confetti.webm"
+      },
+      "defaultAnimation": "dance",
+      "syncAnimations": ["dance", "clap"],
+      "color": "#8b5cf6",
+      "metadata": {
+        "name": "Exploding Ribbon and Confetti",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "flirting-dog-webm",
+      "name": "Flirting Dog",
+      "category": "Animated Avatar",
+      "description": "Cute flirting dog animation",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/Flirting Dog.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/Flirting Dog.webm",
+        "dance": "/avatars/cheering-robot/Flirting Dog.webm",
+        "clap": "/avatars/cheering-robot/Flirting Dog.webm",
+        "lipsync": "/avatars/cheering-robot/Flirting Dog.webm"
+      },
+      "defaultAnimation": "idle",
+      "syncAnimations": ["dance"],
+      "color": "#06b6d4",
+      "metadata": {
+        "name": "Flirting Dog",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "girl-music-webm",
+      "name": "Girl Listening to Music",
+      "category": "Animated Avatar",
+      "description": "Girl with headphones listening to music",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/Girl listening to music.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/Girl listening to music.webm",
+        "dance": "/avatars/cheering-robot/Girl listening to music.webm",
+        "clap": "/avatars/cheering-robot/Girl listening to music.webm",
+        "lipsync": "/avatars/cheering-robot/Girl listening to music.webm"
+      },
+      "defaultAnimation": "dance",
+      "syncAnimations": ["dance", "clap"],
+      "color": "#f59e0b",
+      "metadata": {
+        "name": "Girl Listening to Music",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "heart-webm",
+      "name": "Heart",
+      "category": "Animated Avatar",
+      "description": "Animated heart",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/Heart.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/Heart.webm",
+        "dance": "/avatars/cheering-robot/Heart.webm",
+        "clap": "/avatars/cheering-robot/Heart.webm",
+        "lipsync": "/avatars/cheering-robot/Heart.webm"
+      },
+      "defaultAnimation": "idle",
+      "syncAnimations": ["dance"],
+      "color": "#ef4444",
+      "metadata": {
+        "name": "Heart",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "pochita-webm",
+      "name": "Pochita Improved",
+      "category": "Animated Avatar",
+      "description": "Improved Pochita character animation",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/Pochita Improved.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/Pochita Improved.webm",
+        "dance": "/avatars/cheering-robot/Pochita Improved.webm",
+        "clap": "/avatars/cheering-robot/Pochita Improved.webm",
+        "lipsync": "/avatars/cheering-robot/Pochita Improved.webm"
+      },
+      "defaultAnimation": "dance",
+      "syncAnimations": ["dance", "clap"],
+      "color": "#f59e0b",
+      "metadata": {
+        "name": "Pochita Improved",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "rainbow-cat-webm",
+      "name": "Rainbow Cat",
+      "category": "Animated Avatar",
+      "description": "Colorful rainbow cat animation",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/Rainbow cat.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/Rainbow cat.webm",
+        "dance": "/avatars/cheering-robot/Rainbow cat.webm",
+        "clap": "/avatars/cheering-robot/Rainbow cat.webm",
+        "lipsync": "/avatars/cheering-robot/Rainbow cat.webm"
+      },
+      "defaultAnimation": "dance",
+      "syncAnimations": ["dance", "clap"],
+      "color": "#8b5cf6",
+      "metadata": {
+        "name": "Rainbow Cat",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    }
+  ],
+  "categories": [
+    "All",
+    "Animated Emoji",
+    "Animated Avatar"
+  ],
+  "settings": {
+    "defaultScale": 1,
+    "defaultPosition": {
+      "x": 50,
+      "y": 70
+    },
+    "maxScale": 1.5,
+    "minScale": 0.5,
+    "frameBounds": {
+      "width": 288,
+      "height": 576,
+      "padding": 20
+    }
+  }
+}

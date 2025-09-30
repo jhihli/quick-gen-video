@@ -178,12 +178,11 @@ export async function createVideoFromImages(options) {
 
       // Add progress tracking
       command.on('progress', (progress) => {
-        console.log(`Processing: ${Math.round(progress.percent || 0)}% done`);
+        // Progress tracking handled by caller
       });
 
       // Handle completion
       command.on('end', () => {
-        console.log('Video creation completed successfully');
         resolve(outputPath);
       });
 
@@ -226,8 +225,6 @@ export async function createReliableSlideshow(options) {
 
   // For multiple images, use two-step process for reliability
   if (images.length > 1) {
-    console.log(`Creating slideshow with ${images.length} images using two-step process`);
-    console.log(`Total duration: ${finalDuration} seconds (${10} seconds per image)`);
     const timePerImage = Math.max(10, Math.floor(finalDuration / images.length));
     
     return new Promise(async (resolve, reject) => {
@@ -240,7 +237,6 @@ export async function createReliableSlideshow(options) {
           fs.mkdirSync(tempDir, { recursive: true });
         }
         
-        console.log(`Step 1: Creating ${images.length} individual video clips...`);
         
         // Step 1: Create individual video clips from each image
         for (let i = 0; i < images.length; i++) {
@@ -248,11 +244,6 @@ export async function createReliableSlideshow(options) {
           const tempVideoPath = path.join(tempDir, `clip_${i}.mp4`);
           tempVideoFiles.push(tempVideoPath);
           
-          console.log(`Creating clip ${i + 1}/${images.length} from ${path.basename(imagePath)}`);
-          
-          // Report progress for clip creation (0-50% of total progress)
-          const clipProgress = Math.round((i / images.length) * 50);
-          onProgress({ percent: clipProgress });
           
           await new Promise((resolveClip, rejectClip) => {
             // Check if this is a video file
@@ -279,7 +270,6 @@ export async function createReliableSlideshow(options) {
               ])
               .format('mp4')
               .on('start', (commandLine) => {
-                console.log('📹 FFmpeg command for clip ' + (i + 1) + ':', commandLine);
               })
               .on('error', (err) => {
                 console.error(`❌ Error creating clip ${i + 1}:`, err.message);
@@ -287,14 +277,18 @@ export async function createReliableSlideshow(options) {
                 rejectClip(new Error(`Failed to create clip ${i + 1}: ${err.message}`));
               })
               .on('progress', (progress) => {
-                // Each clip represents a portion of the first 50% of total progress
-                const baseProgress = Math.round((i / images.length) * 50);
-                const clipContribution = Math.round((progress.percent || 0) * (50 / images.length) / 100);
-                onProgress({ percent: Math.min(50, baseProgress + clipContribution) });
+                // Simplified progress reporting - only report meaningful progress updates
+                const clipBaseProgress = Math.round((i / images.length) * 50);
+                const clipProgressContribution = Math.round((progress.percent || 0) * (50 / images.length) / 100);
+                const totalProgress = clipBaseProgress + clipProgressContribution;
+
+                // Only report if progress is meaningful and doesn't go backwards
+                if (totalProgress > 0 && totalProgress <= 50) {
+                  onProgress({ percent: totalProgress });
+                }
               })
               .on('end', () => {
-                console.log(`Clip ${i + 1} created successfully`);
-                // Report completion of this clip
+                // Report completion of this clip (only if it's progress forward)
                 const clipProgress = Math.round(((i + 1) / images.length) * 50);
                 onProgress({ percent: Math.min(50, clipProgress) });
                 resolveClip();
@@ -303,7 +297,6 @@ export async function createReliableSlideshow(options) {
           });
         }
         
-        console.log('Step 2: Concatenating video clips and adding audio...');
         
         // Report 50% progress before starting final concatenation
         onProgress({ percent: 50 });
@@ -327,7 +320,6 @@ export async function createReliableSlideshow(options) {
           ])
           .format('mp4')
           .on('start', (commandLine) => {
-            console.log('Final concat command:', commandLine);
           })
           .on('progress', (progress) => {
             // Final concatenation represents 50-100% of total progress
@@ -349,7 +341,6 @@ export async function createReliableSlideshow(options) {
             reject(new Error(`Final concatenation failed: ${err.message}`));
           })
           .on('end', () => {
-            console.log('Slideshow created successfully');
             // Report 100% completion
             onProgress({ percent: 100 });
             // Clean up temp files
@@ -430,16 +421,11 @@ export async function createVideoWithAudio(options) {
       const videoDuration = await getVideoDuration(normalizedVideoPath);
       const audioDuration = await getAudioDuration(normalizedAudioPath);
       
-      console.log(`🎬 Video file: ${path.basename(normalizedVideoPath)} (${formatDuration(videoDuration)})`);
-      console.log(`🎵 Audio file: ${path.basename(normalizedAudioPath)} (${formatDuration(audioDuration)})`);
-      console.log(`⚙️  Settings duration: ${settings.duration ? formatDuration(settings.duration) : 'undefined (will use video duration)'}`);
-      console.log(`📊 Final logic: Video ${formatDuration(videoDuration)} vs Audio ${formatDuration(audioDuration)}`);
 
       let args;
       
       if (audioDuration > videoDuration) {
         // Long music and short video: cut the music when video ends
-        console.log(`Audio is longer than video (${formatDuration(audioDuration)} > ${formatDuration(videoDuration)}) - cutting audio to match video length`);
         args = [
           '-i', normalizedVideoPath,
           '-i', normalizedAudioPath,
@@ -455,7 +441,6 @@ export async function createVideoWithAudio(options) {
         ];
       } else if (audioDuration < videoDuration) {
         // Short music and long video: repeat the music until video ends
-        console.log(`Audio is shorter than video (${formatDuration(audioDuration)} < ${formatDuration(videoDuration)}) - looping audio to match video length`);
         args = [
           '-i', normalizedVideoPath,
           '-stream_loop', '-1', // Loop audio indefinitely
@@ -472,7 +457,6 @@ export async function createVideoWithAudio(options) {
         ];
       } else {
         // Equal duration: just replace audio
-        console.log(`Audio and video have equal duration (${formatDuration(audioDuration)}) - direct replacement`);
         args = [
           '-i', normalizedVideoPath,
           '-i', normalizedAudioPath,
@@ -487,7 +471,6 @@ export async function createVideoWithAudio(options) {
         ];
       }
 
-      console.log('FFmpeg command:', ffmpegBinary, args.join(' '));
 
       const process = spawn(ffmpegBinary, args);
       let stderr = '';
@@ -518,7 +501,6 @@ export async function createVideoWithAudio(options) {
 
       process.on('close', (code) => {
         if (code === 0) {
-          console.log('Video with audio replacement created successfully');
           onProgress({ percent: 100 });
           resolve(normalizedOutputPath);
         } else {
@@ -560,7 +542,6 @@ export async function createSlideshowDirectly(options) {
   // Check if we have a single video file
   if (normalizedImages.length === 1 && isVideoFile(normalizedImages[0])) {
     // Single video file - replace audio (ignore settings.duration, use actual video duration)
-    console.log('🎬 Single video file detected - using actual video duration, ignoring settings.duration');
     return createVideoWithAudio({
       videoPath: normalizedImages[0],
       audioPath: normalizedAudioPath,
@@ -599,21 +580,16 @@ export async function createSlideshowDirectly(options) {
           const videoDuration = await getVideoDuration(normalizedImages[i]);
           itemDurations.push(videoDuration);
           actualTotalDuration += videoDuration;
-          console.log(`📹 Video ${i + 1}: ${path.basename(normalizedImages[i])} - ${videoDuration.toFixed(1)}s`);
         } else {
           // For images, use default duration per item
           const imageTime = duration / normalizedImages.length;
           itemDurations.push(imageTime);
           actualTotalDuration += imageTime;
-          console.log(`🖼️ Image ${i + 1}: ${path.basename(normalizedImages[i])} - ${imageTime.toFixed(1)}s`);
         }
       }
 
-      console.log(`🎬 Creating slideshow: ${normalizedImages.length} items, total duration: ${actualTotalDuration.toFixed(1)}s`);
-      console.log(`🎯 Video resolution: 1080x1920 (Mobile Portrait) with letterboxing`);
 
       // Step 1: Create individual video clips (from original images or trim existing videos)
-      console.log('🎬 Step 1: Creating individual video clips...');
       const clipPaths = [];
       for (let i = 0; i < normalizedImages.length; i++) {
         const clipPath = path.join(tempDir, `clip_${i}.mp4`);
@@ -673,7 +649,6 @@ export async function createSlideshowDirectly(options) {
             })
             .on('end', () => {
               const itemType = isVideoFile(normalizedImages[i]) ? 'video' : 'image';
-              console.log(`✓ Clip ${i + 1} created successfully from ${itemType}`);
               // Clip creation takes 0-70% of total progress
               const clipProgress = Math.round(((i + 1) / normalizedImages.length) * 70);
               onProgress({ percent: clipProgress, stage: 'creating_clips' });
@@ -684,7 +659,6 @@ export async function createSlideshowDirectly(options) {
       }
 
       // Step 2: Create concat file and combine with audio
-      console.log('🎵 Step 2: Concatenating clips and adding audio...');
       const concatFile = path.join(tempDir, 'list.txt');
       const concatContent = clipPaths.map(p => `file '${p.replace(/\\/g, '/')}'`).join('\n');
       fs.writeFileSync(concatFile, concatContent);
@@ -693,13 +667,11 @@ export async function createSlideshowDirectly(options) {
       const audioDuration = await getAudioDuration(normalizedAudioPath);
       const totalVideoDuration = actualTotalDuration; // Use the calculated actual duration from all clips
 
-      console.log(`Total video duration: ${formatDuration(totalVideoDuration)}, Audio duration: ${formatDuration(audioDuration)}`);
       
       let finalArgs;
       
       if (audioDuration > totalVideoDuration) {
         // Long music: cut the music when video ends
-        console.log(`Audio is longer than video (${formatDuration(audioDuration)} > ${formatDuration(totalVideoDuration)}) - cutting audio to match video length`);
         finalArgs = [
           '-f', 'concat',
           '-safe', '0',
@@ -714,7 +686,6 @@ export async function createSlideshowDirectly(options) {
         ];
       } else if (audioDuration < totalVideoDuration) {
         // Short music: repeat the music until video ends
-        console.log(`Audio is shorter than video (${formatDuration(audioDuration)} < ${formatDuration(totalVideoDuration)}) - looping audio to match video length`);
         finalArgs = [
           '-f', 'concat',
           '-safe', '0',
@@ -730,7 +701,6 @@ export async function createSlideshowDirectly(options) {
         ];
       } else {
         // Equal duration: direct combination
-        console.log(`Audio and video have equal duration (${formatDuration(audioDuration)}) - direct combination`);
         finalArgs = [
           '-f', 'concat',
           '-safe', '0',
@@ -795,7 +765,6 @@ export async function createSlideshowDirectly(options) {
         }
 
         if (code === 0) {
-          console.log('Slideshow created successfully');
           onProgress({ percent: 100 });
           resolve(normalizedOutputPath);
         } else {
@@ -885,26 +854,22 @@ export async function createVideoDirectly(options) {
       });
       
       const normalizedAudioPath = path.resolve(audioPath);
-      console.log('Audio path check:', { original: audioPath, normalized: normalizedAudioPath, exists: fs.existsSync(normalizedAudioPath) });
       if (!fs.existsSync(normalizedAudioPath)) {
         throw new Error(`Audio file not found: ${normalizedAudioPath}`);
       }
       
       const normalizedOutputPath = path.resolve(outputPath);
-      console.log('Output path check:', { original: outputPath, normalized: normalizedOutputPath, dirExists: fs.existsSync(path.dirname(normalizedOutputPath)) });
       
       // Ensure output directory exists
       const outputDir = path.dirname(normalizedOutputPath);
       if (!fs.existsSync(outputDir)) {
         fs.mkdirSync(outputDir, { recursive: true });
-        console.log('Created output directory:', outputDir);
       }
 
       // Build FFmpeg command arguments
       let args;
       
       // Use fluent-ffmpeg with proper size and autopad methods
-      console.log('Creating video with letterboxing to preserve full images');
       
       ffmpeg()
         .input(normalizedImages[0])
@@ -929,7 +894,6 @@ export async function createVideoDirectly(options) {
           '-shortest'
         ])
         .on('start', (commandLine) => {
-          console.log('FFmpeg command:', commandLine);
         })
         .on('progress', (progress) => {
           const percent = Math.round(progress.percent || 0);
@@ -942,7 +906,6 @@ export async function createVideoDirectly(options) {
           reject(new Error(`Video creation failed: ${err.message}`));
         })
         .on('end', () => {
-          console.log('Video created successfully');
           onProgress({ percent: 100 });
           resolve(normalizedOutputPath);
         })
@@ -992,19 +955,15 @@ export async function createSimpleSlideshow(options) {
           throw new Error(`Image file does not exist: ${normalizedPath}`);
         }
         normalizedImages.push(normalizedPath);
-        console.log('Image path:', normalizedPath);
       }
       
       const normalizedAudioPath = path.resolve(audioPath);
       if (!fs.existsSync(normalizedAudioPath)) {
         throw new Error(`Audio file does not exist: ${normalizedAudioPath}`);
       }
-      console.log('Audio path:', normalizedAudioPath);
       
       const normalizedOutputPath = path.resolve(outputPath);
-      console.log('Output path:', normalizedOutputPath);
 
-      console.log(`Total video duration: ${duration} seconds`);
       
       let command = ffmpeg();
 
@@ -1035,13 +994,7 @@ export async function createSimpleSlideshow(options) {
         ]);
 
       command.on('start', (commandLine) => {
-        console.log('=== FFmpeg Command ===');
-        console.log(commandLine);
-        console.log('=== Input Files ===');
-        console.log('Image:', normalizedImages[0]);
-        console.log('Audio:', normalizedAudioPath);
-        console.log('Output:', normalizedOutputPath);
-        console.log('===================');
+        // Command logging disabled for cleaner output
       });
 
       command.on('error', (err) => {
@@ -1067,13 +1020,11 @@ export async function createSimpleSlideshow(options) {
       command.on('progress', (progress) => {
         const percent = Math.round(progress.percent || 0);
         if (percent > 0) {
-          console.log(`Processing: ${percent}% done`);
           onProgress({ percent: percent });
         }
       });
 
       command.on('end', () => {
-        console.log('Video creation completed successfully');
         onProgress({ percent: 100 });
         resolve(normalizedOutputPath);
       });
@@ -1399,23 +1350,19 @@ export async function createSimpleVideo(options) {
       // For video files, get actual duration
       const videoDuration = await getVideoDuration(images[i]);
       actualTotalDuration += videoDuration;
-      console.log(`📹 Video ${i + 1}: ${path.basename(images[i])} - ${videoDuration.toFixed(1)}s`);
     } else {
       // For images, use 3 seconds per image (or from settings)
       const imageTime = 3;
       actualTotalDuration += imageTime;
-      console.log(`🖼️ Image ${i + 1}: ${path.basename(images[i])} - ${imageTime}s`);
     }
   }
 
   const duration = Math.max(10, actualTotalDuration); // Use actual duration, minimum 10 seconds
 
-  console.log(`🎬 Creating simple video with ${images.length} files, total duration: ${duration.toFixed(1)}s`);
   
   return new Promise((resolve, reject) => {
     // Get FFmpeg binary without fluent-ffmpeg dependency
     const ffmpegBinary = getFFmpegBinaryPath();
-    console.log('🔧 Using FFmpeg binary:', ffmpegBinary);
     
     // Validate inputs
     if (!fs.existsSync(images[0])) {
@@ -1515,10 +1462,8 @@ export async function createSimpleVideo(options) {
     });
 
     ffmpegProcess.on('close', (code) => {
-      console.log(`🏁 FFmpeg process exited with code: ${code}`);
       
       if (code === 0) {
-        console.log('✅ Video created successfully');
         onProgress({ percent: 100 });
         resolve({ success: true, outputPath });
       } else {

@@ -16,6 +16,7 @@ import { LogoIcon } from './AnimatedIcons'
 
 // Lazy load heavy components
 const MusicSelector = React.lazy(() => import('./MusicSelector'))
+const AvatarSelector = React.lazy(() => import('./AvatarSelector'))
 const VideoExportSidebar = React.lazy(() => import('./VideoExportSidebar'))
 const LanguageSelector = React.lazy(() => import('./LanguageSelector'))
 
@@ -27,12 +28,14 @@ const Generator = () => {
     photos,
     selectedMusic,
     generatedVideo,
-    isProcessing
+    isProcessing,
+    selectedAvatar,
+    slideAvatars
   } = useAppContext()
   const navigate = useNavigate()
 
   // State management for drawer
-  const [activeMode, setActiveMode] = useState('preview') // 'preview', 'upload', 'music', 'generate'
+  const [activeMode, setActiveMode] = useState('preview') // 'preview', 'upload', 'music', 'avatar', 'generate'
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
@@ -85,8 +88,15 @@ const Generator = () => {
   }
 
   const handleAvatarClick = () => {
-    // Reserved for future use
-    console.log('Avatar feature coming soon!')
+    if (activeMode === 'avatar' && isDrawerOpen) {
+      // Close if already open
+      setIsDrawerOpen(false)
+      setActiveMode('preview')
+    } else {
+      // Open avatar selector
+      setActiveMode('avatar')
+      setIsDrawerOpen(true)
+    }
   }
 
   const handleGenerateClick = () => {
@@ -119,6 +129,22 @@ const Generator = () => {
   // Check if generation can proceed
   const canGenerate = photos.length > 0 && selectedMusic && !isProcessing
 
+  // Get modal width based on active mode
+  const getModalWidth = () => {
+    switch (activeMode) {
+      case 'avatar':
+        return 'wide'
+      case 'upload':
+        return 'medium'
+      case 'music':
+        return 'medium'
+      case 'generate':
+        return 'default'
+      default:
+        return 'default'
+    }
+  }
+
   // Render content for two-column layouts
   const renderLeftContent = () => {
     switch (activeMode) {
@@ -128,6 +154,12 @@ const Generator = () => {
         return (
           <Suspense fallback={<LoadingFallback message={t('loadingMusicLibrary')} />}>
             <MusicSelector />
+          </Suspense>
+        )
+      case 'avatar':
+        return (
+          <Suspense fallback={<LoadingFallback message={t('loadingAvatars')} />}>
+            <AvatarSelector />
           </Suspense>
         )
       case 'generate':
@@ -164,6 +196,8 @@ const Generator = () => {
         return t('uploadPhotos')
       case 'music':
         return t('musicLibrary')
+      case 'avatar':
+        return 'Select Avatar'
       case 'generate':
         return t('ready')
       default:
@@ -235,7 +269,7 @@ const Generator = () => {
           className="h-full flex flex-col items-center justify-center"
         >
           {/* Centered Content Container */}
-          <div className="flex flex-col items-center justify-center space-y pt-20">
+          <div className="flex flex-col items-center justify-center space-y pt-4">
             {/* Preview Frame */}
             <div className="flex items-center justify-center">
               <PreviewFrame
@@ -255,7 +289,7 @@ const Generator = () => {
                 onGenerateClick={handleGenerateClick}
                 hasPhotos={photos.length > 0}
                 hasMusic={!!selectedMusic}
-                hasAvatar={false}
+                hasAvatar={!!selectedAvatar}
                 canGenerate={canGenerate}
                 isGenerating={isProcessing}
               />
@@ -268,6 +302,7 @@ const Generator = () => {
           isOpen={isDrawerOpen}
           onOpenChange={setIsDrawerOpen}
           title={getLeftTitle()}
+          modalWidth={getModalWidth()}
         >
           {renderLeftContent()}
         </BottomSheetDrawer>

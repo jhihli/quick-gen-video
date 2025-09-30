@@ -758,6 +758,9 @@ const temporaryUrls = new Map();
 // Session tracking for cleanup management
 const activeSessions = new Map(); // sessionId -> { lastHeartbeat, files: [], generationAttempts: [] }
 
+// Track active video generation jobs to prevent concurrent processing
+const activeGenerationJobs = new Set(); // Set of sessionIds currently generating videos
+
 // Legacy session tracking for file cleanup (still needed)
 // Rate limiting is now handled by Redis-based system
 
@@ -854,10 +857,21 @@ app.post('/api/heartbeat', (req, res) => {
 // Generate video endpoint with enhanced IP-based rate limiting
 app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
   try {
-    const { photos, music, settings = {} } = req.body;
-    
+    const { photos, music, settings = {}, avatars } = req.body;
+
     // Session ID is still used for UX but not required for rate limiting
     const sessionId = req.body.sessionId || req.headers['x-session-id'];
+
+    // Prevent concurrent video generation for the same session
+    if (sessionId && activeGenerationJobs.has(sessionId)) {
+      return res.status(429).json({
+        error: 'Video generation already in progress for this session. Please wait for the current generation to complete.',
+        retryAfter: 30
+      });
+    }
+
+    // Check if avatars are included for overlay processing
+    const hasAvatars = avatars && avatars.slideAvatars && Object.keys(avatars.slideAvatars).length > 0;
 
     if (!photos || photos.length === 0) {
       return res.status(400).json({ error: 'Photos are required' });
@@ -867,20 +881,27 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
       return res.status(400).json({ error: 'Music is required' });
     }
 
-    console.log('Starting video generation...');
-    console.log('Photos:', photos);
-    console.log('Music:', music);
 
     // Record this generation attempt in Redis
     await recordGenerationAttempt(req);
     const clientIP = getClientIP(req);
-    console.log(`🎬 Generation attempt recorded for IP: ${clientIP}${sessionId ? `, Session: ${sessionId}` : ''}`);
 
     // Generate unique job ID for progress tracking
     const jobId = `job-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
+    // Add session to active generation jobs
+    if (sessionId) {
+      activeGenerationJobs.add(sessionId);
+    }
+
     // Import video processor functions
     const { createSimpleVideo, createReliableSlideshow, validateVideosDuration } = await import('./src/lib/videoProcessor.js');
+
+    // Import avatar processor if avatars are present
+    let avatarProcessor = null;
+    if (hasAvatars) {
+      avatarProcessor = await import('./src/lib/avatarProcessor.js');
+    }
 
     // Prepare file paths - URLs are like '/public/uploads/filename.jpg' for uploaded files
     const imagePaths = photos.map(photo => path.join(__dirname, photo.url.slice(1))); // Remove leading slash
@@ -931,7 +952,8 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
     progressTrackers.set(jobId, {
       progress: 0,
       status: 'initializing',
-      message: 'Starting video generation...'
+      message: 'Starting video generation...',
+      lastProgress: 0 // Track last progress to prevent backwards updates
     });
 
     // Start video processing asynchronously
@@ -941,41 +963,190 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
         const onProgress = (progress) => {
           const tracker = progressTrackers.get(jobId);
           if (tracker) {
-            tracker.progress = Math.round(progress.percent || 0);
-            tracker.status = 'processing';
-            tracker.message = `Processing video... ${tracker.progress}% complete`;
-            progressTrackers.set(jobId, tracker);
-            console.log(`Job ${jobId}: ${tracker.progress}% done`);
+            // Ensure progress is within valid bounds (0-100)
+            const validProgress = Math.min(100, Math.max(0, Math.round(progress.percent || 0)));
+
+            // Prevent backwards progress updates
+            if (validProgress >= tracker.lastProgress) {
+              tracker.progress = validProgress;
+              tracker.lastProgress = validProgress;
+              tracker.status = 'processing';
+              tracker.message = `Processing video... ${tracker.progress}% complete`;
+              progressTrackers.set(jobId, tracker);
+            } else {
+            }
           }
         };
 
-        // Choose video creation method based on number of images
-        if (imagePaths.length === 1) {
-          // Single file - use simple video creation
-          await createSimpleVideo({
-            images: imagePaths,
-            audioPath: audioPath,
-            outputPath: outputPath,
-            settings: {
-              duration: settings.duration || 30,
-              fps: settings.fps || 25,
-              resolution: settings.resolution || '1280x720'
-            },
-            onProgress: onProgress
-          });
+        // Choose video creation method based on number of images and avatar presence
+        if (hasAvatars) {
+
+          // First create base video without avatars
+          const tempVideoPath = outputPath.replace('.mp4', '-temp.mp4');
+
+          if (imagePaths.length === 1) {
+            // Single file - create base video
+            await createSimpleVideo({
+              images: imagePaths,
+              audioPath: audioPath,
+              outputPath: tempVideoPath,
+              settings: {
+                duration: settings.duration || 30,
+                fps: settings.fps || 25,
+                resolution: settings.resolution || '1080x1920' // Mobile-first portrait
+              },
+              onProgress: (baseProgress) => onProgress({ percent: Math.min(50, Math.max(0, baseProgress.percent * 0.5)) }) // First half of progress
+            });
+
+            // Get avatar data for slide 0 (single image)
+            const avatarData = avatars.slideAvatars[0] || avatars.slideAvatars['0'];
+            const avatarPosition = avatars.slideAvatarPositions[0] || avatars.slideAvatarPositions['0'] || { x: 50, y: 70 };
+            const avatarSettings = avatars.slideAvatarSettings[0] || avatars.slideAvatarSettings['0'] || {};
+
+            if (avatarData) {
+              console.log(`🎭 Adding avatar overlay for single video...`);
+
+              await avatarProcessor.processVideoWithAvatar({
+                mainVideoPath: tempVideoPath,
+                musicPath: audioPath,
+                avatarData: avatarData,
+                avatarPosition: avatarPosition,
+                avatarSettings: avatarSettings,
+                videoDuration: settings.duration || 30,
+                outputPath: outputPath,
+                tempDir: path.join(__dirname, 'public', 'temp-videos'),
+                onProgress: (avatarProgress) => onProgress({ percent: Math.min(100, Math.max(50, 50 + (avatarProgress.percent * 0.5))) }) // Second half of progress
+              });
+
+              // Clean up temp video
+              if (fs.existsSync(tempVideoPath)) {
+                fs.unlinkSync(tempVideoPath);
+              }
+            } else {
+              // No avatar for this slide, just rename temp video
+              fs.renameSync(tempVideoPath, outputPath);
+            }
+
+          } else {
+            // Multiple files - create slideshow then add per-slide avatars
+            await createReliableSlideshow({
+              images: imagePaths,
+              audioPath: audioPath,
+              outputPath: tempVideoPath,
+              settings: {
+                duration: settings.duration || 30,
+                fps: settings.fps || 25,
+                resolution: settings.resolution || '1080x1920' // Mobile-first portrait
+              },
+              onProgress: (baseProgress) => onProgress({ percent: Math.min(60, Math.max(0, baseProgress.percent * 0.6)) }) // 60% of progress for base video
+            });
+
+            // Process per-slide avatars with proper timing
+            const slideIndices = Object.keys(avatars.slideAvatars);
+            if (slideIndices.length > 0) {
+
+              // Calculate slide timing (matches createReliableSlideshow logic)
+              const totalDuration = settings.duration || 30;
+              const timePerImage = Math.max(10, Math.floor(totalDuration / imagePaths.length));
+
+
+              // Process each slide with its avatar sequentially
+              let currentVideoPath = tempVideoPath;
+              let processedSlides = 0;
+
+              for (const slideIndex of slideIndices) {
+                const slideNum = parseInt(slideIndex);
+
+                // Skip if slide index is out of bounds
+                if (slideNum >= imagePaths.length) {
+                  continue;
+                }
+
+                const avatarData = avatars.slideAvatars[slideIndex];
+                const avatarPosition = avatars.slideAvatarPositions[slideIndex] || { x: 50, y: 70 };
+                const avatarSettings = avatars.slideAvatarSettings[slideIndex] || {};
+
+                // Calculate time range for this slide
+                const slideTimeRange = {
+                  start: slideNum * timePerImage,
+                  end: Math.min((slideNum + 1) * timePerImage, totalDuration)
+                };
+
+
+                // Create output path for this iteration
+                const nextVideoPath = processedSlides === slideIndices.length - 1 ?
+                  outputPath : // Final iteration outputs to final path
+                  outputPath.replace('.mp4', `-avatar-${processedSlides}.mp4`); // Intermediate path
+
+                await avatarProcessor.processVideoWithAvatar({
+                  mainVideoPath: currentVideoPath,
+                  musicPath: audioPath,
+                  avatarData: avatarData,
+                  avatarPosition: avatarPosition,
+                  avatarSettings: avatarSettings,
+                  videoDuration: totalDuration,
+                  outputPath: nextVideoPath,
+                  tempDir: path.join(__dirname, 'public', 'temp-videos'),
+                  slideTimeRange: slideTimeRange, // Pass slide timing for per-slide overlay
+                  onProgress: (avatarProgress) => {
+                    // Ensure valid avatar progress
+                    const validAvatarProgress = Math.min(100, Math.max(0, avatarProgress.percent || 0));
+                    const overallProgress = 60 + ((processedSlides + (validAvatarProgress / 100)) / slideIndices.length) * 40;
+                    const finalProgress = Math.min(100, Math.max(60, Math.round(overallProgress)));
+                    onProgress({ percent: finalProgress });
+                  }
+                });
+
+                // Clean up previous iteration's temp file (but not the original tempVideoPath yet)
+                if (currentVideoPath !== tempVideoPath && fs.existsSync(currentVideoPath)) {
+                  fs.unlinkSync(currentVideoPath);
+                }
+
+                currentVideoPath = nextVideoPath;
+                processedSlides++;
+              }
+
+              // Clean up original temp video
+              if (fs.existsSync(tempVideoPath)) {
+                fs.unlinkSync(tempVideoPath);
+              }
+
+              console.log(`✅ Successfully processed ${processedSlides} slide avatars`);
+            } else {
+              // No avatars found, just rename temp video
+              fs.renameSync(tempVideoPath, outputPath);
+            }
+          }
+
         } else {
-          // Multiple files - use slideshow creation
-          await createReliableSlideshow({
-            images: imagePaths,
-            audioPath: audioPath,
-            outputPath: outputPath,
-            settings: {
-              duration: settings.duration || 30,
-              fps: settings.fps || 25,
-              resolution: settings.resolution || '1280x720'
-            },
-            onProgress: onProgress
-          });
+          // No avatars - use original logic
+          if (imagePaths.length === 1) {
+            // Single file - use simple video creation
+            await createSimpleVideo({
+              images: imagePaths,
+              audioPath: audioPath,
+              outputPath: outputPath,
+              settings: {
+                duration: settings.duration || 30,
+                fps: settings.fps || 25,
+                resolution: settings.resolution || '1080x1920' // Mobile-first portrait
+              },
+              onProgress: onProgress
+            });
+          } else {
+            // Multiple files - use slideshow creation
+            await createReliableSlideshow({
+              images: imagePaths,
+              audioPath: audioPath,
+              outputPath: outputPath,
+              settings: {
+                duration: settings.duration || 30,
+                fps: settings.fps || 25,
+                resolution: settings.resolution || '1080x1920' // Mobile-first portrait
+              },
+              onProgress: onProgress
+            });
+          }
         }
 
         // Verify the output file was created
@@ -1022,7 +1193,6 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
           size: fs.statSync(outputPath).size
         };
 
-        console.log('Video generated successfully:', videoData);
 
         // Update progress tracker with completion
         progressTrackers.set(jobId, {
@@ -1037,6 +1207,11 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
           progressTrackers.delete(jobId);
         }, 30000); // 30 seconds
 
+        // Remove session from active generation jobs
+        if (sessionId) {
+          activeGenerationJobs.delete(sessionId);
+        }
+
       } catch (ffmpegError) {
         console.error('FFmpeg processing error:', ffmpegError);
         progressTrackers.set(jobId, {
@@ -1050,6 +1225,11 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
         setTimeout(() => {
           progressTrackers.delete(jobId);
         }, 30000);
+
+        // Remove session from active generation jobs
+        if (sessionId) {
+          activeGenerationJobs.delete(sessionId);
+        }
       }
     })();
 
@@ -1062,7 +1242,13 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
 
   } catch (error) {
     console.error('Video generation error:', error);
-    res.status(500).json({ 
+
+    // Remove session from active generation jobs on error
+    if (sessionId) {
+      activeGenerationJobs.delete(sessionId);
+    }
+
+    res.status(500).json({
       error: 'Failed to start video generation',
       details: error.message,
       type: error.name
