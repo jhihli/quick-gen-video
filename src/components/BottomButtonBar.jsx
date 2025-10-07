@@ -2,16 +2,17 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 
-const BottomButtonBar = ({ 
-  onPhotosClick, 
-  onMusicClick, 
-  onAvatarClick, 
+const BottomButtonBar = ({
+  onPhotosClick,
+  onMusicClick,
+  onAvatarClick,
   onGenerateClick,
   hasPhotos = false,
   hasMusic = false,
   hasAvatar = false,
   canGenerate = false,
-  isGenerating = false 
+  isGenerating = false,
+  hasVideo = false
 }) => {
   const { t } = useLanguage();
 
@@ -51,6 +52,8 @@ const BottomButtonBar = ({
           return 'text-orange-400';
         case 'generate':
           return 'text-cyan-400';
+        case 'download':
+          return 'text-green-400';
         default:
           return 'text-white/80';
       }
@@ -81,6 +84,12 @@ const BottomButtonBar = ({
         return (
           <svg className={iconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+        );
+      case 'download':
+        return (
+          <svg className={iconClass} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
           </svg>
         );
       default:
@@ -199,10 +208,10 @@ const BottomButtonBar = ({
         />
 
         <ActionButton
-          icon="generate"
-          label={t('generate')}
+          icon={hasVideo ? "download" : "generate"}
+          label={hasVideo ? t('download') : t('generate')}
           onClick={onGenerateClick}
-          disabled={!canGenerate}
+          disabled={!canGenerate && !hasVideo}
           primary={true}
           loading={isGenerating}
         />

@@ -87,13 +87,15 @@ export default {
 
   // Home page content
   guideStepsTitle: 'Étapes du Guide avec Photos',
-  guideStepsDescription: 'Créer des vidéos incroyables avec QWGenv est aussi simple que trois étapes faciles. Suivez notre processus simplifié pour transformer vos photos en vidéos captivantes en quelques minutes.',
+  guideStepsDescription: 'Créer des vidéos incroyables avec QWGenv est aussi simple que quatre étapes faciles. Suivez notre processus simplifié pour transformer vos photos en vidéos captivantes avec musique et avatars animés en quelques minutes.',
   stepUploadMedia: 'Télécharger Média',
   stepSelectMusic: 'Sélectionner Musique',
+  stepAddAvatar: 'Ajouter Avatar',
   stepGenerateVideo: 'Générer Vidéo',
-  stepUploadDescription: 'Glissez et déposez vos photos ou vidéos',
-  stepMusicDescription: 'Choisissez dans notre bibliothèque ou téléchargez la vôtre',
-  stepVideoDescription: 'Cliquez sur générer et téléchargez votre vidéo',
+  stepUploadDescription: 'Glissez et déposez jusqu\'à 10 photos ou vidéos. Chaque fichier peut faire jusqu\'à 10 Mo. Prend en charge les formats JPG, PNG, MP4. Créez de beaux diaporamas avec vos souvenirs préférés.',
+  stepMusicDescription: 'Choisissez dans notre bibliothèque musicale sélectionnée ou téléchargez votre propre bande sonore. Personnalisez la durée et créez l\'ambiance parfaite pour votre vidéo.',
+  stepAvatarDescription: 'Sélectionnez parmi plus de 10 personnages animés. Positionnez et redimensionnez votre avatar sur chaque diapositive pour créer des duos virtuels captivants. Donnez vie à vos photos avec de la personnalité.',
+  stepVideoDescription: 'Cliquez sur générer et regardez vos photos se transformer en vidéo professionnelle avec musique et avatars. Téléchargez instantanément et partagez avec vos amis et votre famille.',
 
   // Comments section
   userComments: 'Commentaires des Utilisateurs',
@@ -163,9 +165,25 @@ export default {
   
   // Modal content text
   contactModalContent: 'Si vous avez des questions, des suggestions, ou souhaitez simplement partager votre expérience avec notre générateur de vidéos, n\'hésitez pas à laisser vos commentaires. Vos pensées nous sont incroyablement précieuses et nous aident à rendre QWGenv encore meilleur pour tous.',
-  
+
   // Coming soon modal
   excitingNewFeatures: 'De nouvelles fonctionnalités passionnantes arrivent pour rendre votre création de vidéos encore plus incroyable!',
-  
+
+  // New UI redesign translations
+  musicAdded: 'Musique ajoutée',
   photo: 'photo',
+  photos: 'Photos',
+
+  // Avatar feature highlights
+  featureAvatarGeneration: 'Add animated avatars to bring photos to life',
+  featureAvatarCustomization: 'Customize each slide with unique animated characters',
+  featureAvatarOutput: 'Beat-synchronized avatar animations included',
+
+  // FAQ about avatars
+  faqAvatarQuestion: 'Can I add animated avatars to my videos?',
+  faqAvatarAnswer: 'Yes! You can add animated avatars to any slide in your video. Choose from 10+ characters, position them anywhere on your photos, adjust their size, and create engaging virtual duets. Each slide can have its own unique avatar with custom placement.',
+
+  // Blog post about avatars
+  blogAvatarTitle: 'Using Animated Avatars in Videos',
+  blogAvatarDescription: 'Add personality to your slideshows with animated characters and virtual duets'
 };

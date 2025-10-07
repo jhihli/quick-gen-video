@@ -11,13 +11,14 @@ import { dirname } from 'path';
 import { spawn } from 'child_process';
 import ffmpegPath from '@ffmpeg-installer/ffmpeg';
 import QRCode from 'qrcode';
-import { 
-  validateUploadedFile, 
-  postUploadValidation, 
+import sharp from 'sharp';
+import {
+  validateUploadedFile,
+  postUploadValidation,
   generateSecureFilename,
-  FILE_SIZE_LIMITS 
+  FILE_SIZE_LIMITS
 } from './src/lib/fileValidator.js';
-import { 
+import {
   // initRedis,
   rateLimiter,
   combinedRateLimit,
@@ -506,16 +507,29 @@ app.post('/api/upload-photos', upload.array('photos', 10), async (req, res) => {
     for (const file of req.files) {
       const filePath = path.join(__dirname, 'public', 'uploads', file.filename);
       const validation = await postUploadValidation(file, filePath);
-      
+
       if (validation.isValid) {
-        validFiles.push({
+        const photoData = {
           id: Math.random().toString(36),
           filename: file.filename,
           originalname: file.originalname,
           url: `/public/uploads/${file.filename}`,
           size: file.size,
           validationResult: validation
-        });
+        };
+
+        // Extract image dimensions for image files (needed for avatar positioning)
+        if (file.mimetype.startsWith('image/')) {
+          try {
+            const metadata = await sharp(filePath).metadata();
+            photoData.width = metadata.width;
+            photoData.height = metadata.height;
+          } catch (err) {
+            console.warn('Failed to extract image dimensions:', err);
+          }
+        }
+
+        validFiles.push(photoData);
       } else {
         invalidFiles.push({
           filename: file.originalname,
@@ -905,6 +919,16 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
 
     // Prepare file paths - URLs are like '/public/uploads/filename.jpg' for uploaded files
     const imagePaths = photos.map(photo => path.join(__dirname, photo.url.slice(1))); // Remove leading slash
+
+    // Calculate dynamic duration based on photo count (matches videoProcessor.js logic)
+    function calculatePerSlideDuration(photoCount) {
+      if (photoCount <= 3) return 10;
+      if (photoCount <= 6) return 8;
+      return 5; // 7-10+ photos
+    }
+
+    const perSlideDuration = calculatePerSlideDuration(imagePaths.length);
+    const totalVideoDuration = imagePaths.length * perSlideDuration;
     
     // Validate video durations (max 3 minutes per video)
     const validationResult = await validateVideosDuration(imagePaths);
@@ -986,12 +1010,12 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
 
           if (imagePaths.length === 1) {
             // Single file - create base video
+            // NOTE: Do NOT pass duration in settings - let videoProcessor calculate dynamic duration
             await createSimpleVideo({
               images: imagePaths,
               audioPath: audioPath,
               outputPath: tempVideoPath,
               settings: {
-                duration: settings.duration || 30,
                 fps: settings.fps || 25,
                 resolution: settings.resolution || '1080x1920' // Mobile-first portrait
               },
@@ -1006,15 +1030,22 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
             if (avatarData) {
               console.log(`🎭 Adding avatar overlay for single video...`);
 
+              // Get photo metadata for avatar positioning
+              const photoMetadata = photos[0] && photos[0].width && photos[0].height
+                ? { originalWidth: photos[0].width, originalHeight: photos[0].height }
+                : null;
+
               await avatarProcessor.processVideoWithAvatar({
                 mainVideoPath: tempVideoPath,
                 musicPath: audioPath,
                 avatarData: avatarData,
                 avatarPosition: avatarPosition,
                 avatarSettings: avatarSettings,
-                videoDuration: settings.duration || 30,
+                videoDuration: totalVideoDuration,
                 outputPath: outputPath,
                 tempDir: path.join(__dirname, 'public', 'temp-videos'),
+                photoMetadata: photoMetadata,
+                slideNumber: 1, // Single video/image is slide 1
                 onProgress: (avatarProgress) => onProgress({ percent: Math.min(100, Math.max(50, 50 + (avatarProgress.percent * 0.5))) }) // Second half of progress
               });
 
@@ -1029,12 +1060,12 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
 
           } else {
             // Multiple files - create slideshow then add per-slide avatars
+            // NOTE: Do NOT pass duration in settings - let videoProcessor calculate dynamic duration
             await createReliableSlideshow({
               images: imagePaths,
               audioPath: audioPath,
               outputPath: tempVideoPath,
               settings: {
-                duration: settings.duration || 30,
                 fps: settings.fps || 25,
                 resolution: settings.resolution || '1080x1920' // Mobile-first portrait
               },
@@ -1045,9 +1076,9 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
             const slideIndices = Object.keys(avatars.slideAvatars);
             if (slideIndices.length > 0) {
 
-              // Calculate slide timing (matches createReliableSlideshow logic)
-              const totalDuration = settings.duration || 30;
-              const timePerImage = Math.max(10, Math.floor(totalDuration / imagePaths.length));
+              // Use calculated dynamic duration (matches videoProcessor.js)
+              const totalDuration = totalVideoDuration;
+              const timePerImage = perSlideDuration;
 
 
               // Process each slide with its avatar sequentially
@@ -1065,6 +1096,11 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
                 const avatarData = avatars.slideAvatars[slideIndex];
                 const avatarPosition = avatars.slideAvatarPositions[slideIndex] || { x: 50, y: 70 };
                 const avatarSettings = avatars.slideAvatarSettings[slideIndex] || {};
+
+                // Get photo metadata for this slide for avatar positioning
+                const photoMetadata = photos[slideNum] && photos[slideNum].width && photos[slideNum].height
+                  ? { originalWidth: photos[slideNum].width, originalHeight: photos[slideNum].height }
+                  : null;
 
                 // Calculate time range for this slide
                 const slideTimeRange = {
@@ -1088,6 +1124,8 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
                   outputPath: nextVideoPath,
                   tempDir: path.join(__dirname, 'public', 'temp-videos'),
                   slideTimeRange: slideTimeRange, // Pass slide timing for per-slide overlay
+                  photoMetadata: photoMetadata, // Pass photo dimensions for accurate positioning
+                  slideNumber: slideNum + 1, // Pass slide number for logging (1-indexed)
                   onProgress: (avatarProgress) => {
                     // Ensure valid avatar progress
                     const validAvatarProgress = Math.min(100, Math.max(0, avatarProgress.percent || 0));
@@ -1120,6 +1158,7 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
 
         } else {
           // No avatars - use original logic
+          // NOTE: Do NOT pass duration in settings - let videoProcessor calculate dynamic duration
           if (imagePaths.length === 1) {
             // Single file - use simple video creation
             await createSimpleVideo({
@@ -1127,7 +1166,6 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
               audioPath: audioPath,
               outputPath: outputPath,
               settings: {
-                duration: settings.duration || 30,
                 fps: settings.fps || 25,
                 resolution: settings.resolution || '1080x1920' // Mobile-first portrait
               },
@@ -1140,7 +1178,6 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
               audioPath: audioPath,
               outputPath: outputPath,
               settings: {
-                duration: settings.duration || 30,
                 fps: settings.fps || 25,
                 resolution: settings.resolution || '1080x1920' // Mobile-first portrait
               },

@@ -44,13 +44,15 @@ export default {
 
   // Home page content
   guideStepsTitle: 'Anleitung mit Fotos',
-  guideStepsDescription: 'Großartige Videos mit QWGenv zu erstellen ist so einfach wie drei leichte Schritte.',
+  guideStepsDescription: 'Großartige Videos mit QWGenv zu erstellen ist so einfach wie vier leichte Schritte. Verwandeln Sie Ihre Fotos in fesselnde Videos mit Musik und animierten Avataren in Minuten.',
   stepUploadMedia: 'Medien Hochladen',
   stepSelectMusic: 'Musik Auswählen',
+  stepAddAvatar: 'Avatar Hinzufügen',
   stepGenerateVideo: 'Video Generieren',
-  stepUploadDescription: 'Ziehen Sie Ihre Fotos oder Videos hinein',
-  stepMusicDescription: 'Wählen Sie aus unserer Bibliothek oder laden Sie Ihre eigene hoch',
-  stepVideoDescription: 'Klicken Sie auf Generieren und laden Sie Ihr Video herunter',
+  stepUploadDescription: 'Ziehen Sie bis zu 10 Fotos oder Videos hinein. Jede Datei kann bis zu 10MB groß sein. Unterstützt JPG-, PNG-, MP4-Formate. Erstellen Sie schöne Diashows mit Ihren Lieblingserinnerungen.',
+  stepMusicDescription: 'Wählen Sie aus unserer kuratierten Musikbibliothek oder laden Sie Ihren eigenen Soundtrack hoch. Passen Sie die Dauer an und schaffen Sie die perfekte Stimmung für Ihr Video.',
+  stepAvatarDescription: 'Wählen Sie aus über 10 animierten Charakteren. Positionieren und skalieren Sie Ihren Avatar auf jeder Folie, um ansprechende virtuelle Duette zu erstellen. Erwecken Sie Ihre Fotos mit Persönlichkeit zum Leben.',
+  stepVideoDescription: 'Klicken Sie auf Generieren und sehen Sie zu, wie sich Ihre Fotos in ein professionelles Video mit Musik und Avataren verwandeln. Laden Sie sofort herunter und teilen Sie mit Freunden und Familie.',
 
   // Loading states
   loading: 'Laden...',
@@ -107,12 +109,29 @@ export default {
   // Coming soon features
   flipPhotosFeature: 'Foto-Flip-Modus',
   flipPhotosDesc: 'Fügen Sie dynamische Flip-Übergänge zwischen Ihren Fotos für ansprechendere Videos hinzu',
-  gridLayoutFeature: 'Rasterlayout-Optionen', 
+  gridLayoutFeature: 'Rasterlayout-Optionen',
   gridLayoutDesc: 'Zeigen Sie mehrere Fotos in kreativen Rasteranordnungen und Collagen an',
   stayTuned: 'Bleiben Sie dran für diese aufregenden Funktionen',
   comingSoon: 'Demnächst',
   newFeaturesTitle: 'Kommende Funktionen',
-  
+
   // Coming soon modal
-  excitingNewFeatures: 'Aufregende neue Funktionen sind unterwegs, um Ihre Videoerstellung noch erstaunlicher zu machen!'
+  excitingNewFeatures: 'Aufregende neue Funktionen sind unterwegs, um Ihre Videoerstellung noch erstaunlicher zu machen!',
+
+  // New UI redesign translations
+  musicAdded: 'Musik hinzugefügt',
+  photos: 'Fotos',
+
+  // Avatar feature highlights
+  featureAvatarGeneration: 'Add animated avatars to bring photos to life',
+  featureAvatarCustomization: 'Customize each slide with unique animated characters',
+  featureAvatarOutput: 'Beat-synchronized avatar animations included',
+
+  // FAQ about avatars
+  faqAvatarQuestion: 'Can I add animated avatars to my videos?',
+  faqAvatarAnswer: 'Yes! You can add animated avatars to any slide in your video. Choose from 10+ characters, position them anywhere on your photos, adjust their size, and create engaging virtual duets. Each slide can have its own unique avatar with custom placement.',
+
+  // Blog post about avatars
+  blogAvatarTitle: 'Using Animated Avatars in Videos',
+  blogAvatarDescription: 'Add personality to your slideshows with animated characters and virtual duets'
 };

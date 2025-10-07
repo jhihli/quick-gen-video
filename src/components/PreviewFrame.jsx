@@ -12,11 +12,20 @@ const PreviewFrame = ({
   selectedMusic = null
 }) => {
   const { t } = useLanguage();
-  const { selectedAvatar, currentSlideIndex, slideAvatars, setCurrentSlide } = useAppContext();
+  const { selectedAvatar, currentSlideIndex, slideAvatars, setCurrentSlide, isProcessing, generationProgress } = useAppContext();
 
   // Slideshow state - moved to top level to follow Rules of Hooks
   const [autoSlideshow, setAutoSlideshow] = useState(false);
   const [slideshowInterval, setSlideshowInterval] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Auto slideshow for multiple photos
   useEffect(() => {
@@ -648,6 +657,51 @@ const PreviewFrame = ({
                     })()}
                   </span>
                 </div>
+              )}
+
+              {/* Inline Circular Progress - Show during processing (in same row on desktop, below on mobile) */}
+              {isProcessing && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  className="inline-flex"
+                >
+                  <div className={`relative ${isMobile ? 'w-20 h-20' : 'w-12 h-12'}`}>
+                    <svg className={`${isMobile ? 'w-20 h-20' : 'w-12 h-12'} transform -rotate-90`}>
+                      <circle
+                        cx={isMobile ? "40" : "24"}
+                        cy={isMobile ? "40" : "24"}
+                        r={isMobile ? "32" : "20"}
+                        stroke="currentColor"
+                        strokeWidth={isMobile ? "6" : "4"}
+                        fill="none"
+                        className="text-gray-700"
+                      />
+                      <motion.circle
+                        cx={isMobile ? "40" : "24"}
+                        cy={isMobile ? "40" : "24"}
+                        r={isMobile ? "32" : "20"}
+                        stroke="currentColor"
+                        strokeWidth={isMobile ? "6" : "4"}
+                        fill="none"
+                        strokeLinecap="round"
+                        className="text-blue-500"
+                        style={{
+                          strokeDasharray: isMobile ? "201" : "126",
+                          strokeDashoffset: isMobile
+                            ? 201 - (201 * (generationProgress || 0)) / 100
+                            : 126 - (126 * (generationProgress || 0)) / 100
+                        }}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className={`text-white font-semibold ${isMobile ? 'text-sm' : 'text-xs'}`}>
+                        {Math.round(generationProgress || 0)}%
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
               )}
             </div>
           </motion.div>

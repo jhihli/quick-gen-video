@@ -87,13 +87,15 @@ export default {
 
   // Home page content
   guideStepsTitle: 'خطوات الدليل بالصور',
-  guideStepsDescription: 'إنشاء فيديوهات رائعة مع QWGenv بسيط مثل ثلاث خطوات سهلة. اتبع عمليتنا المبسطة لتحويل صورك إلى فيديوهات جذابة في دقائق.',
+  guideStepsDescription: 'إنشاء فيديوهات رائعة مع QWGenv بسيط مثل أربع خطوات سهلة. اتبع عمليتنا المبسطة لتحويل صورك إلى فيديوهات جذابة مع الموسيقى والأفاتار المتحركة في دقائق.',
   stepUploadMedia: 'رفع الوسائط',
   stepSelectMusic: 'اختيار الموسيقى',
+  stepAddAvatar: 'إضافة أفاتار',
   stepGenerateVideo: 'إنشاء الفيديو',
-  stepUploadDescription: 'اسحب وأفلت صورك أو فيديوهاتك',
-  stepMusicDescription: 'اختر من مكتبتنا أو ارفع الخاصة بك',
-  stepVideoDescription: 'انقر على إنشاء وحمل فيديوك',
+  stepUploadDescription: 'اسحب وأفلت ما يصل إلى 10 صور أو فيديوهات. كل ملف يمكن أن يصل إلى 10 ميجابايت. يدعم صيغ JPG و PNG و MP4. أنشئ عروض شرائح جميلة بذكرياتك المفضلة.',
+  stepMusicDescription: 'اختر من مكتبتنا الموسيقية المنتقاة أو ارفع موسيقاك الخاصة. قم بتخصيص المدة وضبط المزاج المثالي لفيديوك.',
+  stepAvatarDescription: 'اختر من بين أكثر من 10 شخصيات متحركة. ضع أفاتارك وغير حجمه في كل شريحة لإنشاء ثنائيات افتراضية جذابة. أحيي صورك بالشخصية.',
+  stepVideoDescription: 'انقر على إنشاء وشاهد صورك تتحول إلى فيديو احترافي مع الموسيقى والأفاتارات. حمّل فوراً وشارك مع الأصدقاء والعائلة.',
 
   // Comments section
   userComments: 'تعليقات المستخدمين',
@@ -232,7 +234,23 @@ export default {
   photo: 'صورة',
   selected: 'محدد',
   scanWithPhone: 'امسح بهاتفك للوصول للفيديو',
-  
+
   // Coming soon modal
-  excitingNewFeatures: 'ميزات جديدة مثيرة في الطريق لجعل إنشاء الفيديو الخاص بك أكثر إذهالاً!'
+  excitingNewFeatures: 'ميزات جديدة مثيرة في الطريق لجعل إنشاء الفيديو الخاص بك أكثر إذهالاً!',
+
+  // New UI redesign translations
+  musicAdded: 'تمت إضافة الموسيقى',
+
+  // Avatar feature highlights
+  featureAvatarGeneration: 'Add animated avatars to bring photos to life',
+  featureAvatarCustomization: 'Customize each slide with unique animated characters',
+  featureAvatarOutput: 'Beat-synchronized avatar animations included',
+
+  // FAQ about avatars
+  faqAvatarQuestion: 'Can I add animated avatars to my videos?',
+  faqAvatarAnswer: 'Yes! You can add animated avatars to any slide in your video. Choose from 10+ characters, position them anywhere on your photos, adjust their size, and create engaging virtual duets. Each slide can have its own unique avatar with custom placement.',
+
+  // Blog post about avatars
+  blogAvatarTitle: 'Using Animated Avatars in Videos',
+  blogAvatarDescription: 'Add personality to your slideshows with animated characters and virtual duets'
 };

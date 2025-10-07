@@ -87,13 +87,15 @@ export default {
 
   // Home page content
   guideStepsTitle: 'Шаги Руководства с Фото',
-  guideStepsDescription: 'Создавать потрясающие видео с QWGenv так же просто, как три легких шага. Следуйте нашему упрощенному процессу, чтобы превратить ваши фотографии в увлекательные видео за считанные минуты.',
+  guideStepsDescription: 'Создавать потрясающие видео с QWGenv так же просто, как четыре легких шага. Следуйте нашему упрощенному процессу, чтобы превратить ваши фотографии в увлекательные видео с музыкой и анимированными аватарами за считанные минуты.',
   stepUploadMedia: 'Загрузить Медиа',
   stepSelectMusic: 'Выбрать Музыку',
+  stepAddAvatar: 'Добавить Аватар',
   stepGenerateVideo: 'Создать Видео',
-  stepUploadDescription: 'Перетащите ваши фото или видео',
-  stepMusicDescription: 'Выберите из нашей библиотеки или загрузите свою',
-  stepVideoDescription: 'Нажмите создать и загрузите ваше видео',
+  stepUploadDescription: 'Перетащите до 10 фотографий или видео. Каждый файл может быть до 10 МБ. Поддерживает форматы JPG, PNG, MP4. Создавайте красивые слайд-шоу с вашими любимыми воспоминаниями.',
+  stepMusicDescription: 'Выберите из нашей отобранной музыкальной библиотеки или загрузите свой саундтрек. Настройте продолжительность и создайте идеальное настроение для вашего видео.',
+  stepAvatarDescription: 'Выберите из более чем 10 анимированных персонажей. Расположите и измените размер вашего аватара на каждом слайде для создания увлекательных виртуальных дуэтов. Оживите свои фотографии с индивидуальностью.',
+  stepVideoDescription: 'Нажмите создать и смотрите, как ваши фотографии превращаются в профессиональное видео с музыкой и аватарами. Загрузите мгновенно и поделитесь с друзьями и семьей.',
 
   // Comments section
   userComments: 'Комментарии Пользователей',
@@ -232,7 +234,23 @@ export default {
   photo: 'фото',
   selected: 'выбрано',
   scanWithPhone: 'Сканируйте телефоном для доступа к видео',
-  
+
   // Coming soon modal
-  excitingNewFeatures: 'Захватывающие новые функции на подходе, чтобы сделать создание ваших видео еще более невероятным!'
+  excitingNewFeatures: 'Захватывающие новые функции на подходе, чтобы сделать создание ваших видео еще более невероятным!',
+
+  // New UI redesign translations
+  musicAdded: 'Музыка добавлена',
+
+  // Avatar feature highlights
+  featureAvatarGeneration: 'Add animated avatars to bring photos to life',
+  featureAvatarCustomization: 'Customize each slide with unique animated characters',
+  featureAvatarOutput: 'Beat-synchronized avatar animations included',
+
+  // FAQ about avatars
+  faqAvatarQuestion: 'Can I add animated avatars to my videos?',
+  faqAvatarAnswer: 'Yes! You can add animated avatars to any slide in your video. Choose from 10+ characters, position them anywhere on your photos, adjust their size, and create engaging virtual duets. Each slide can have its own unique avatar with custom placement.',
+
+  // Blog post about avatars
+  blogAvatarTitle: 'Using Animated Avatars in Videos',
+  blogAvatarDescription: 'Add personality to your slideshows with animated characters and virtual duets'
 };

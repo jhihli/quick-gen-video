@@ -99,7 +99,7 @@ function VideoExportSidebar({ onNewVideo, onFeedback }) {
     }
   }, []) // Only run on mount
 
-  // Auto-start generation when component mounts if we have photos and music but no video
+  // Auto-start generation when activeMode is 'generate' (triggered by Generate button click)
   useEffect(() => {
     // Only auto-generate once per component lifecycle and avoid during errors
     // Wait for initial state check to complete to prevent race conditions
@@ -111,7 +111,6 @@ function VideoExportSidebar({ onNewVideo, onFeedback }) {
         // Double-check state before actually triggering generation
         if (!isProcessing && !currentJobId) {
           handleGenerateVideo()
-        } else {
         }
       }, 100)
     }
@@ -354,30 +353,95 @@ function VideoExportSidebar({ onNewVideo, onFeedback }) {
     }
   }
 
+  // Detect mobile
+  const [isMobile, setIsMobile] = React.useState(false)
+
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   return (
     <div className="p-6 space-y-6 h-full overflow-y-auto">
-      {/* Generation Status */}
+      {/* Status Badges - Always show when no video is generated */}
+      {!localVideoData && (
+        <motion.div
+          className="flex flex-wrap items-center justify-center gap-2"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          {/* Music Badge */}
+          {selectedMusic && (
+            <motion.div
+              className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+            >
+              <svg className="w-4 h-4 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM15.657 6.343a1 1 0 011.414 0A9.972 9.972 0 0119 12a9.972 9.972 0 01-1.929 5.657 1 1 0 11-1.414-1.414A7.971 7.971 0 0017 12a7.971 7.971 0 00-1.343-4.243 1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+              <span className="text-white/90 text-sm font-medium">{t('musicAdded')}</span>
+            </motion.div>
+          )}
+
+          {/* Photos Badge */}
+          {photos?.length > 0 && (
+            <motion.div
+              className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <svg className="w-4 h-4 text-blue-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+              </svg>
+              <span className="text-white/90 text-sm font-medium">{photos.length} {photos.length === 1 ? t('photo') : t('photos')}</span>
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+
+      {/* Inline Circular Progress - Below badges */}
       {isProcessing && (
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-400/30 rounded-xl p-4"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          className="flex justify-center"
         >
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-blue-300 font-medium">{t('generatingVideo')}</span>
+          <div className="relative w-20 h-20">
+            <svg className="w-20 h-20 transform -rotate-90">
+              <circle
+                cx="40"
+                cy="40"
+                r="32"
+                stroke="currentColor"
+                strokeWidth="6"
+                fill="none"
+                className="text-gray-700"
+              />
+              <motion.circle
+                cx="40"
+                cy="40"
+                r="32"
+                stroke="currentColor"
+                strokeWidth="6"
+                fill="none"
+                strokeLinecap="round"
+                className="text-blue-500"
+                style={{
+                  strokeDasharray: "201",
+                  strokeDashoffset: 201 - (201 * generationProgress) / 100
+                }}
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-white font-semibold text-sm">{Math.round(generationProgress)}%</span>
+            </div>
           </div>
-          
-          {/* Progress Bar */}
-          <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-            <motion.div
-              className="h-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${generationProgress}%` }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            />
-          </div>
-          <p className="text-blue-200 text-sm mt-2">{Math.round(generationProgress)}% {t('completed')}</p>
         </motion.div>
       )}
 

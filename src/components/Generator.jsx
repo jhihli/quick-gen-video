@@ -50,6 +50,19 @@ const Generator = () => {
     return () => window.removeEventListener('resize', updateDimensions)
   }, [])
 
+  // Auto-close drawer when processing starts, reopen when video is ready
+  useEffect(() => {
+    if (isProcessing && isDrawerOpen && activeMode === 'generate') {
+      // Close drawer when processing starts
+      setIsDrawerOpen(false)
+      setActiveMode('preview')
+    } else if (!isProcessing && generatedVideo && activeMode === 'preview') {
+      // Reopen drawer when video is ready
+      setActiveMode('generate')
+      setIsDrawerOpen(true)
+    }
+  }, [isProcessing, generatedVideo])
+
   // Navigation handlers
   const handleNavigateToHome = (e) => {
     e.preventDefault()
@@ -105,10 +118,17 @@ const Generator = () => {
         // Close if already open
         setIsDrawerOpen(false)
         setActiveMode('preview')
-      } else {
-        // Open generate drawer
+      } else if (generatedVideo) {
+        // Video exists - open drawer to show download options
         setActiveMode('generate')
         setIsDrawerOpen(true)
+      } else {
+        // No video yet - don't open drawer, start generation directly
+        // Set mode but keep drawer closed
+        setActiveMode('generate')
+        setIsDrawerOpen(false)
+        // Trigger generation through a ref or direct call
+        // For now, we'll rely on mounting VideoExportSidebar to handle it
       }
     }
   }
@@ -292,10 +312,26 @@ const Generator = () => {
                 hasAvatar={!!selectedAvatar}
                 canGenerate={canGenerate}
                 isGenerating={isProcessing}
+                hasVideo={!!generatedVideo}
               />
             </div>
           </div>
         </motion.div>
+
+        {/* Hidden VideoExportSidebar - renders in background to handle generation */}
+        {activeMode === 'generate' && !isDrawerOpen && (
+          <div style={{ display: 'none' }}>
+            <Suspense fallback={null}>
+              <VideoExportSidebar
+                onNewVideo={() => {
+                  cleanupAndReset()
+                  handleDrawerClose()
+                }}
+                onFeedback={handleNavigateToHome}
+              />
+            </Suspense>
+          </div>
+        )}
 
         {/* Bottom Sheet Drawer */}
         <BottomSheetDrawer

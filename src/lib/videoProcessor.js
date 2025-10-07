@@ -77,6 +77,22 @@ try {
 }
 
 /**
+ * Calculate per-slide duration based on total photo count
+ * Implements tiered duration system:
+ * - 1-3 photos: 10s per slide (max 30s total)
+ * - 4-6 photos: 8s per slide (max 48s total)
+ * - 7-10+ photos: 5s per slide (max 50s+ total)
+ *
+ * @param {number} photoCount - Total number of photos in slideshow
+ * @returns {number} Duration in seconds for each slide
+ */
+function calculatePerSlideDuration(photoCount) {
+  if (photoCount <= 3) return 10;
+  if (photoCount <= 6) return 8;
+  return 5; // 7-10+ photos
+}
+
+/**
  * Creates a video from an array of images and audio
  * @param {Object} options - Video creation options
  * @param {Array} options.images - Array of image file paths
@@ -219,13 +235,13 @@ export async function createReliableSlideshow(options) {
 
   const resolution = '1080x1920'; // Mobile portrait format
 
-  // Calculate minimum required duration: 10 seconds per image, minimum 30 seconds total
-  const minDurationForImages = images.length * 10;
-  const finalDuration = Math.max(30, minDurationForImages, settings.duration || 30);
+  // Calculate dynamic duration based on photo count
+  const perSlideDuration = calculatePerSlideDuration(images.length);
+  const finalDuration = images.length * perSlideDuration;
 
   // For multiple images, use two-step process for reliability
   if (images.length > 1) {
-    const timePerImage = Math.max(10, Math.floor(finalDuration / images.length));
+    const timePerImage = perSlideDuration;
     
     return new Promise(async (resolve, reject) => {
       const tempDir = path.join(path.dirname(outputPath), 'temp_videos');
@@ -534,7 +550,9 @@ export async function createSlideshowDirectly(options) {
     onProgress = () => {}
   } = options;
 
-  const duration = Math.max(10, settings.duration || 30);
+  // Calculate dynamic duration based on photo count
+  const perSlideDuration = calculatePerSlideDuration(images.length);
+  const duration = images.length * perSlideDuration;
   const normalizedImages = images.map(img => path.resolve(img));
   const normalizedAudioPath = path.resolve(audioPath);
   const normalizedOutputPath = path.resolve(outputPath);
@@ -581,10 +599,9 @@ export async function createSlideshowDirectly(options) {
           itemDurations.push(videoDuration);
           actualTotalDuration += videoDuration;
         } else {
-          // For images, use default duration per item
-          const imageTime = duration / normalizedImages.length;
-          itemDurations.push(imageTime);
-          actualTotalDuration += imageTime;
+          // For images, use dynamic per-slide duration
+          itemDurations.push(perSlideDuration);
+          actualTotalDuration += perSlideDuration;
         }
       }
 
@@ -834,7 +851,9 @@ export async function createVideoDirectly(options) {
     onProgress = () => {}
   } = options;
 
-  const duration = Math.max(10, settings.duration || 30);
+  // Calculate dynamic duration based on photo count
+  const perSlideDuration = calculatePerSlideDuration(images.length);
+  const duration = images.length * perSlideDuration;
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -933,9 +952,9 @@ export async function createSimpleSlideshow(options) {
 
   const resolution = '1080x1920'; // Mobile portrait format
 
-  // Calculate minimum required duration: 3 seconds per image, minimum 10 seconds total
-  const minDurationForImages = images.length * 3;
-  const duration = Math.max(10, minDurationForImages, settings.duration || 30);
+  // Calculate dynamic duration based on photo count
+  const perSlideDuration = calculatePerSlideDuration(images.length);
+  const duration = images.length * perSlideDuration;
 
   return new Promise((resolve, reject) => {
     try {

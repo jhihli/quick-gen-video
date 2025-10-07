@@ -87,13 +87,15 @@ export default {
 
   // Home page content
   guideStepsTitle: '사진으로 하는 가이드 단계',
-  guideStepsDescription: 'QWGenv로 놀라운 비디오를 만드는 것은 세 가지 쉬운 단계만큼 간단합니다. 우리의 간소화된 프로세스를 따라 몇 분 안에 사진을 매력적인 비디오로 변환하세요.',
+  guideStepsDescription: 'QWGenv로 놀라운 비디오를 만드는 것은 네 가지 쉬운 단계만큼 간단합니다. 우리의 간소화된 프로세스를 따라 몇 분 안에 사진을 음악과 애니메이션 아바타가 있는 매력적인 비디오로 변환하세요.',
   stepUploadMedia: '미디어 업로드',
   stepSelectMusic: '음악 선택',
+  stepAddAvatar: '아바타 추가',
   stepGenerateVideo: '비디오 생성',
-  stepUploadDescription: '사진이나 비디오를 드래그 앤 드롭',
-  stepMusicDescription: '라이브러리에서 선택하거나 업로드',
-  stepVideoDescription: '생성을 클릭하고 비디오를 다운로드',
+  stepUploadDescription: '최대 10개의 사진 또는 비디오를 드래그 앤 드롭하세요. 각 파일은 최대 10MB입니다. JPG, PNG, MP4 형식을 지원합니다. 좋아하는 추억으로 아름다운 슬라이드쇼를 만드세요.',
+  stepMusicDescription: '엄선된 음악 라이브러리에서 선택하거나 자신의 사운드트랙을 업로드하세요. 지속 시간을 맞춤 설정하고 비디오에 완벽한 분위기를 설정하세요.',
+  stepAvatarDescription: '10가지 이상의 애니메이션 캐릭터 중에서 선택하세요. 각 슬라이드에서 아바타의 위치와 크기를 조정하여 매력적인 가상 듀엣을 만드세요. 개성으로 사진에 생명을 불어넣으세요.',
+  stepVideoDescription: '생성을 클릭하고 사진이 음악과 아바타가 포함된 전문 비디오로 변환되는 것을 확인하세요. 즉시 다운로드하고 친구 및 가족과 공유하세요.',
 
   // Comments section
   userComments: '사용자 댓글',
@@ -232,7 +234,23 @@ export default {
   photo: '사진',
   selected: '선택됨',
   scanWithPhone: '휴대폰으로 스캔하여 비디오에 접근',
-  
+
   // Coming soon modal
-  excitingNewFeatures: '비디오 제작을 더욱 놀랍게 만들어 줄 흥미진진한 새 기능들이 곧 출시됩니다!'
+  excitingNewFeatures: '비디오 제작을 더욱 놀랍게 만들어 줄 흥미진진한 새 기능들이 곧 출시됩니다!',
+
+  // New UI redesign translations
+  musicAdded: '음악 추가됨',
+
+  // Avatar feature highlights
+  featureAvatarGeneration: 'Add animated avatars to bring photos to life',
+  featureAvatarCustomization: 'Customize each slide with unique animated characters',
+  featureAvatarOutput: 'Beat-synchronized avatar animations included',
+
+  // FAQ about avatars
+  faqAvatarQuestion: 'Can I add animated avatars to my videos?',
+  faqAvatarAnswer: 'Yes! You can add animated avatars to any slide in your video. Choose from 10+ characters, position them anywhere on your photos, adjust their size, and create engaging virtual duets. Each slide can have its own unique avatar with custom placement.',
+
+  // Blog post about avatars
+  blogAvatarTitle: 'Using Animated Avatars in Videos',
+  blogAvatarDescription: 'Add personality to your slideshows with animated characters and virtual duets'
 };

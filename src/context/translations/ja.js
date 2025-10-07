@@ -87,13 +87,15 @@ export default {
 
   // Home page content
   guideStepsTitle: '写真でのガイド手順',
-  guideStepsDescription: 'QWGenvで素晴らしいビデオを作成することは、3つの簡単な手順と同じくらい簡単です。シンプルなプロセスに従って、数分で写真を魅力的なビデオに変換してください。',
+  guideStepsDescription: 'QWGenvで素晴らしいビデオを作成することは、4つの簡単な手順と同じくらい簡単です。シンプルなプロセスに従って、数分で写真を音楽とアニメーションアバターを使った魅力的なビデオに変換してください。',
   stepUploadMedia: 'メディアアップロード',
   stepSelectMusic: '音楽選択',
+  stepAddAvatar: 'アバター追加',
   stepGenerateVideo: 'ビデオ生成',
-  stepUploadDescription: '写真またはビデオをドラッグアンドドロップ',
-  stepMusicDescription: 'ライブラリから選択またはアップロード',
-  stepVideoDescription: '生成をクリックしてビデオをダウンロード',
+  stepUploadDescription: '最大10枚の写真または動画をドラッグアンドドロップ。各ファイルは最大10MB。JPG、PNG、MP4形式に対応。お気に入りの思い出で美しいスライドショーを作成。',
+  stepMusicDescription: '厳選された音楽ライブラリから選択するか、独自のサウンドトラックをアップロード。期間をカスタマイズして、ビデオに最適なムードを設定。',
+  stepAvatarDescription: '10種類以上のアニメーションキャラクターから選択。各スライドでアバターの位置とサイズを調整して、魅力的なバーチャルデュエットを作成。写真に個性を与えて命を吹き込みます。',
+  stepVideoDescription: '生成をクリックして、写真が音楽とアバターを含むプロフェッショナルなビデオに変わるのを見てください。即座にダウンロードして、友人や家族と共有。',
 
   // Comments section
   userComments: 'ユーザーコメント',
@@ -232,7 +234,23 @@ export default {
   photo: '写真',
   selected: '選択済み',
   scanWithPhone: '電話でスキャンしてビデオにアクセス',
-  
+
   // Coming soon modal
-  excitingNewFeatures: 'ビデオ作成をさらに素晴らしくするエキサイティングな新機能が近日登場！'
+  excitingNewFeatures: 'ビデオ作成をさらに素晴らしくするエキサイティングな新機能が近日登場！',
+
+  // New UI redesign translations
+  musicAdded: '音楽が追加されました',
+
+  // Avatar feature highlights
+  featureAvatarGeneration: 'Add animated avatars to bring photos to life',
+  featureAvatarCustomization: 'Customize each slide with unique animated characters',
+  featureAvatarOutput: 'Beat-synchronized avatar animations included',
+
+  // FAQ about avatars
+  faqAvatarQuestion: 'Can I add animated avatars to my videos?',
+  faqAvatarAnswer: 'Yes! You can add animated avatars to any slide in your video. Choose from 10+ characters, position them anywhere on your photos, adjust their size, and create engaging virtual duets. Each slide can have its own unique avatar with custom placement.',
+
+  // Blog post about avatars
+  blogAvatarTitle: 'Using Animated Avatars in Videos',
+  blogAvatarDescription: 'Add personality to your slideshows with animated characters and virtual duets'
 };

@@ -13,7 +13,7 @@ export default {
 
   // What is QWGenv section
   whatIsQWGenv: 'What is QWGenv?',
-  qwgenvIntro: 'In today\'s fast-paced digital world, creating engaging video content <span style="color: #fbbf24; font-weight: 600;">quickly</span> has become essential for personal memories, social media, marketing campaigns, and professional presentations. QWGenv addresses this need by providing an <span style="color: #f97316; font-weight: 600;">incredibly fast</span> and <span style="color: #fbbf24; font-weight: 600;">efficient solution</span> that transforms your static photos into dynamic, professional-quality videos <span style="color: #f97316; font-weight: 600;">within seconds</span>.',
+  qwgenvIntro: 'In today\'s fast-paced digital world, creating engaging video content <span style="color: #fbbf24; font-weight: 600;">quickly</span> has become essential for personal memories, social media, marketing campaigns, and professional presentations. QWGenv addresses this need by providing an <span style="color: #f97316; font-weight: 600;">incredibly fast</span> and <span style="color: #fbbf24; font-weight: 600;">efficient solution</span> that transforms your static photos into dynamic, professional-quality videos <span style="color: #f97316; font-weight: 600;">within seconds</span>. Add <span style="color: #8b5cf6; font-weight: 600;">animated avatars</span> to bring personality and life to every slide, creating <span style="color: #8b5cf6; font-weight: 600;">virtual duets</span> that captivate your audience.',
   readyToStart: 'Ready to create your first video?',
   tryItNow: 'Try it now',
   andSeeTheMagic: 'and see the magic happen!',
@@ -57,6 +57,7 @@ export default {
   videoGenerated: 'Video Generated Successfully!',
   slideshowReady: 'Slideshow Ready',
   videoPreview: 'Video Preview',
+  download: 'Download',
   downloadVideo: 'Download Video',
   createNewVideo: 'New Video',
 
@@ -115,18 +116,20 @@ export default {
   close: 'Close',
 
   // Home page content
-  guideStepsTitle: 'Guide Steps with Photos',
-  guideStepsDescription: 'Creating amazing videos with QWGenv is as simple as three easy steps. Follow our streamlined process to transform your photos into captivating videos in minutes.',
+  guideStepsTitle: 'Guide Steps with Generation',
+  guideStepsDescription: 'Creating amazing videos with QWGenv is as simple as four easy steps. Follow our streamlined process to transform your photos into captivating videos with music and animated avatars in minutes.',
   stepUploadMedia: 'Upload Media',
   stepSelectMusic: 'Select Music',
+  stepAddAvatar: 'Add Avatar',
   stepGenerateVideo: 'Generate Video',
-  stepUploadDescription: 'Drag and drop your photos or videos',
-  stepMusicDescription: 'Choose from our library or upload your own',
-  stepVideoDescription: 'Click generate and download your video',
+  stepUploadDescription: 'Drag and drop up to 10 photos or videos. Each file can be up to 10MB. Supports JPG, PNG, MP4 formats. Create beautiful slideshows with your favorite memories.',
+  stepMusicDescription: 'Choose from our curated music library or upload your own soundtrack. Customize the duration and set the perfect mood for your video creation.',
+  stepAvatarDescription: 'Select from 10+ animated characters. Position and resize your avatar on each slide to create engaging virtual duets. Bring your photos to life with personality.',
+  stepVideoDescription: 'Click generate and watch your photos transform into a professional video with music and avatars. Download instantly and share with friends and family.',
 
   // Footer and legal
   aboutUs: 'About Us',
-  contactUs: 'Contact Us', 
+  contactUs: 'Contact Us',
   privacyPolicy: 'Privacy Policy',
   termsOfService: 'Terms of Service',
   allRightsReserved: 'All rights reserved',
@@ -143,7 +146,7 @@ export default {
   // Features and coming soon
   flipPhotosFeature: 'Flip Photos Mode',
   flipPhotosDesc: 'Add dynamic flip transitions between your photos for more engaging videos',
-  gridLayoutFeature: 'Grid Layout Options', 
+  gridLayoutFeature: 'Grid Layout Options',
   gridLayoutDesc: 'Display multiple photos in creative grid arrangements and collages',
   stayTuned: 'Stay tuned for these exciting features',
   comingSoon: 'Coming Soon',
@@ -166,7 +169,7 @@ export default {
 
   // Download options
   hideQR: 'Hide QR',
-  qrCode: 'QR Code', 
+  qrCode: 'QR Code',
   hideQRCode: 'Hide QR Code',
   showQRCode: 'Show QR Code',
 
@@ -180,7 +183,7 @@ export default {
   // Error messages
   uploadFailed: 'Upload failed',
   failedToUploadMedia: 'Failed to upload media',
-  videoProcessingFailed: 'Video processing failed', 
+  videoProcessingFailed: 'Video processing failed',
   failedToGetProgress: 'Failed to get progress',
   unknownErrorOccurred: 'Unknown error occurred',
   failedToGenerateQRCode: 'Failed to generate QR code',
@@ -204,71 +207,71 @@ export default {
   photo: 'photo',
   selected: 'selected',
   scanWithPhone: 'Scan with your phone to access the video',
-  
+
   // Additional hardcoded strings
   quickWayGenerateVideo: 'Quick Way Generate Video',
   readyToCreateVideo: 'Ready to create your video?',
   shareYourThoughtsMobile: 'Share your thoughts!',
   loadingQRCode: 'Loading QR code...',
-  
+
   // User Comments placeholders
   thankYouForFeedback: 'Thank you for your feedback! ✨',
   shareExperienceWithGenerator: 'Share your experience with our video generator... ✨',
-  
+
   // Music player
   remove: 'Remove',
-  
+
   // Rate limiting and generation limits
   generationLimits: 'Generation Limits',
   hourly: 'hourly',
   daily: 'daily',
-  
+
   // Progress messages (additional)
   creatingClips: 'Creating video clips...',
-  
+
   // Status messages (additional)  
   photoDisplayed: 'Your photo will be displayed for',
   photosDisplayed: 'Your photos will be displayed sequentially',
   secondsEach: 'seconds each',
   withMusic: 'with your music.',
   music: 'Add music',
-  
+
   // File info
   filename: 'Filename',
   processing: 'Processing',
   completed: 'Completed',
   ready: 'Ready',
   seconds: 'seconds',
-  
+
   // Mobile instructions
   mobileUsers: 'Mobile Users',
   iosInstructions: 'iOS: Tap button → Long press video → "Save to Photos"',
   androidInstructions: 'Android: Tap button → Downloads folder or "Save video"',
   chromeInstructions: 'Chrome: Tap button → Check Downloads notification',
-  
+
   // QR Code
   mobileQRCode: 'Mobile QR Code',
   qrCodeForVideo: 'QR Code for video',
   expires: 'Expires',
-  
+
   // Video export
   videoPreview: 'Video Preview',
   downloadVideo: 'Download Video',
   slideshowReady: 'Slideshow Ready',
-  
+
   // Feedback and community
   feedback: 'Feedback',
   community: 'Community',
   yourFeedbackWillSupport: 'Your feedback will support our continuous improvement efforts.',
   typeFeedbackHere: 'Type your feedback here!',
   yourExperienceShared: 'Your experience has been shared and will help us improve our video generator for everyone.',
-  
+
   // Modal content text
   contactModalContent: 'If you have any questions, suggestions, or just want to share your experience with our video generator, please feel free to leave your feedback. Your thoughts are incredibly valuable to us and help us make QWGenv even better for everyone.',
-  
+
   // Coming soon modal
   excitingNewFeatures: 'Exciting new features are on their way to make your video creation even more amazing!',
-  
+
   // New UI redesign translations
   addPhotosAndMusicToStart: 'Add photos and music to start creating your video',
   noPhotosSelected: 'No photos selected',
@@ -281,5 +284,18 @@ export default {
   addPhotosToStart: 'Add photos to get started',
   addMusicToContinue: 'Add music to continue',
   readyToGenerate: 'Ready to generate your video!',
-  completeStepsToGenerate: 'Complete all steps to generate video'
+  completeStepsToGenerate: 'Complete all steps to generate video',
+
+  // Avatar feature highlights
+  featureAvatarGeneration: 'Add animated avatars to bring photos to life',
+  featureAvatarCustomization: 'Customize each slide with unique animated characters',
+  featureAvatarOutput: 'Beat-synchronized avatar animations included',
+
+  // FAQ about avatars
+  faqAvatarQuestion: 'Can I add animated avatars to my videos?',
+  faqAvatarAnswer: 'Yes! You can add animated avatars to any slide in your video. Choose from 10+ characters, position them anywhere on your photos, adjust their size, and create engaging virtual duets. Each slide can have its own unique avatar with custom placement.',
+
+  // Blog post about avatars
+  blogAvatarTitle: 'Using Animated Avatars in Videos',
+  blogAvatarDescription: 'Add personality to your slideshows with animated characters and virtual duets'
 };

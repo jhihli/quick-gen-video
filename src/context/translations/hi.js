@@ -87,13 +87,15 @@ export default {
 
   // Home page content
   guideStepsTitle: 'फ़ोटो के साथ गाइड चरण',
-  guideStepsDescription: 'QWGenv के साथ अद्भुत वीडियो बनाना तीन आसान चरणों जितना सरल है। अपनी तस्वीरों को मिनटों में मनमोहक वीडियो में बदलने के लिए हमारी सरलीकृत प्रक्रिया का पालन करें।',
+  guideStepsDescription: 'QWGenv के साथ अद्भुत वीडियो बनाना चार आसान चरणों जितना सरल है। अपनी तस्वीरों को संगीत और एनिमेटेड अवतार के साथ मिनटों में मनमोहक वीडियो में बदलने के लिए हमारी सरलीकृत प्रक्रिया का पालन करें।',
   stepUploadMedia: 'मीडिया अपलोड करें',
   stepSelectMusic: 'संगीत चुनें',
+  stepAddAvatar: 'अवतार जोड़ें',
   stepGenerateVideo: 'वीडियो बनाएं',
-  stepUploadDescription: 'अपनी तस्वीरें या वीडियो खींचें और छोड़ें',
-  stepMusicDescription: 'हमारी लाइब्रेरी से चुनें या अपना अपलोड करें',
-  stepVideoDescription: 'जनरेट पर क्लिक करें और अपना वीडियो डाउनलोड करें',
+  stepUploadDescription: '10 तक फ़ोटो या वीडियो खींचें और छोड़ें। प्रत्येक फ़ाइल 10MB तक हो सकती है। JPG, PNG, MP4 प्रारूपों का समर्थन करता है। अपनी पसंदीदा यादों के साथ सुंदर स्लाइडशो बनाएं।',
+  stepMusicDescription: 'हमारी चयनित संगीत लाइब्रेरी से चुनें या अपना स्वयं का साउंडट्रैक अपलोड करें। अवधि को अनुकूलित करें और अपने वीडियो के लिए सही मूड सेट करें।',
+  stepAvatarDescription: '10+ एनिमेटेड पात्रों में से चुनें। प्रत्येक स्लाइड पर अपने अवतार की स्थिति और आकार समायोजित करें और आकर्षक आभासी युगल बनाएं। अपनी तस्वीरों को व्यक्तित्व के साथ जीवंत करें।',
+  stepVideoDescription: 'जनरेट पर क्लिक करें और अपनी तस्वीरों को संगीत और अवतारों के साथ एक पेशेवर वीडियो में बदलते हुए देखें। तुरंत डाउनलोड करें और दोस्तों और परिवार के साथ साझा करें।',
 
   // Comments section
   userComments: 'उपयोगकर्ता टिप्पणियां',
@@ -232,7 +234,23 @@ export default {
   photo: 'फोटो',
   selected: 'चयनित',
   scanWithPhone: 'वीडियो एक्सेस करने के लिए फ़ोन से स्कैन करें',
-  
+
   // Coming soon modal
-  excitingNewFeatures: 'आपके वीडियो निर्माण को और भी अद्भुत बनाने के लिए रोमांचक नई सुविधाएं आ रही हैं!'
+  excitingNewFeatures: 'आपके वीडियो निर्माण को और भी अद्भुत बनाने के लिए रोमांचक नई सुविधाएं आ रही हैं!',
+
+  // New UI redesign translations
+  musicAdded: 'संगीत जोड़ा गया',
+
+  // Avatar feature highlights
+  featureAvatarGeneration: 'Add animated avatars to bring photos to life',
+  featureAvatarCustomization: 'Customize each slide with unique animated characters',
+  featureAvatarOutput: 'Beat-synchronized avatar animations included',
+
+  // FAQ about avatars
+  faqAvatarQuestion: 'Can I add animated avatars to my videos?',
+  faqAvatarAnswer: 'Yes! You can add animated avatars to any slide in your video. Choose from 10+ characters, position them anywhere on your photos, adjust their size, and create engaging virtual duets. Each slide can have its own unique avatar with custom placement.',
+
+  // Blog post about avatars
+  blogAvatarTitle: 'Using Animated Avatars in Videos',
+  blogAvatarDescription: 'Add personality to your slideshows with animated characters and virtual duets'
 };
