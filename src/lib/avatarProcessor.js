@@ -306,6 +306,8 @@ export const processVideoWithAvatar = async ({
   outputPath,
   tempDir,
   slideTimeRange = null, // Optional: { start: number, end: number } for per-slide timing
+  photoMetadata = null, // Optional: original photo dimensions for avatar positioning
+  slideNumber = null, // Optional: slide number for logging
   onProgress
 }) => {
   try {
@@ -328,6 +330,8 @@ export const processVideoWithAvatar = async ({
         outputPath,
         tempDir,
         slideTimeRange,
+        photoMetadata,
+        slideNumber,
         onProgress
       });
 

@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-mo
 import { useLanguage } from '../context/LanguageContext';
 import { useAppContext } from '../context/AppContext';
 import AvatarPreview from './AvatarPreview';
+import { calculateLetterbox } from '../lib/letterboxUtils';
 
 const PreviewFrame = ({
   mode = 'default', // 'default', 'photos', 'video'
@@ -105,7 +106,7 @@ const PreviewFrame = ({
       >
         {/* iPhone Frame for Default Mode */}
         <div className="flex items-center justify-center">
-          <div className="bg-black rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden relative mx-auto shadow-2xl" style={{ width: '21rem', height: '38rem' }}>
+          <div className="bg-black rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden relative mx-auto shadow-2xl" style={{ width: '360px', height: '640px' }}>
             <div
               className="aspect-none bg-gradient-to-br from-gray-900 to-black flex flex-col items-center justify-center relative overflow-hidden group w-full h-full cursor-pointer"
               onMouseMove={handleMouseMove}
@@ -382,8 +383,8 @@ const PreviewFrame = ({
               {(selectedAvatar || (slideAvatars && slideAvatars[currentSlideIndex])) && (
                 <div className="absolute inset-0">
                   <AvatarPreview
-                    frameWidth={384} // iPhone preview frame width (24rem = 384px)
-                    frameHeight={672} // iPhone preview frame height (42rem = 672px)
+                    frameWidth={360} // Divides 1080 evenly (scale factor 3.0)
+                    frameHeight={640} // Divides 1920 evenly (scale factor 3.0)
                   />
                 </div>
               )}
@@ -423,7 +424,7 @@ const PreviewFrame = ({
             </motion.button>
           )}
 
-          <div className="bg-black rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden relative mx-auto shadow-2xl" style={{ width: '21rem', height: '37rem' }}>
+          <div className="bg-black rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden relative mx-auto shadow-2xl" style={{ width: '360px', height: '640px' }}>
             {photos.length > 0 ? (
               /* Current Media Preview - Video or Image */
               <AnimatePresence mode="wait">
@@ -449,13 +450,32 @@ const PreviewFrame = ({
                     }
                   }}
                 >
-                  {isVideoFile(photos[currentSlideIndex]) ? (
-                    <video
-                      key={`video-${currentSlideIndex}`}
-                      src={photos[currentSlideIndex] instanceof File ? URL.createObjectURL(photos[currentSlideIndex]) : (photos[currentSlideIndex].url || photos[currentSlideIndex])}
-                      className="w-full h-full object-cover"
-                      muted
-                      preload="metadata"
+                  {/* FFmpeg-exact letterboxing wrapper */}
+                  {(() => {
+                    const currentPhoto = photos[currentSlideIndex];
+                    const letterbox = calculateLetterbox(
+                      currentPhoto?.width,
+                      currentPhoto?.height,
+                      360, // frame width (divides 1080 evenly)
+                      640 // frame height (divides 1920 evenly)
+                    );
+
+                    return (
+                      <div className="relative w-full h-full bg-black">
+                        {isVideoFile(photos[currentSlideIndex]) ? (
+                          <video
+                            key={`video-${currentSlideIndex}`}
+                            src={photos[currentSlideIndex] instanceof File ? URL.createObjectURL(photos[currentSlideIndex]) : (photos[currentSlideIndex].url || photos[currentSlideIndex])}
+                            className="absolute"
+                            style={{
+                              width: `${letterbox.width}px`,
+                              height: `${letterbox.height}px`,
+                              left: `${letterbox.left}px`,
+                              top: `${letterbox.top}px`,
+                              objectFit: 'fill'
+                            }}
+                            muted
+                            preload="metadata"
                       onError={(e) => {
                         console.error('Video load error:', e);
                         // Fallback to showing error message
@@ -472,19 +492,26 @@ const PreviewFrame = ({
                         `;
                         e.target.parentNode.appendChild(errorDiv);
                       }}
-                    />
-                  ) : (
-                    <img
-                      key={`image-${currentSlideIndex}`}
-                      src={photos[currentSlideIndex] instanceof File ? URL.createObjectURL(photos[currentSlideIndex]) : (photos[currentSlideIndex].url || photos[currentSlideIndex])}
-                      alt={`Preview ${currentSlideIndex + 1}`}
-                      className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <img
+                              key={`image-${currentSlideIndex}`}
+                              src={photos[currentSlideIndex] instanceof File ? URL.createObjectURL(photos[currentSlideIndex]) : (photos[currentSlideIndex].url || photos[currentSlideIndex])}
+                              alt={`Preview ${currentSlideIndex + 1}`}
+                              className="absolute"
+                              style={{
+                                width: `${letterbox.width}px`,
+                                height: `${letterbox.height}px`,
+                                left: `${letterbox.left}px`,
+                                top: `${letterbox.top}px`,
+                                objectFit: 'fill'
+                              }}
                       onError={(e) => {
                         console.error('Image load error:', e);
                         // Try as video if image fails
                         const videoElement = document.createElement('video');
                         videoElement.src = photos[currentSlideIndex] instanceof File ? URL.createObjectURL(photos[currentSlideIndex]) : (photos[currentSlideIndex].url || photos[currentSlideIndex]);
-                        videoElement.className = 'w-full h-full object-cover';
+                        videoElement.className = 'w-full h-full object-contain bg-black';
                         videoElement.muted = true;
                         videoElement.preload = 'metadata';
 
@@ -509,18 +536,19 @@ const PreviewFrame = ({
                           `;
                           container.appendChild(errorDiv);
                         };
-                      }}
-                    />
-                  )}
-
-
+                              }}
+                            />
+                          )}
+                        </div>
+                      );
+                    })()}
 
                   {/* Avatar Preview Overlay - Now per-slide */}
                   {(selectedAvatar || (slideAvatars && slideAvatars[currentSlideIndex])) && (
                     <div className="absolute inset-0">
                       <AvatarPreview
-                        frameWidth={384} // iPhone preview frame width (24rem = 384px)
-                        frameHeight={672} // iPhone preview frame height (42rem = 672px)
+                        frameWidth={360} // Divides 1080 evenly (scale factor 3.0)
+                        frameHeight={640} // Divides 1920 evenly (scale factor 3.0)
                       />
                     </div>
                   )}
@@ -670,7 +698,7 @@ const PreviewFrame = ({
           <div className="absolute inset-0">
             <AvatarPreview
               frameWidth={288} // iPhone preview frame width
-              frameHeight={576} // iPhone preview frame height (36rem = 576px)
+              frameHeight={512} // 288 / 0.5625 = 512 (matches 1080/1920 video ratio)
             />
           </div>
         )}

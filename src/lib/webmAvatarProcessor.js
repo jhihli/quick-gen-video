@@ -71,6 +71,7 @@ export const calculateTempoAdjustment = (musicBPM, baselineBPM = 120) => {
 };
 
 
+
 /**
  * Apply WebM avatar overlay to main video
  * @param {Object} options - Overlay options
@@ -87,7 +88,8 @@ const applyWebMAvatarToVideo = async ({
   slideTimeRange = null, // Optional: { start: number, end: number } for per-slide timing
   overlayOnly = false, // If true, don't re-process music, just add avatar overlay
   onProgress = null,
-  photoMetadata = null // Optional: original photo dimensions for letterboxing calculation
+  photoMetadata = null, // Optional: original photo dimensions for letterboxing calculation
+  slideNumber = null // Optional: slide number for logging
 }) => {
   return new Promise((resolve, reject) => {
 
@@ -109,52 +111,17 @@ const applyWebMAvatarToVideo = async ({
     // Match AvatarPreview sizing calculation EXACTLY
     const frameWidth = 1080; // Video frame width
     const frameHeight = 1920; // Video frame height
-    const videoScaleFactor = frameWidth / 288; // 3.75 (same as preview: 1080/288)
     const baseAvatarSize = 160; // Same as AvatarPreview for WebM
-
-    // DPR-aware WYSIWYG calculation
-    // Preview accounts for DPR: (baseSize * scale * DPR) / videoScaleFactor
-    // Video uses absolute pixels (no DPR): baseSize * scale
-    // This ensures what user sees in preview matches the final video output
     const avatarSize = Math.round(baseAvatarSize * avatarSettings.scale);
 
-    // Calculate position using letterboxing-aware logic
-    let x, y, centerX, centerY;
+    // Avatar position is stored as FRAME-RELATIVE percentages (simplified!)
+    // Convert percentage directly to pixel coordinates and ROUND FIRST
+    const centerX = Math.round((avatarPosition.x / 100) * frameWidth);
+    const centerY = Math.round((avatarPosition.y / 100) * frameHeight);
 
-    if (photoMetadata && photoMetadata.originalWidth && photoMetadata.originalHeight) {
-      // Calculate letterboxing offsets based on original photo dimensions
-      const originalAspect = photoMetadata.originalWidth / photoMetadata.originalHeight;
-      const targetAspect = frameWidth / frameHeight; // 1080 / 1920 = 0.5625
-
-      let scaledWidth, scaledHeight, padX, padY;
-
-      if (originalAspect > targetAspect) {
-        // Photo is wider than target - will have padding on top/bottom
-        scaledWidth = frameWidth;
-        scaledHeight = Math.round(frameWidth / originalAspect);
-        padX = 0;
-        padY = (frameHeight - scaledHeight) / 2;
-      } else {
-        // Photo is taller than target - will have padding on left/right
-        scaledWidth = Math.round(frameHeight * originalAspect);
-        scaledHeight = frameHeight;
-        padX = (frameWidth - scaledWidth) / 2;
-        padY = 0;
-      }
-
-      // Calculate position relative to actual photo content, then add padding offset
-      centerX = (avatarPosition.x / 100) * scaledWidth + padX;
-      centerY = (avatarPosition.y / 100) * scaledHeight + padY;
-      x = Math.round(centerX - (avatarSize / 2));
-      y = Math.round(centerY - (avatarSize / 2));
-
-    } else {
-      // Fallback to old calculation if no photo metadata available
-      centerX = (avatarPosition.x / 100) * frameWidth;
-      centerY = (avatarPosition.y / 100) * frameHeight;
-      x = Math.round(centerX - (avatarSize / 2));
-      y = Math.round(centerY - (avatarSize / 2));
-    }
+    // Convert center to top-left corner for FFmpeg overlay (centerX/Y are already integers)
+    const x = centerX - Math.round(avatarSize / 2);
+    const y = centerY - Math.round(avatarSize / 2);
 
 
 
@@ -255,6 +222,8 @@ export const processVideoWithWebMAvatar = async ({
   outputPath,
   tempDir,
   slideTimeRange = null, // Optional: { start: number, end: number } for per-slide timing
+  photoMetadata = null, // Optional: original photo dimensions for avatar positioning
+  slideNumber = null, // Optional: slide number for logging
   overlayOnly = false, // If true, don't re-process music, just add avatar overlay
   onProgress = null
 }) => {
@@ -307,6 +276,8 @@ export const processVideoWithWebMAvatar = async ({
       videoDuration,
       outputPath: tempOutputPath,
       slideTimeRange,
+      photoMetadata,
+      slideNumber,
       overlayOnly,
       onProgress: (progress) => updateProgress('apply', progress)
     });

@@ -128,6 +128,76 @@ TKVGen is a web-based video editing tool that allows users to upload multiple ph
 - Mobile browser compatibility mechanisms
 - Responsive design with touch-friendly interfaces
 
+### Avatar Positioning System (CRITICAL - DO NOT MODIFY WITHOUT UNDERSTANDING)
+
+**Problem Solved**: Avatar positions were shifting left/up after video generation due to coordinate system mismatches and sub-pixel rendering issues.
+
+**Root Causes Identified**:
+1. **Frame dimension mismatch**: Preview container (336×608px from 21rem×38rem) didn't match AvatarPreview frame (360×640px)
+2. **Non-integer scale factors**: 336→1080 = 3.214× and 608→1920 = 3.157× caused cumulative rounding errors
+3. **Sub-pixel positioning**: Framer Motion's drag system allowed fractional pixel positions (e.g., 123.4px)
+4. **Decimal frame heights**: Using 682.67px caused browser sub-pixel rendering inconsistencies
+5. **Rounding order**: Math.round(centerX - avatarSize/2) vs Math.round(centerX) - avatarSize/2 produced different results
+
+**Final Solution Architecture**:
+
+1. **Integer Frame Dimensions**:
+   - Preview container: **360×640px** (changed from 21rem×38rem)
+   - AvatarPreview frame: **360×640px**
+   - Video output: **1080×1920px**
+   - Scale factor: **exactly 3.0** (clean integer scaling)
+
+2. **Shared Letterbox Utility** (`src/lib/letterboxUtils.js`):
+   - Single source of truth for FFmpeg letterbox calculations
+   - Used by PreviewFrame, AvatarPreview (if needed), and backend
+   - Exact algorithm: `scale=W:H:force_original_aspect_ratio=decrease,pad=W:H:(ow-iw)/2:(oh-ih)/2:black`
+
+3. **Simplified Coordinate System**:
+   - **Frame-relative percentages only** (not photo-relative)
+   - Preview saves: `(pixelX / frameWidth) × 100`
+   - Backend receives: `(percentage / 100) × frameWidth`
+   - No intermediate coordinate transformations
+
+4. **Pixel-Perfect Positioning**:
+   - **Round to integer pixels** before converting to percentage in preview
+   - **Round center position first** in backend: `Math.round((percentage/100) × 1080)`
+   - Then subtract half avatar size: `roundedCenter - Math.round(avatarSize/2)`
+
+5. **Code Structure**:
+   ```
+   Preview (AvatarPreview.jsx):
+   - User drops at 123.7px → rounds to 124px
+   - Percentage: (124 / 360) × 100 = 34.444444%
+   - Saves to context
+
+   Backend (webmAvatarProcessor.js):
+   - Receives: 34.444444%
+   - Center: Math.round(34.444444% × 1080) = Math.round(372) = 372px
+   - Top-left: 372 - Math.round(320/2) = 372 - 160 = 212px
+   - Verification: 124 × 3.0 = 372px ✅ Perfect!
+   ```
+
+**Key Files Modified**:
+- `src/lib/letterboxUtils.js` - NEW: Shared letterbox calculation
+- `src/components/AvatarPreview.jsx` - Simplified to 337 lines (from 515), frame-relative coordinates
+- `src/lib/webmAvatarProcessor.js` - Simplified position calculation, removed photo-relative logic
+- `src/components/PreviewFrame.jsx` - Updated to 360×640px containers, uses shared utility
+
+**CRITICAL RULES**:
+- ✅ **NEVER** change preview frame dimensions from 360×640px
+- ✅ **ALWAYS** maintain 3.0 scale factor to video (1080×1920)
+- ✅ **ALWAYS** round pixel positions to integers before percentage conversion
+- ✅ **NEVER** use photo-relative coordinates (use frame-relative only)
+- ✅ **ALWAYS** use shared letterbox utility from `letterboxUtils.js`
+- ✅ **NEVER** introduce fractional frame dimensions (e.g., 682.67px)
+
+**Testing Avatar Positioning**:
+1. Upload photos with different aspect ratios (portrait 1280×2276, square 554×554)
+2. Position avatar on each slide
+3. Generate video
+4. Verify avatar appears in EXACT same position in generated video
+5. Check logs: Preview pixel × 3.0 should equal backend pixel
+
 ## File Structure Notes
 
 - **ES Modules**: Both frontend and backend use `"type": "module"`
