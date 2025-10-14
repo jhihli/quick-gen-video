@@ -18,7 +18,6 @@ import { LogoIcon } from './AnimatedIcons'
 const MusicSelector = React.lazy(() => import('./MusicSelector'))
 const AvatarSelector = React.lazy(() => import('./AvatarSelector'))
 const VideoExportSidebar = React.lazy(() => import('./VideoExportSidebar'))
-const LanguageSelector = React.lazy(() => import('./LanguageSelector'))
 
 const Generator = () => {
   const { t } = useLanguage()
@@ -265,15 +264,12 @@ const Generator = () => {
                 <span className="sm:hidden font-bold">TOOL</span>
               </Link>
               <Link
-                to="/blog"
+                to="/help"
                 className="text-gray-300 hover:text-white transition-colors font-medium text-sm sm:text-base"
               >
-                <span className="hidden sm:inline">Blog</span>
-                <span className="sm:hidden font-bold">BLOG</span>
+                <span className="hidden sm:inline">Help</span>
+                <span className="sm:hidden font-bold">HELP</span>
               </Link>
-              <Suspense fallback={<div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}>
-                <LanguageSelector />
-              </Suspense>
             </nav>
           </div>
         </div>

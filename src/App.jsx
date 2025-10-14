@@ -9,7 +9,8 @@ import LanguageLoadingWrapper from './components/LanguageLoadingWrapper'
 // Lazy load route components for code splitting
 const Home = React.lazy(() => import('./components/Home'))
 const Generator = React.lazy(() => import('./components/Generator'))
-const Blog = React.lazy(() => import('./components/Blog'))
+const HelpLanding = React.lazy(() => import('./components/HelpLanding'))
+const TopicDetail = React.lazy(() => import('./components/TopicDetail'))
 
 function AppWithHeartbeat() {
   useSessionHeartbeat()
@@ -20,7 +21,8 @@ function AppWithHeartbeat() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/generator" element={<Generator />} />
-          <Route path="/blog" element={<Blog />} />
+          <Route path="/help" element={<HelpLanding />} />
+          <Route path="/help/:topicId" element={<TopicDetail />} />
         </Routes>
       </Suspense>
     </div>

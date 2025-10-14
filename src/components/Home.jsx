@@ -1,13 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { LogoIcon } from './AnimatedIcons'
 import AnimatedTitle from './AnimatedTitle'
-import LanguageSelector from './LanguageSelector'
 import Modal from './Modal'
-import { useLanguage } from '../context/LanguageContext'
 import { useAppContext } from '../context/AppContext'
-import UserComments from './UserComments'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -34,41 +31,13 @@ const itemVariants = {
 
 
 const Home = () => {
-  const { t, currentLanguage } = useLanguage()
   const { hasGeneratedVideo, cleanupAndReset } = useAppContext()
-  const location = useLocation()
   const navigate = useNavigate()
-  const feedbackSectionRef = useRef(null)
 
-  const [sessionId, setSessionId] = useState(null)
   const [activeModal, setActiveModal] = useState(null)
-  const [hoveredImage, setHoveredImage] = useState(null)
-  const [imageDialogPosition, setImageDialogPosition] = useState({ x: 0, y: 0 })
+  const [activeGuideStep, setActiveGuideStep] = useState(0)
   const [expandedFAQ, setExpandedFAQ] = useState(null)
-
-  // Generate session ID for UserComments
-  useEffect(() => {
-    let storedSessionId = sessionStorage.getItem('tkvgen-home-session-id')
-    if (!storedSessionId) {
-      storedSessionId = `home-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`
-      sessionStorage.setItem('tkvgen-home-session-id', storedSessionId)
-    }
-    setSessionId(storedSessionId)
-  }, [])
-
-  // Scroll to feedback section if navigated from VideoExport
-  useEffect(() => {
-    if (location.state?.scrollToFeedback && feedbackSectionRef.current) {
-      const timer = setTimeout(() => {
-        feedbackSectionRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        })
-      }, 100)
-
-      return () => clearTimeout(timer)
-    }
-  }, [location.state])
+  const [isVideoMuted, setIsVideoMuted] = useState(true)
 
   // FAQ data
   const faqData = [
@@ -106,6 +75,11 @@ const Home = () => {
       id: 7,
       question: "Can I edit the video after it's generated?",
       answer: "Currently, QWGenv generates videos in a single process. If you'd like changes, you can create a new video with different photos, music, or settings. We're working on editing features for future updates."
+    },
+    {
+      id: 8,
+      question: "Can I add animated avatars to my videos?",
+      answer: "Yes! You can add animated avatars to any slide in your video. Choose from 10+ characters, position them anywhere on your photos, adjust their size, and create engaging virtual duets. Each slide can have its own unique avatar with custom placement."
     }
   ]
 
@@ -114,47 +88,19 @@ const Home = () => {
     setExpandedFAQ(expandedFAQ === faqId ? null : faqId)
   }
 
-  const handleImageHover = (index, event) => {
-    const rect = event.currentTarget.getBoundingClientRect()
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-    const viewportWidth = window.innerWidth
-    const viewportHeight = window.innerHeight
-
-    // Estimate dialog size (max 384px + padding for decorative frames)
-    const dialogWidth = 384 + 32 // max-w-96 + decorative frame padding
-    const dialogHeight = 384 + 32
-
-    // Calculate initial position (centered on image)
-    let x = rect.left + rect.width / 2
-    let y = rect.top + scrollTop + rect.height / 2 - 80
-
-    // Prevent right edge cropping
-    if (x + dialogWidth / 2 > viewportWidth) {
-      x = viewportWidth - dialogWidth / 2 - 20 // 20px margin from edge
+  // Keyboard navigation for Guide Steps
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === 'ArrowLeft' && activeGuideStep > 0) {
+        setActiveGuideStep(activeGuideStep - 1)
+      } else if (e.key === 'ArrowRight' && activeGuideStep < 3) {
+        setActiveGuideStep(activeGuideStep + 1)
+      }
     }
 
-    // Prevent left edge cropping
-    if (x - dialogWidth / 2 < 0) {
-      x = dialogWidth / 2 + 20 // 20px margin from edge
-    }
-
-    // Prevent top edge cropping
-    if (y - dialogHeight / 2 < scrollTop) {
-      y = scrollTop + dialogHeight / 2 + 20
-    }
-
-    // Prevent bottom edge cropping
-    if (y + dialogHeight / 2 > scrollTop + viewportHeight) {
-      y = scrollTop + viewportHeight - dialogHeight / 2 - 20
-    }
-
-    setImageDialogPosition({ x, y })
-    setHoveredImage(index)
-  }
-
-  const handleImageLeave = () => {
-    setHoveredImage(null)
-  }
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [activeGuideStep])
 
   const handleNavigateToGenerator = (e) => {
     e.preventDefault()
@@ -164,32 +110,33 @@ const Home = () => {
 
 
   const stepImages = [
-    { step: t('stepUploadMedia'), image: "🖼️", description: t('stepUploadDescription') },
-    { step: t('stepSelectMusic'), image: "🎵", description: t('stepMusicDescription') },
-    { step: t('stepGenerateVideo'), image: "🎬", description: t('stepVideoDescription') }
+    { step: 'Upload Media', image: "🖼️", description: 'Drag and drop up to 10 photos or videos. Each file can be up to 10MB. Supports JPG, PNG, MP4 formats. Create beautiful slideshows with your favorite memories.' },
+    { step: 'Select Music', image: "🎵", description: 'Choose from our curated music library or upload your own soundtrack. Customize the duration and set the perfect mood for your video creation.' },
+    { step: 'Add Avatar', image: "🎭", description: 'Select from 10+ animated characters. Position and resize your avatar on each slide to create engaging virtual duets. Bring your photos to life with personality.' },
+    { step: 'Generate Video', image: "🎬", description: 'Click generate and watch your photos transform into a professional video with music and avatars. Download instantly and share with friends and family.' }
   ]
 
   const modalContent = {
-    about: t('aboutContent'),
+    about: 'QWGenv is a powerful video creation tool that transforms your photos into stunning videos with custom music. Our mission is to make video creation accessible, fast, and enjoyable for everyone.',
     contact: (
       <div>
         <p className="text-center text-gray-300 text-base mt-4 leading-relaxed">
-          {t('contactModalContent')}
+          If you have any questions, suggestions, or just want to share your experience with our video generator, please feel free to leave your feedback. Your thoughts are incredibly valuable to us and help us make QWGenv even better for everyone.
         </p>
         <p className="text-center text-gray-200 text-lg mt-6 font-medium">
           ✨ We'd be delighted to hear from you! ✨
         </p>
       </div>
     ),
-    privacy: t('privacyContent'),
-    terms: t('termsContent')
+    privacy: 'Your privacy is important to us. We do not store your photos or personal data permanently. All uploads are automatically deleted after processing to ensure your privacy and security.',
+    terms: 'By using QWGenv, you agree to our terms of service and acceptable use policy. Please use our service responsibly and do not upload copyrighted material without permission.'
   }
 
   return (
     <>
       {/* Header with Navigation and Title */}
       <motion.header
-        className="bg-white/10 backdrop-blur-md border-b border-white/20"
+        className="sticky top-0 z-50 bg-white/10 backdrop-blur-md border-b border-white/20"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
@@ -218,7 +165,7 @@ const Home = () => {
                 }}
                 className="text-white font-medium border-b-2 border-purple-400 pb-1 text-sm sm:text-base cursor-pointer"
               >
-                <span className="hidden sm:inline">{t('home')}</span>
+                <span className="hidden sm:inline">Home</span>
                 <span className="sm:hidden font-bold">HOME</span>
               </a>
               <a
@@ -226,472 +173,409 @@ const Home = () => {
                 onClick={handleNavigateToGenerator}
                 className="text-gray-300 hover:text-white transition-colors font-medium text-sm sm:text-base cursor-pointer"
               >
-                <span className="hidden sm:inline">{t('generator')}</span>
+                <span className="hidden sm:inline">Generator</span>
                 <span className="sm:hidden font-bold">TOOL</span>
               </a>
-              <Link
-                to="/blog"
-                className="text-gray-300 hover:text-white transition-colors font-medium text-sm sm:text-base"
+              <a
+                href="/help"
+                onClick={(e) => {
+                  e.preventDefault()
+                  navigate('/help')
+                }}
+                className="text-gray-300 hover:text-white transition-colors font-medium text-sm sm:text-base cursor-pointer"
               >
-                <span className="hidden sm:inline">Blog</span>
-                <span className="sm:hidden font-bold">BLOG</span>
-              </Link>
-              <LanguageSelector />
+                <span className="hidden sm:inline">Help</span>
+                <span className="sm:hidden font-bold">HELP</span>
+              </a>
             </nav>
           </div>
 
         </div>
       </motion.header>
 
-{/* Body Section */}
+      {/* Body Section */}
       <motion.main
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        {/* Introduction Subsection */}
+        {/* Combined Introduction Section */}
         <motion.section variants={itemVariants} className="mb-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:h-auto">
-            {/* What is QWGenv */}
-            <motion.div
-              className="relative overflow-hidden bg-gradient-to-br from-blue-900/30 via-indigo-800/20 to-purple-900/30 backdrop-blur-xl border border-blue-300/20 rounded-3xl p-8 shadow-2xl h-full flex flex-col"
-              whileHover={{ scale: 1.02, y: -5 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* Animated background elements */}
-              <div className="absolute inset-0 opacity-20">
-                <motion.div
-                  className="absolute top-0 left-0 w-32 h-32 bg-cyan-400/20 rounded-full blur-xl"
-                  animate={{
-                    x: [0, 100, 0],
-                    y: [0, 50, 0],
-                  }}
-                  transition={{
-                    duration: 8,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
-                <motion.div
-                  className="absolute bottom-0 right-0 w-24 h-24 bg-purple-400/20 rounded-full blur-lg"
-                  animate={{
-                    x: [0, -80, 0],
-                    y: [0, -40, 0],
-                  }}
-                  transition={{
-                    duration: 6,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
+          <div className="relative overflow-hidden bg-gradient-to-br from-blue-900/30 via-indigo-800/20 to-purple-900/30 backdrop-blur-xl border border-blue-300/20 rounded-3xl p-6 sm:p-8 lg:p-12 shadow-2xl">
+            {/* Animated background elements */}
+            <div className="absolute inset-0 opacity-20">
+              <motion.div
+                className="absolute top-0 left-0 w-32 h-32 bg-cyan-400/20 rounded-full blur-xl"
+                animate={{
+                  x: [0, 100, 0],
+                  y: [0, 50, 0],
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+              <motion.div
+                className="absolute bottom-0 right-0 w-24 h-24 bg-purple-400/20 rounded-full blur-lg"
+                animate={{
+                  x: [0, -80, 0],
+                  y: [0, -40, 0],
+                }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+            </div>
+
+            <div className="relative z-10">
+              {/* Powerful gradient title */}
+              <div className="text-center mb-8 sm:mb-12">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4">
+                  <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                    Transform your photos
+                  </span>{' '}
+                  <span className="text-white">
+                    into stunning videos
+                  </span>
+                </h2>
+                <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                  Create professional slideshow videos with music and animated avatars. No editing experience required.
+                </p>
               </div>
 
-              <div className="relative z-10">
-                <h2 className="text-3xl font-bold text-white mb-6 bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text text-transparent">{t('whatIsQWGenv')}</h2>
-                <div className="text-gray-200 leading-relaxed h-full flex flex-col">
-                  <div className="flex-1">
-                    <div className="mb-4">
-                      {/* Mobile-optimized shorter content */}
-                      <div className="block sm:hidden">
-                        <div className="mb-3">
-                          <div className="inline-flex items-center gap-2 bg-white/5 text-white px-3 py-1.5 rounded-lg border border-white/20 text-sm font-medium">
-                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                            {t('quickWayGenerateVideo')}
-                          </div>
-                        </div>
-                        <p className="text-base text-gray-300 leading-relaxed">
-                          QWGenv is a powerful web-based video editor that transforms your photos into stunning slideshow videos with music. Create professional-looking videos in minutes with our easy-to-use interface.
-                        </p>
-                      </div>
-                      {/* Desktop full content */}
-                      <div className="hidden sm:block">
-                        <div className="mb-4">
-                          <div className="inline-flex items-center gap-2 bg-white/5 text-white px-3 py-1.5 rounded-lg border border-white/20 text-sm font-medium">
-                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                            {t('quickWayGenerateVideo')}
-                          </div>
-                        </div>
-                        <p className="text-base text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: t('qwgenvIntro') }}>
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-3 sm:mt-4 p-2 sm:p-3 md:p-4 bg-gradient-to-r from-orange-500/10 to-yellow-500/10 rounded-xl border border-orange-400/30">
-                      <div className="text-center">
-                        {/* Mobile-optimized shorter CTA text */}
-                        <div className="block sm:hidden">
-                          <p className="text-orange-100 font-medium text-sm mb-1.5">
-                            ✨ {t('readyToCreateVideo')}
-                          </p>
-                        </div>
-                        {/* Desktop full CTA text */}
-                        <div className="hidden sm:block">
-                          <p className="text-orange-100 font-medium text-base mb-3">
-                            ✨ {t('readyToStart')} {' '} {t('andSeeTheMagic')}
-                          </p>
-                        </div>
-                        <a
-                          href="/generator"
-                          onClick={handleNavigateToGenerator}
-                          className="inline-flex items-center px-4 sm:px-6 py-1.5 sm:py-3 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-bold text-sm sm:text-lg rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-yellow-300 hover:border-yellow-200 cursor-pointer"
-                        >
-                          <span className="mr-2">🚀</span>
-                          {t('tryItNow')}
-                          <span className="ml-2">→</span>
-                        </a>
-                      </div>
-                    </div>
-
-                    {/* Feedback Section */}
-                    <div className="mt-2 sm:mt-4 p-2 sm:p-3 md:p-4 bg-gradient-to-r from-purple-500/10 to-violet-500/10 rounded-xl border border-purple-400/30">
-                      <div className="text-center">
-                        {/* Mobile-optimized shorter feedback text */}
-                        <div className="block sm:hidden">
-                          <p className="text-purple-100 font-medium text-sm mb-1.5">
-                            💬 Share your thoughts!
-                          </p>
-                        </div>
-                        {/* Desktop full feedback text */}
-                        <div className="hidden sm:block">
-                          <p className="text-purple-100 font-medium text-base mb-3">
-                            💬 Share your thoughts about QWGenv and help us improve!
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => {
-                            if (feedbackSectionRef.current) {
-                              feedbackSectionRef.current.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'start'
-                              })
-                            }
-                          }}
-                          className="inline-flex items-center px-4 sm:px-6 py-1.5 sm:py-3 bg-gradient-to-r from-purple-400 to-violet-500 hover:from-purple-500 hover:to-violet-600 text-white font-bold text-sm sm:text-lg rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-purple-300 hover:border-purple-200"
-                        >
-                          <span className="mr-2">💭</span>
-                          Give Feedback
-                          <span className="ml-2">↓</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Blog Section */}
-                    <div className="mt-1 sm:mt-4 p-2 sm:p-3 md:p-4 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl border border-cyan-400/30">
-                      <div className="text-center">
-                        {/* Mobile-optimized shorter blog text */}
-                        <div className="block sm:hidden">
-                          <p className="text-cyan-100 font-medium text-sm mb-1.5">
-                            📚 Learn expert tips!
-                          </p>
-                        </div>
-                        {/* Desktop full blog text */}
-                        <div className="hidden sm:block">
-                          <p className="text-cyan-100 font-medium text-base mb-3">
-                            📚 Learn expert video creation strategies and tips!
-                          </p>
-                        </div>
-                        <Link
-                          to="/blog"
-                          className="inline-flex items-center px-4 sm:px-6 py-1.5 sm:py-3 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-500 hover:to-blue-600 text-white font-bold text-sm sm:text-lg rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl border-2 border-cyan-300 hover:border-cyan-200"
-                        >
-                          <span className="mr-2">📖</span>
-                          Read Blog
-                          <span className="ml-2">→</span>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Guide Steps */}
-            <motion.div
-              className="relative overflow-hidden bg-gradient-to-br from-emerald-900/30 via-teal-800/20 to-cyan-900/30 backdrop-blur-xl border border-emerald-300/20 rounded-3xl p-8 shadow-2xl h-full flex flex-col"
-              whileHover={{ scale: 1.02, y: -5 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* Animated background elements */}
-              <div className="absolute inset-0 opacity-20">
-                <motion.div
-                  className="absolute top-1/4 right-0 w-28 h-28 bg-emerald-400/20 rounded-full blur-xl"
-                  animate={{
-                    x: [0, -60, 0],
-                    y: [0, 30, 0],
-                    rotate: [0, 180, 360],
-                  }}
-                  transition={{
-                    duration: 10,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
-                <motion.div
-                  className="absolute bottom-1/4 left-0 w-20 h-20 bg-teal-400/20 rounded-full blur-lg"
-                  animate={{
-                    x: [0, 70, 0],
-                    y: [0, -20, 0],
-                  }}
-                  transition={{
-                    duration: 7,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
-              </div>
-
-              <div className="relative z-10 h-full flex flex-col">
-                <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-white mb-4 bg-gradient-to-r from-emerald-300 to-teal-300 bg-clip-text text-transparent">{t('guideStepsTitle')}</h2>
-                  <p className="text-gray-200 mb-6">
-                    {t('guideStepsDescription')}
-                  </p>
-                </div>
-
-                <div className="flex-1">
-                  <div className="max-w-4xl mx-auto">
-                    {/* Progress indicator */}
-                    <div className="flex items-center justify-center mb-8 px-4">
-                      <div className="flex items-center space-x-4 sm:space-x-6">
-                        {stepImages.map((step, index) => (
-                          <div key={index} className="flex items-center">
-                            <motion.div
-                              className="relative group cursor-pointer"
-                              initial={{ scale: 0, rotate: -180 }}
-                              animate={{ scale: 1, rotate: 0 }}
-                              transition={{
-                                duration: 0.6,
-                                delay: index * 0.2,
-                                type: "spring",
-                                stiffness: 100
-                              }}
-                              whileHover={{ scale: 1.2 }}
+              {/* Guide Steps - Interactive Tab System */}
+              <div className="mb-8">
+                <div className="max-w-5xl mx-auto">
+                  {/* Interactive Tab Bar */}
+                  <div className="flex items-center justify-center mb-8 sm:mb-12 px-4" role="tablist" aria-label="Video creation steps">
+                    <div className="flex items-center space-x-3 sm:space-x-4 md:space-x-6">
+                      {stepImages.map((step, index) => {
+                        const isActive = activeGuideStep === index
+                        const isAvatarStep = index === 2
+                        return (
+                          <div key={index} className="flex flex-col items-center">
+                            {/* Tab Button */}
+                            <button
+                              role="tab"
+                              aria-selected={isActive}
+                              aria-controls={`step-panel-${index}`}
+                              id={`step-tab-${index}`}
+                              onClick={() => setActiveGuideStep(index)}
+                              onMouseEnter={() => setActiveGuideStep(index)}
+                              className="relative group cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-full"
                             >
-                              {/* Outer glow ring */}
                               <motion.div
-                                className="absolute inset-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-emerald-400/30 via-cyan-400/30 to-teal-400/30 blur-md"
+                                initial={{ scale: 0, rotate: -180 }}
                                 animate={{
-                                  scale: [1, 1.2, 1],
-                                  opacity: [0.3, 0.6, 0.3]
+                                  scale: isActive ? 1.3 : 1,
+                                  rotate: 0
                                 }}
                                 transition={{
-                                  duration: 2,
-                                  repeat: Infinity,
-                                  delay: index * 0.3
+                                  duration: 0.6,
+                                  delay: index * 0.2,
+                                  type: "spring",
+                                  stiffness: 100
                                 }}
-                              />
-
-                              {/* Main dot */}
-                              <motion.div
-                                className="relative w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-emerald-400 via-cyan-400 to-teal-400 shadow-lg border-2 border-white/20 flex items-center justify-center"
-                                animate={{
-                                  boxShadow: [
-                                    "0 0 0 0 rgba(52, 211, 153, 0.4)",
-                                    "0 0 0 10px rgba(52, 211, 153, 0)",
-                                    "0 0 0 0 rgba(52, 211, 153, 0)"
-                                  ]
-                                }}
-                                transition={{
-                                  duration: 1.5,
-                                  repeat: Infinity,
-                                  delay: index * 0.5
-                                }}
+                                whileHover={{ scale: isActive ? 1.4 : 1.2 }}
                               >
-                                {/* Inner sparkle */}
+                                {/* Outer glow ring */}
                                 <motion.div
-                                  className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white/80"
+                                  className={`absolute inset-0 rounded-full blur-md ${isActive
+                                    ? isAvatarStep
+                                      ? 'bg-gradient-to-r from-purple-400/60 via-fuchsia-400/60 to-purple-400/60 w-9 h-9 sm:w-10 sm:h-10'
+                                      : 'bg-gradient-to-r from-blue-400/60 via-purple-400/60 to-pink-400/60 w-9 h-9 sm:w-10 sm:h-10'
+                                    : 'bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 w-7 h-7 sm:w-8 sm:h-8'
+                                    }`}
                                   animate={{
-                                    scale: [0.8, 1.2, 0.8],
-                                    opacity: [0.6, 1, 0.6]
-                                  }}
-                                  transition={{
-                                    duration: 1,
-                                    repeat: Infinity,
-                                    delay: index * 0.4
-                                  }}
-                                />
-                              </motion.div>
-
-                              {/* Step number */}
-                              <motion.div
-                                className="absolute -bottom-5 sm:-bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-semibold text-emerald-300"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.2 + 0.5 }}
-                              >
-                                {index + 1}
-                              </motion.div>
-                            </motion.div>
-
-                            {index < stepImages.length - 1 && (
-                              <motion.div
-                                className="relative mx-3 sm:mx-6"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: index * 0.2 + 0.3 }}
-                              >
-                                {/* Animated connecting line */}
-                                <motion.div
-                                  className="w-12 sm:w-20 h-1 bg-gradient-to-r from-emerald-300/30 to-cyan-300/30 rounded-full"
-                                  initial={{ scaleX: 0 }}
-                                  animate={{ scaleX: 1 }}
-                                  transition={{ duration: 0.8, delay: index * 0.3 + 0.4 }}
-                                />
-
-                                {/* Moving particle effect */}
-                                <motion.div
-                                  className="absolute top-0 w-1 h-1 bg-emerald-400 rounded-full"
-                                  animate={{
-                                    x: [0, 48, 0],
-                                    opacity: [0, 1, 0]
+                                    scale: isActive ? [1, 1.3, 1] : [1, 1.1, 1],
+                                    opacity: isActive ? [0.6, 1, 0.6] : [0.2, 0.4, 0.2]
                                   }}
                                   transition={{
                                     duration: 2,
                                     repeat: Infinity,
-                                    delay: index * 0.7 + 1
+                                    delay: index * 0.3
                                   }}
                                 />
-                              </motion.div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
 
-                    {/* Steps grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 max-w-7xl mx-auto">
-                      {stepImages.map((step, index) => {
-                        const imageNames = ['upload photo.png', 'select music.png', 'generate video.png'];
-                        return (
-                          <motion.div
-                            key={index}
-                            className="group relative"
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: index * 0.2 }}
-                          >
-                            {/* Step card */}
-                            <div className="relative bg-gradient-to-br from-emerald-900/10 to-teal-800/10 rounded-2xl p-6 border border-emerald-300/20 hover:border-emerald-300/40 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10">
-
-                              {/* Image container with frame */}
-                              <div className="relative mb-6">
-                                {/* Decorative frame */}
-                                <div className="absolute -inset-3 bg-gradient-to-br from-emerald-400/20 via-cyan-400/10 to-teal-400/20 rounded-2xl blur-sm"></div>
-                                <div className="absolute -inset-2 bg-gradient-to-br from-white/10 to-white/5 rounded-xl"></div>
-
-                                {/* Main image frame */}
-                                <div
-                                  className="relative w-full h-64 rounded-xl overflow-hidden bg-gradient-to-br from-slate-900/20 to-slate-800/20 border-2 border-emerald-300/40 hover:border-emerald-300/70 shadow-lg hover:shadow-emerald-500/20 transition-all duration-300 cursor-pointer group/image"
-                                  onMouseEnter={(e) => handleImageHover(index, e)}
-                                  onMouseLeave={handleImageLeave}
+                                {/* Main dot */}
+                                <motion.div
+                                  className={`relative rounded-full shadow-lg border-2 flex items-center justify-center ${isActive
+                                    ? isAvatarStep
+                                      ? 'w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-purple-400 via-fuchsia-400 to-purple-400 border-purple-200/40'
+                                      : 'w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 border-white/40'
+                                    : 'w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-blue-600/60 via-purple-600/60 to-pink-600/60 border-white/20 opacity-60'
+                                    }`}
+                                  animate={isActive ? {
+                                    boxShadow: isAvatarStep
+                                      ? [
+                                        "0 0 0 0 rgba(168, 85, 247, 0.6)",
+                                        "0 0 0 12px rgba(168, 85, 247, 0)",
+                                        "0 0 0 0 rgba(168, 85, 247, 0)"
+                                      ]
+                                      : [
+                                        "0 0 0 0 rgba(147, 51, 234, 0.6)",
+                                        "0 0 0 12px rgba(147, 51, 234, 0)",
+                                        "0 0 0 0 rgba(147, 51, 234, 0)"
+                                      ]
+                                  } : {}}
+                                  transition={{
+                                    duration: 1.5,
+                                    repeat: Infinity,
+                                    delay: index * 0.5
+                                  }}
                                 >
-                                  {/* Inner frame border */}
-                                  <div className="absolute inset-2 border border-white/20 rounded-lg pointer-events-none"></div>
-
-                                  <img
-                                    src={`/local-img/${imageNames[index]}`}
-                                    alt={step.step}
-                                    className="w-full h-full object-cover"
+                                  {/* Inner sparkle */}
+                                  <motion.div
+                                    className={`rounded-full ${isActive
+                                      ? 'w-2 h-2 sm:w-2.5 sm:h-2.5 bg-white/90'
+                                      : 'w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white/60'
+                                      }`}
+                                    animate={{
+                                      scale: isActive ? [0.8, 1.3, 0.8] : [0.8, 1.1, 0.8],
+                                      opacity: isActive ? [0.7, 1, 0.7] : [0.4, 0.7, 0.4]
+                                    }}
+                                    transition={{
+                                      duration: 1,
+                                      repeat: Infinity,
+                                      delay: index * 0.4
+                                    }}
                                   />
+                                </motion.div>
+                              </motion.div>
+                            </button>
 
-                                  {/* Corner decorations */}
-                                  <div className="absolute top-2 left-2 w-3 h-3 border-l-2 border-t-2 border-emerald-400/60 rounded-tl"></div>
-                                  <div className="absolute top-2 right-2 w-3 h-3 border-r-2 border-t-2 border-emerald-400/60 rounded-tr"></div>
-                                  <div className="absolute bottom-2 left-2 w-3 h-3 border-l-2 border-b-2 border-emerald-400/60 rounded-bl"></div>
-                                  <div className="absolute bottom-2 right-2 w-3 h-3 border-r-2 border-b-2 border-emerald-400/60 rounded-br"></div>
-                                </div>
-                              </div>
-
-                              {/* Step content */}
-                              <div className="text-center mt-4">
-                                <h3 className="text-base font-medium text-white mb-1 group-hover:text-emerald-300 transition-colors duration-300 whitespace-nowrap overflow-hidden text-ellipsis">
-                                  {step.step}
-                                </h3>
-                                <div className="w-8 h-0.5 bg-emerald-400 mx-auto rounded-full group-hover:w-12 group-hover:bg-emerald-300 transition-all duration-300"></div>
-                              </div>
-                            </div>
-                          </motion.div>
-                        );
+                            {/* Step Label */}
+                            <motion.div
+                              className={`mt-2 sm:mt-3 text-center whitespace-nowrap text-xs sm:text-sm font-medium transition-all duration-300 ${isActive
+                                ? isAvatarStep
+                                  ? 'text-purple-300 font-bold'
+                                  : 'text-blue-300 font-bold'
+                                : 'text-gray-400 opacity-70'
+                                }`}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{
+                                opacity: isActive ? 1 : 0.7,
+                                y: 0,
+                                scale: isActive ? 1.05 : 1
+                              }}
+                              transition={{ delay: index * 0.2 + 0.5 }}
+                            >
+                              <span className="hidden sm:inline">{step.step}</span>
+                              <span className="sm:hidden">{index + 1}</span>
+                            </motion.div>
+                          </div>
+                        )
                       })}
                     </div>
                   </div>
+
+                  {/* Content Display Area */}
+                  <div className="relative max-w-4xl mx-auto">
+                    <AnimatePresence mode="wait">
+                      {(() => {
+                        const imageNames = ['upload photo.png', 'select music.png', 'add avatar.png', 'generate video.png']
+                        const currentStep = stepImages[activeGuideStep]
+                        const isAvatarStep = activeGuideStep === 2
+
+                        return (
+                          <motion.div
+                            key={activeGuideStep}
+                            role="tabpanel"
+                            id={`step-panel-${activeGuideStep}`}
+                            aria-labelledby={`step-tab-${activeGuideStep}`}
+                            initial={{ opacity: 0, x: 50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -50 }}
+                            transition={{ duration: 0.4, ease: "easeInOut" }}
+                            drag="x"
+                            dragConstraints={{ left: 0, right: 0 }}
+                            dragElastic={0.2}
+                            onDragEnd={(e, { offset, velocity }) => {
+                              const swipeThreshold = 50
+                              if (offset.x > swipeThreshold && activeGuideStep > 0) {
+                                setActiveGuideStep(activeGuideStep - 1)
+                              } else if (offset.x < -swipeThreshold && activeGuideStep < 3) {
+                                setActiveGuideStep(activeGuideStep + 1)
+                              }
+                            }}
+                            className="cursor-grab active:cursor-grabbing"
+                          >
+                            {/* Large Image Container */}
+                            <div className="relative mb-6">
+                              {/* Decorative frame */}
+                              <div className={`absolute -inset-4 rounded-3xl blur-2xl ${isAvatarStep
+                                ? 'bg-gradient-to-br from-purple-400/30 via-fuchsia-400/20 to-purple-400/30'
+                                : 'bg-gradient-to-br from-blue-400/30 via-purple-400/20 to-pink-400/30'
+                                }`}></div>
+                              <div className="absolute -inset-3 bg-gradient-to-br from-white/10 to-white/5 rounded-2xl"></div>
+
+                              {/* Main Image Frame */}
+                              <motion.div
+                                className={`relative w-full h-64 sm:h-80 md:h-96 rounded-2xl overflow-hidden bg-slate-900 border-3 shadow-2xl ${isAvatarStep
+                                  ? 'border-purple-300/50 shadow-purple-500/30'
+                                  : 'border-blue-300/50 shadow-blue-500/30'
+                                  }`}
+                                initial={{ scale: 0.95 }}
+                                animate={{ scale: 1 }}
+                                transition={{ duration: 0.5, ease: "easeOut" }}
+                              >
+                                {/* Inner decorative border */}
+                                <div className="absolute inset-3 border-2 border-white/20 rounded-xl pointer-events-none"></div>
+
+                                {/* Image */}
+                                <img
+                                  src={`/local-img/${imageNames[activeGuideStep]}`}
+                                  alt={currentStep.step}
+                                  className="w-full h-full object-contain"
+                                />
+
+                                {/* Corner Decorations */}
+                                <div className={`absolute top-3 left-3 w-4 h-4 border-l-3 border-t-3 rounded-tl ${isAvatarStep ? 'border-purple-400/70' : 'border-blue-400/70'
+                                  }`}></div>
+                                <div className={`absolute top-3 right-3 w-4 h-4 border-r-3 border-t-3 rounded-tr ${isAvatarStep ? 'border-purple-400/70' : 'border-blue-400/70'
+                                  }`}></div>
+                                <div className={`absolute bottom-3 left-3 w-4 h-4 border-l-3 border-b-3 rounded-bl ${isAvatarStep ? 'border-purple-400/70' : 'border-blue-400/70'
+                                  }`}></div>
+                                <div className={`absolute bottom-3 right-3 w-4 h-4 border-r-3 border-b-3 rounded-br ${isAvatarStep ? 'border-purple-400/70' : 'border-blue-400/70'
+                                  }`}></div>
+                              </motion.div>
+                            </div>
+                          </motion.div>
+                        )
+                      })()}
+                    </AnimatePresence>
+                  </div>
                 </div>
               </div>
-            </motion.div>
+
+              {/* CTA Section */}
+              <div className="text-center mt-8">
+                <a
+                  href="/generator"
+                  onClick={handleNavigateToGenerator}
+                  className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white font-bold text-base sm:text-lg rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl cursor-pointer"
+                >
+                  <span className="mr-2">🚀</span>
+                  Try it now
+                  <span className="ml-2">→</span>
+                </a>
+              </div>
+            </div>
           </div>
         </motion.section>
 
         {/* Quick Way Video Generator Section */}
         <motion.section variants={itemVariants} className="mb-16">
-          <div className="relative overflow-hidden bg-gradient-to-br from-slate-100/95 via-white/90 to-gray-100/95 backdrop-blur-xl border border-gray-200/40 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-2xl">
+          <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50/80 to-purple-50 backdrop-blur-xl border border-indigo-100/60 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-2xl">
             {/* Section Header */}
             <div className="text-center mb-8 sm:mb-10 lg:mb-12">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-black leading-tight">
-                Quick Way Video Generator
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight">
+                <span className="bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  Quick Way
+                </span>{' '}
+                <span className="text-black">
+                  Video Generator
+                </span>
               </h2>
             </div>
 
             {/* Section 1: Generate videos with zero complexity */}
-            <div className="mb-8 sm:mb-12 lg:mb-16">
+            <div className="mb-6 sm:mb-8 lg:mb-10">
               {/* Mobile Layout */}
               <div className="lg:hidden">
                 {/* Mobile: Title */}
                 <motion.div
-                  className="px-2 mb-4"
+                  className="px-2 mb-3"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
                 >
-                  <h3 className="text-xl sm:text-2xl font-bold text-black mb-3 leading-tight">
+                  <h3 className="text-xl sm:text-2xl font-bold text-black mb-2 leading-tight">
                     Generate videos with zero complexity
                   </h3>
                   <p className="text-sm sm:text-base text-black leading-relaxed">
-                    Type your idea, add the specifics—like length, platform, voiceover accent, and get AI-generated 
+                    Create your idea, add the specifics—like photos, video, music, and get animated avatar
                     high-quality videos that put your ideas into focus.
                   </p>
                 </motion.div>
-                
-                {/* Mobile: Mockup */}
+
+                {/* Mobile: iPhone Mockup */}
                 <motion.div
-                  className="px-2 mb-4"
+                  className="px-2 mb-3"
                   initial={{ opacity: 0, x: 50 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
                 >
-                  <div className="relative bg-gray-900 rounded-xl overflow-hidden shadow-2xl mx-auto max-w-sm">
-                    <div className="aspect-video bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-800 relative">
-                      <div className="absolute inset-0 flex items-center justify-center p-4">
-                        <div className="text-center text-white">
-                          <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
-                            <div className="w-0 h-0 border-l-4 border-t-2 border-b-2 border-l-white border-t-transparent border-b-transparent ml-0.5"></div>
-                          </div>
-                          <p className="text-xs opacity-80 px-2">5 min YouTube video of a man traveling through time</p>
-                        </div>
+                  {/* iPhone 17 Mockup Frame */}
+                  <div className="relative mx-auto" style={{ maxWidth: '240px' }}>
+                    {/* iPhone 17 Device Frame - Slimmer bezels and modern design */}
+                    <div className="relative bg-gradient-to-b from-gray-800 via-gray-900 to-black rounded-[3rem] p-1.5 shadow-2xl border-[3px] border-gray-700">
+                      {/* Dynamic Island - Wider for iPhone 17 */}
+                      <div className="absolute top-3 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-[1.5rem] z-10 shadow-lg border border-gray-800/50"></div>
+
+                      {/* Screen Container - Thinner bezels */}
+                      <div
+                        className="relative bg-black rounded-[2.5rem] overflow-hidden"
+                        style={{ aspectRatio: '9/19.5' }}
+                      >
+                        {/* Video Player */}
+                        <video
+                          id="preview-video-mobile"
+                          className="absolute inset-0 w-full h-full pointer-events-none"
+                          style={{ objectFit: 'cover', objectPosition: 'center' }}
+                          preload="metadata"
+                          playsInline
+                          muted
+                          loop
+                          autoPlay
+                        >
+                          <source src="/sample-video/Generate videos with zero complexity.mp4?v=2" type="video/mp4" />
+                        </video>
+
+                        {/* Sound Toggle Button - Inside Frame */}
+                        <button
+                          onClick={() => {
+                            const video = document.getElementById('preview-video-mobile');
+                            if (video) {
+                              video.muted = !video.muted;
+                              setIsVideoMuted(video.muted);
+                            }
+                          }}
+                          className={`absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all duration-300 shadow-lg ${isVideoMuted
+                            ? 'bg-white/90 text-gray-800 hover:bg-white'
+                            : 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white hover:shadow-xl'
+                            }`}
+                        >
+                          {isVideoMuted ? (
+                            <>
+                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                              </svg>
+                              <span className="text-[10px]">OFF</span>
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clipRule="evenodd" />
+                              </svg>
+                              <span className="text-[10px]">ON</span>
+                            </>
+                          )}
+                        </button>
                       </div>
-                      <div className="absolute top-2 left-2 right-2">
-                        <div className="bg-black/50 backdrop-blur-sm rounded-md px-2 py-1.5 flex items-center justify-between">
-                          <span className="text-white text-xs truncate mr-2">5 min YouTube video of a man traveling through time</span>
-                          <button className="bg-blue-600 text-white px-2 py-0.5 rounded text-xs font-medium flex-shrink-0">
-                            Generate
-                          </button>
-                        </div>
-                      </div>
-                      <div className="absolute bottom-2 left-2 right-2">
-                        <div className="bg-black/50 backdrop-blur-sm rounded-md px-2 py-1.5">
-                          <div className="flex items-center space-x-2">
-                            <button className="text-white text-sm">⏸️</button>
-                            <div className="flex-1 bg-white/20 rounded-full h-0.5">
-                              <div className="bg-white rounded-full h-0.5 w-1/3"></div>
-                            </div>
-                            <span className="text-white text-xs">01:45 / 05:00</span>
-                          </div>
-                        </div>
-                      </div>
+
+                      {/* iPhone 17 Side Buttons - More refined */}
+                      <div className="absolute right-0 top-20 w-0.5 h-16 bg-gray-600 rounded-l-md shadow-inner"></div>
+                      <div className="absolute right-0 top-40 w-0.5 h-12 bg-gray-600 rounded-l-md shadow-inner"></div>
+                      <div className="absolute left-0 top-28 w-0.5 h-8 bg-gray-600 rounded-r-md shadow-inner"></div>
                     </div>
                   </div>
                 </motion.div>
-                
+
                 {/* Mobile: Features & Button */}
                 <motion.div
                   className="px-2"
@@ -699,14 +583,14 @@ const Home = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.6 }}
                 >
-                  <div className="space-y-2 mb-6">
+                  <div className="space-y-2 mb-4">
                     <div className="flex items-center">
                       <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2 flex-shrink-0"></div>
                       <span className="text-sm text-gray-700">No video editing experience required</span>
                     </div>
                     <div className="flex items-center">
                       <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2 flex-shrink-0"></div>
-                      <span className="text-sm text-gray-700">AI-powered content generation</span>
+                      <span className="text-sm text-gray-700">Add animated avatars to bring photos to life</span>
                     </div>
                     <div className="flex items-center">
                       <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2 flex-shrink-0"></div>
@@ -723,30 +607,30 @@ const Home = () => {
                   </a>
                 </motion.div>
               </div>
-              
+
               {/* Desktop Layout */}
-              <div className="hidden lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
+              <div className="hidden lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
                 {/* Left Column - Text Content */}
                 <motion.div
                   initial={{ opacity: 0, x: -50 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
                 >
-                  <h3 className="text-3xl xl:text-4xl font-bold text-black mb-6 leading-tight">
+                  <h3 className="text-3xl xl:text-4xl font-bold text-black mb-4 leading-tight">
                     Generate videos with zero complexity
                   </h3>
-                  <p className="text-lg text-black mb-6 leading-relaxed">
-                    Type your idea, add the specifics—like length, platform, voiceover accent, and get AI-generated 
+                  <p className="text-lg text-black mb-5 leading-relaxed">
+                    Create your idea, add the specifics—like photos, video, music, and get animated avatar
                     high-quality videos that put your ideas into focus.
                   </p>
-                  <div className="space-y-3 mb-8">
+                  <div className="space-y-2.5 mb-6">
                     <div className="flex items-center">
                       <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 flex-shrink-0"></div>
                       <span className="text-base text-gray-700">No video editing experience required</span>
                     </div>
                     <div className="flex items-center">
                       <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 flex-shrink-0"></div>
-                      <span className="text-base text-gray-700">AI-powered content generation</span>
+                      <span className="text-base text-gray-700">Add animated avatars to bring photos to life</span>
                     </div>
                     <div className="flex items-center">
                       <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 flex-shrink-0"></div>
@@ -769,41 +653,69 @@ const Home = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
                 >
-                  <div className="relative bg-gray-900 rounded-2xl overflow-hidden shadow-2xl">
-                    {/* Video Player Mockup */}
-                    <div className="aspect-video bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-800 relative">
-                      {/* Video Content Placeholder */}
-                      <div className="absolute inset-0 flex items-center justify-center p-4">
-                        <div className="text-center text-white">
-                          <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-4 mx-auto">
-                            <div className="w-0 h-0 border-l-8 border-t-4 border-b-4 border-l-white border-t-transparent border-b-transparent ml-1"></div>
-                          </div>
-                          <p className="text-sm opacity-80 px-2">5 min YouTube video of a man traveling through time</p>
-                        </div>
-                      </div>
-                      
-                      {/* Top Prompt Bar */}
-                      <div className="absolute top-4 left-4 right-4">
-                        <div className="bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2 flex items-center justify-between">
-                          <span className="text-white text-sm truncate mr-2">5 min YouTube video of a man traveling through time</span>
-                          <button className="bg-blue-600 text-white px-4 py-1 rounded-md text-sm font-medium flex-shrink-0">
-                            Generate
-                          </button>
-                        </div>
+                  {/* iPhone 17 Mockup Frame */}
+                  <div className="relative mx-auto" style={{ maxWidth: '280px' }}>
+                    {/* iPhone 17 Device Frame - Slimmer bezels and modern design */}
+                    <div className="relative bg-gradient-to-b from-gray-800 via-gray-900 to-black rounded-[3.5rem] p-2 shadow-2xl border-4 border-gray-700">
+                      {/* Dynamic Island - Wider for iPhone 17 */}
+                      <div className="absolute top-4 left-1/2 -translate-x-1/2 w-36 h-8 bg-black rounded-[2rem] z-10 shadow-lg border border-gray-800/50"></div>
+
+                      {/* Screen Container - Thinner bezels */}
+                      <div
+                        className="relative bg-black rounded-[3rem] overflow-hidden"
+                        style={{ aspectRatio: '9/19.5' }}
+                      >
+                        {/* Video Player */}
+                        <video
+                          id="preview-video-desktop"
+                          className="absolute inset-0 w-full h-full pointer-events-none"
+                          style={{ objectFit: 'cover', objectPosition: 'center' }}
+                          preload="metadata"
+                          playsInline
+                          muted
+                          loop
+                          autoPlay
+                        >
+                          <source src="/sample-video/Generate videos with zero complexity.mp4?v=2" type="video/mp4" />
+                          Your browser does not support the video tag.
+                        </video>
+
+                        {/* Sound Toggle Button - Inside Frame */}
+                        <button
+                          onClick={() => {
+                            const video = document.getElementById('preview-video-desktop');
+                            if (video) {
+                              video.muted = !video.muted;
+                              setIsVideoMuted(video.muted);
+                            }
+                          }}
+                          className={`absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium transition-all duration-300 transform hover:scale-105 shadow-lg ${isVideoMuted
+                            ? 'bg-white/90 text-gray-800 hover:bg-white'
+                            : 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white hover:shadow-xl'
+                            }`}
+                        >
+                          {isVideoMuted ? (
+                            <>
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                              </svg>
+                              <span>OFF</span>
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clipRule="evenodd" />
+                              </svg>
+                              <span>ON</span>
+                            </>
+                          )}
+                        </button>
                       </div>
 
-                      {/* Video Controls */}
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <div className="bg-black/50 backdrop-blur-sm rounded-lg px-4 py-2">
-                          <div className="flex items-center space-x-3">
-                            <button className="text-white text-base">⏸️</button>
-                            <div className="flex-1 bg-white/20 rounded-full h-1">
-                              <div className="bg-white rounded-full h-1 w-1/3"></div>
-                            </div>
-                            <span className="text-white text-sm">01:45 / 05:00</span>
-                          </div>
-                        </div>
-                      </div>
+                      {/* iPhone 17 Side Buttons - More refined */}
+                      <div className="absolute right-0 top-28 w-1 h-20 bg-gray-600 rounded-l-md shadow-inner"></div>
+                      <div className="absolute right-0 top-52 w-1 h-14 bg-gray-600 rounded-l-md shadow-inner"></div>
+                      <div className="absolute left-0 top-36 w-1 h-10 bg-gray-600 rounded-r-md shadow-inner"></div>
                     </div>
                   </div>
                 </motion.div>
@@ -811,25 +723,25 @@ const Home = () => {
             </div>
 
             {/* Animated Divider */}
-            <motion.div 
+            <motion.div
               className="flex items-center justify-center my-8 sm:my-10 lg:my-12"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.5 }}
             >
-              <motion.div 
+              <motion.div
                 className="flex-1 h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-blue-600"
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ duration: 1, delay: 0.7 }}
               ></motion.div>
-              <motion.div 
+              <motion.div
                 className="mx-6 relative"
-                animate={{ 
+                animate={{
                   rotate: [0, 360],
                   scale: [1, 1.2, 1]
                 }}
-                transition={{ 
+                transition={{
                   duration: 2,
                   repeat: Infinity,
                   ease: "easeInOut"
@@ -838,7 +750,7 @@ const Home = () => {
                 <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full shadow-lg"></div>
                 <div className="absolute inset-0 w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-ping opacity-75"></div>
               </motion.div>
-              <motion.div 
+              <motion.div
                 className="flex-1 h-0.5 bg-gradient-to-r from-purple-600 to-transparent"
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
@@ -857,55 +769,31 @@ const Home = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.6 }}
                 >
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 leading-tight">
+                  <h3 className="text-xl sm:text-2xl font-bold text-black mb-3 leading-tight">
                     Edit videos with prefer musics
                   </h3>
-                  <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
-                    Edit your videos with the magic box on QWGenv. Give simple commands like change the accent, 
-                    delete scenes or add a funky intro and watch your videos come to life.
+                  <p className="text-sm sm:text-base text-black leading-relaxed">
+                    Edit your video with the magic box on QWGenv. Give simple options like change the photos,
+                    music, add animated avatars and share your videos to life.
                   </p>
                 </motion.div>
-                
-                {/* Mobile: Mockup */}
+
+                {/* Mobile: Image */}
                 <motion.div
                   className="px-2 mb-4"
                   initial={{ opacity: 0, x: 50 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.8 }}
                 >
-                  <div className="relative bg-gray-900 rounded-xl overflow-hidden shadow-2xl mx-auto max-w-sm">
-                    <div className="aspect-video bg-gradient-to-br from-green-600 via-emerald-600 to-teal-800 relative">
-                      <div className="absolute inset-2 bg-black/30 rounded-md">
-                        <div className="h-full flex items-center justify-center p-2">
-                          <div className="text-center text-white">
-                            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
-                              <span className="text-lg">🎵</span>
-                            </div>
-                            <p className="text-xs opacity-80 px-1">A video about luxury travel to Europe</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="absolute bottom-2 left-2 right-2">
-                        <div className="bg-white/95 backdrop-blur-sm rounded-md p-2">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-gray-800 font-medium text-xs truncate mr-2">A video about luxury travel to Europe</span>
-                            <button className="bg-green-600 text-white px-2 py-0.5 rounded text-xs flex-shrink-0">Generate</button>
-                          </div>
-                          <div className="space-y-1 text-xs text-gray-700">
-                            <div>• Narrate the video in a British accent</div>
-                            <div>• Add scenes, delete scenes</div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="absolute right-2 top-2 space-y-1">
-                        <div className="w-8 h-6 bg-blue-500 rounded-sm"></div>
-                        <div className="w-8 h-6 bg-purple-500 rounded-sm"></div>
-                        <div className="w-8 h-6 bg-pink-500 rounded-sm"></div>
-                      </div>
-                    </div>
+                  <div className="relative bg-slate-900 rounded-xl overflow-hidden shadow-2xl mx-auto max-w-sm">
+                    <img
+                      src="/local-img/edit video.png"
+                      alt="Edit Video Interface"
+                      className="w-full h-auto object-contain"
+                    />
                   </div>
                 </motion.div>
-                
+
                 {/* Mobile: Features & Button */}
                 <motion.div
                   className="px-2"
@@ -920,7 +808,7 @@ const Home = () => {
                     </div>
                     <div className="flex items-center">
                       <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 flex-shrink-0"></div>
-                      <span className="text-sm text-gray-700">Upload your own tracks</span>
+                      <span className="text-sm text-gray-700">Customize each slide with unique animated characters</span>
                     </div>
                     <div className="flex items-center">
                       <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 flex-shrink-0"></div>
@@ -937,7 +825,7 @@ const Home = () => {
                   </a>
                 </motion.div>
               </div>
-              
+
               {/* Desktop Layout */}
               <div className="hidden lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
                 {/* Left Column - Text Content */}
@@ -946,12 +834,12 @@ const Home = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.6 }}
                 >
-                  <h3 className="text-3xl xl:text-4xl font-bold text-white mb-6 leading-tight">
+                  <h3 className="text-3xl xl:text-4xl font-bold text-black mb-6 leading-tight">
                     Edit videos with prefer musics
                   </h3>
-                  <p className="text-lg text-gray-300 mb-6 leading-relaxed">
-                    Edit your videos with the magic box on QWGenv. Give simple commands like change the accent, 
-                    delete scenes or add a funky intro and watch your videos come to life.
+                  <p className="text-lg text-black mb-6 leading-relaxed">
+                    Edit your video with the magic box on QWGenv. Give simple options like change the photos,
+                    music, add animated avatars and share your videos to life.
                   </p>
                   <div className="space-y-3 mb-8">
                     <div className="flex items-center">
@@ -960,7 +848,7 @@ const Home = () => {
                     </div>
                     <div className="flex items-center">
                       <div className="w-2 h-2 bg-green-500 rounded-full mr-3 flex-shrink-0"></div>
-                      <span className="text-base text-gray-700">Upload your own tracks</span>
+                      <span className="text-base text-gray-700">Customize each slide with unique animated characters</span>
                     </div>
                     <div className="flex items-center">
                       <div className="w-2 h-2 bg-green-500 rounded-full mr-3 flex-shrink-0"></div>
@@ -977,74 +865,43 @@ const Home = () => {
                   </a>
                 </motion.div>
 
-                {/* Right Column - Music Editing Interface Mockup */}
+                {/* Right Column - Edit Video Image */}
                 <motion.div
                   initial={{ opacity: 0, x: 50 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.8 }}
                 >
-                  <div className="relative bg-gray-900 rounded-2xl overflow-hidden shadow-2xl">
-                    {/* Video with Music Interface */}
-                    <div className="aspect-video bg-gradient-to-br from-green-600 via-emerald-600 to-teal-800 relative">
-                      {/* Main Video Area */}
-                      <div className="absolute inset-4 bg-black/30 rounded-lg">
-                        <div className="h-full flex items-center justify-center">
-                          <div className="text-center text-white">
-                            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-3 mx-auto">
-                              <span className="text-2xl">🎵</span>
-                            </div>
-                            <p className="text-sm opacity-80">A video about luxury travel to Europe</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Music Control Panel */}
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <div className="bg-white/95 backdrop-blur-sm rounded-lg p-3">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-gray-800 font-medium text-sm">A video about luxury travel to Europe</span>
-                            <button className="bg-green-600 text-white px-3 py-1 rounded-md text-sm">Generate</button>
-                          </div>
-                          <div className="space-y-2 text-sm text-gray-700">
-                            <div>• Narrate the video in a British accent</div>
-                            <div>• Add three more scenes with summer destinations</div>
-                            <div>• Delete the second scene</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Music Thumbnails */}
-                      <div className="absolute right-4 top-4 space-y-2">
-                        <div className="w-16 h-12 bg-blue-500 rounded-md"></div>
-                        <div className="w-16 h-12 bg-purple-500 rounded-md"></div>
-                        <div className="w-16 h-12 bg-pink-500 rounded-md"></div>
-                      </div>
-                    </div>
+                  <div className="relative bg-slate-900 rounded-2xl overflow-hidden shadow-2xl">
+                    <img
+                      src="/local-img/edit video.png"
+                      alt="Edit Video Interface"
+                      className="w-full h-auto object-contain"
+                    />
                   </div>
                 </motion.div>
               </div>
             </div>
 
             {/* Animated Divider */}
-            <motion.div 
+            <motion.div
               className="flex items-center justify-center my-8 sm:my-10 lg:my-12"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 1.0 }}
             >
-              <motion.div 
+              <motion.div
                 className="flex-1 h-0.5 bg-gradient-to-r from-transparent via-green-400 to-green-600"
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ duration: 1, delay: 1.2 }}
               ></motion.div>
-              <motion.div 
+              <motion.div
                 className="mx-6 relative"
-                animate={{ 
+                animate={{
                   rotate: [0, 360],
                   scale: [1, 1.2, 1]
                 }}
-                transition={{ 
+                transition={{
                   duration: 2,
                   repeat: Infinity,
                   ease: "easeInOut",
@@ -1054,7 +911,7 @@ const Home = () => {
                 <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-purple-500 rounded-full shadow-lg"></div>
                 <div className="absolute inset-0 w-3 h-3 bg-gradient-to-r from-green-400 to-purple-400 rounded-full animate-ping opacity-75"></div>
               </motion.div>
-              <motion.div 
+              <motion.div
                 className="flex-1 h-0.5 bg-gradient-to-r from-purple-600 to-transparent"
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
@@ -1073,57 +930,52 @@ const Home = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 1.0 }}
                 >
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 leading-tight">
-                    Instantly produced images and videos
+                  <h3 className="text-xl sm:text-2xl font-bold text-black mb-3 leading-tight">
+                    Instantly create vibrant videos with animated avatars, photos, and music
                   </h3>
-                  <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
-                    Get professional-quality videos in minutes, not hours. Our advanced processing engine 
+                  <p className="text-sm sm:text-base text-black leading-relaxed">
+                    Get professional-quality videos in minutes, not hours. Our advanced processing engine
                     ensures fast rendering without compromising on quality.
                   </p>
                 </motion.div>
-                
-                {/* Mobile: Mockup */}
+
+                {/* Mobile: Three Images */}
                 <motion.div
                   className="px-2 mb-4"
                   initial={{ opacity: 0, x: 50 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 1.2 }}
                 >
-                  <div className="relative mx-auto max-w-sm">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="col-span-2 bg-gray-900 rounded-lg overflow-hidden shadow-xl">
-                        <div className="aspect-video bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 relative">
-                          <div className="absolute inset-0 flex items-center justify-center p-2">
-                            <div className="text-center text-white">
-                              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mb-2 mx-auto">
-                                <span className="text-lg">⚡</span>
-                              </div>
-                              <p className="text-xs opacity-80">Generated in 2 minutes</p>
-                            </div>
-                          </div>
-                          <div className="absolute bottom-2 left-2 right-2">
-                            <div className="bg-black/50 backdrop-blur-sm rounded-md px-2 py-1">
-                              <div className="flex items-center justify-between text-white text-xs">
-                                <span>Rendering complete ✓</span>
-                                <span>00:45 / 00:45</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="bg-gray-800 rounded-md aspect-video flex items-center justify-center">
-                        <span className="text-white text-xs">HD 1080p</span>
-                      </div>
-                      <div className="bg-gray-800 rounded-md aspect-video flex items-center justify-center">
-                        <span className="text-white text-xs">Mobile</span>
-                      </div>
+                  <div className="flex items-center justify-center gap-3">
+                    {/* Left Image - Avatar Walk Tree (smaller) */}
+                    <div className="w-24 flex-shrink-0">
+                      <img
+                        src="/local-img/avatar walk tree.png"
+                        alt="Avatar walking animation"
+                        className="w-full h-auto rounded-lg shadow-lg"
+                      />
                     </div>
-                    <div className="absolute -top-2 -right-2 bg-purple-600 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
-                      ⚡ 2 min
+
+                    {/* Center Image - Hand Love (larger) */}
+                    <div className="w-36 flex-shrink-0">
+                      <img
+                        src="/local-img/hand love.png"
+                        alt="Hand love gesture"
+                        className="w-full h-auto rounded-lg shadow-xl"
+                      />
+                    </div>
+
+                    {/* Right Image - Camera (smaller) */}
+                    <div className="w-24 flex-shrink-0">
+                      <img
+                        src="/local-img/camera.png"
+                        alt="Camera feature"
+                        className="w-full h-auto rounded-lg shadow-lg"
+                      />
                     </div>
                   </div>
                 </motion.div>
-                
+
                 {/* Mobile: Features & Button */}
                 <motion.div
                   className="px-2"
@@ -1138,7 +990,7 @@ const Home = () => {
                     </div>
                     <div className="flex items-center">
                       <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-2 flex-shrink-0"></div>
-                      <span className="text-sm text-gray-700">HD quality output</span>
+                      <span className="text-sm text-gray-700">Beat-synchronized avatar animations included</span>
                     </div>
                     <div className="flex items-center">
                       <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mr-2 flex-shrink-0"></div>
@@ -1155,7 +1007,7 @@ const Home = () => {
                   </a>
                 </motion.div>
               </div>
-              
+
               {/* Desktop Layout */}
               <div className="hidden lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
                 {/* Left Column - Text Content */}
@@ -1164,11 +1016,11 @@ const Home = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 1.0 }}
                 >
-                  <h3 className="text-3xl xl:text-4xl font-bold text-white mb-6 leading-tight">
-                    Instantly produced images and videos
+                  <h3 className="text-3xl xl:text-4xl font-bold text-black mb-6 leading-tight">
+                    Instantly create vibrant videos with animated avatars, photos, and music.
                   </h3>
-                  <p className="text-lg text-gray-300 mb-6 leading-relaxed">
-                    Get professional-quality videos in minutes, not hours. Our advanced processing engine 
+                  <p className="text-lg text-black mb-6 leading-relaxed">
+                    Get professional-quality videos in minutes, not hours. Our advanced processing engine
                     ensures fast rendering without compromising on quality.
                   </p>
                   <div className="space-y-3 mb-8">
@@ -1178,7 +1030,7 @@ const Home = () => {
                     </div>
                     <div className="flex items-center">
                       <div className="w-2 h-2 bg-purple-500 rounded-full mr-3 flex-shrink-0"></div>
-                      <span className="text-base text-gray-700">HD quality output</span>
+                      <span className="text-base text-gray-700">Beat-synchronized avatar animations included</span>
                     </div>
                     <div className="flex items-center">
                       <div className="w-2 h-2 bg-purple-500 rounded-full mr-3 flex-shrink-0"></div>
@@ -1195,53 +1047,53 @@ const Home = () => {
                   </a>
                 </motion.div>
 
-                {/* Right Column - Output Showcase Mockup */}
+                {/* Right Column - Image Mockup */}
                 <motion.div
                   initial={{ opacity: 0, x: 50 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 1.2 }}
+                  className="flex items-center justify-center gap-4"
                 >
-                  <div className="relative">
-                    {/* Multiple Video Outputs */}
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* Main Video */}
-                      <div className="col-span-2 bg-gray-900 rounded-xl overflow-hidden shadow-xl">
-                        <div className="aspect-video bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 relative">
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="text-center text-white">
-                              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-3 mx-auto">
-                                <span className="text-2xl">⚡</span>
-                              </div>
-                              <p className="text-sm opacity-80">Generated in 2 minutes</p>
-                            </div>
-                          </div>
-                          {/* Progress Bar */}
-                          <div className="absolute bottom-3 left-3 right-3">
-                            <div className="bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2">
-                              <div className="flex items-center justify-between text-white text-sm">
-                                <span>Rendering complete ✓</span>
-                                <span>00:45 / 00:45</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Thumbnail Outputs */}
-                      <div className="bg-gray-800 rounded-lg aspect-video flex items-center justify-center">
-                        <span className="text-white text-xs">HD 1080p</span>
-                      </div>
-                      <div className="bg-gray-800 rounded-lg aspect-video flex items-center justify-center">
-                        <span className="text-white text-xs">Mobile</span>
-                      </div>
-                    </div>
-                    
-                    {/* Speed Badge */}
-                    <div className="absolute -top-3 -right-3 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
-                      ⚡ 2 min
-                    </div>
-                  </div>
+                  {/* Left Image - Avatar Walk Tree (smaller) */}
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-32 xl:w-40 flex-shrink-0"
+                  >
+                    <img
+                      src="/local-img/avatar walk tree.png"
+                      alt="Avatar walking animation"
+                      className="w-full h-auto rounded-lg shadow-lg"
+                    />
+                  </motion.div>
+
+                  {/* Center Image - Hand Love (larger) */}
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-48 xl:w-56 flex-shrink-0"
+                  >
+                    <img
+                      src="/local-img/hand love.png"
+                      alt="Hand love gesture"
+                      className="w-full h-auto rounded-lg shadow-xl"
+                    />
+                  </motion.div>
+
+                  {/* Right Image - Camera (smaller) */}
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-32 xl:w-40 flex-shrink-0"
+                  >
+                    <img
+                      src="/local-img/camera.png"
+                      alt="Camera feature"
+                      className="w-full h-auto rounded-lg shadow-lg"
+                    />
+                  </motion.div>
                 </motion.div>
+
               </div>
             </div>
           </div>
@@ -1249,20 +1101,20 @@ const Home = () => {
 
       </motion.main>
 
-        {/* How to turn your photos and music into videos Section */}
-        <motion.section variants={itemVariants} className="w-full">
-          <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-black backdrop-blur-xl shadow-2xl">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              {/* Main Content Area */}
-              <div className="flex flex-col lg:flex-row min-h-[500px]">
-                {/* Left Side - Dark Background with Main Content */}
-                <div className="flex-1 bg-gradient-to-br from-gray-900 via-slate-900 to-black p-8 sm:p-10 lg:p-12 rounded-l-3xl">
-                  <div className="max-w-xl">
+      {/* How to turn your photos and music into videos Section */}
+      <motion.section variants={itemVariants} className="w-full">
+        <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-black backdrop-blur-xl shadow-2xl">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Main Content Area */}
+            <div className="flex flex-col lg:flex-row min-h-[500px]">
+              {/* Left Side - Dark Background with Main Content */}
+              <div className="flex-1 bg-gradient-to-br from-gray-900 via-slate-900 to-black p-8 sm:p-10 lg:p-12 rounded-l-3xl">
+                <div className="max-w-xl">
                   <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
-                    How to turn your photos and music into videos with Qwgenv
+                    How to turn your <span className="text-blue-400 font-extrabold">photos</span>, <span className="text-green-400 font-extrabold">music</span> and <span className="text-purple-400 font-extrabold">avatars</span> into video with QWgenv
                   </h2>
                   <p className="text-gray-300 text-lg mb-8 leading-relaxed">
-                    Transform your photos and music into professional videos with our simple 4-step process. No technical skills required.
+                    Transform your photos, music and avatars into professional videos with our simple 4-step process. No technical skills required.
                   </p>
                   <motion.button
                     className="bg-white text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors duration-300"
@@ -1272,14 +1124,14 @@ const Home = () => {
                   >
                     START FOR FREE
                   </motion.button>
-                  </div>
                 </div>
+              </div>
 
-                {/* Right Side - Dark Background with Steps */}
-                <div className="flex-1 bg-gradient-to-br from-gray-900 via-slate-900 to-black p-8 sm:p-10 lg:p-12 rounded-r-3xl flex flex-col justify-center">
+              {/* Right Side - Dark Background with Steps */}
+              <div className="flex-1 bg-gradient-to-br from-gray-900 via-slate-900 to-black p-8 sm:p-10 lg:p-12 rounded-r-3xl flex flex-col justify-center">
                 <div className="space-y-8">
                   {/* Step 01 */}
-                  <motion.div 
+                  <motion.div
                     className="flex items-start space-x-4"
                     whileHover={{ x: 10 }}
                     transition={{ duration: 0.3 }}
@@ -1289,12 +1141,12 @@ const Home = () => {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-white mb-2">Start with an idea</h3>
-                      <p className="text-gray-300">Upload your photos or videos using our drag-and-drop interface. Mix and match your media files.</p>
+                      <p className="text-gray-300">Upload your photos or videos using our interface. Mix and match your media files.</p>
                     </div>
                   </motion.div>
 
                   {/* Step 02 */}
-                  <motion.div 
+                  <motion.div
                     className="flex items-start space-x-4"
                     whileHover={{ x: 10 }}
                     transition={{ duration: 0.3 }}
@@ -1303,13 +1155,13 @@ const Home = () => {
                       <span className="text-white font-bold text-xl">02</span>
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-white mb-2">Build your cast & settings</h3>
-                      <p className="text-gray-300">Choose from our curated music library or upload your own soundtrack to set the perfect mood.</p>
+                      <h3 className="text-xl font-bold text-white mb-2">Build your music & avatars</h3>
+                      <p className="text-gray-300">Choose from our free music library or upload your own. Add animated avatars to personalize each slide with unique characters.</p>
                     </div>
                   </motion.div>
 
                   {/* Step 03 */}
-                  <motion.div 
+                  <motion.div
                     className="flex items-start space-x-4"
                     whileHover={{ x: 10 }}
                     transition={{ duration: 0.3 }}
@@ -1318,13 +1170,13 @@ const Home = () => {
                       <span className="text-white font-bold text-xl">03</span>
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-white mb-2">Perfect your motion</h3>
-                      <p className="text-gray-300">Let our AI generate a professional slideshow video with smooth transitions in just minutes.</p>
+                      <h3 className="text-xl font-bold text-white mb-2">Generate your slideshow</h3>
+                      <p className="text-gray-300">Let our tool generate a professional slideshow video with smooth transitions in just minutes.</p>
                     </div>
                   </motion.div>
 
                   {/* Step 04 */}
-                  <motion.div 
+                  <motion.div
                     className="flex items-start space-x-4"
                     whileHover={{ x: 10 }}
                     transition={{ duration: 0.3 }}
@@ -1333,22 +1185,22 @@ const Home = () => {
                       <span className="text-white font-bold text-xl">04</span>
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-white mb-2">Share your project</h3>
+                      <h3 className="text-xl font-bold text-white mb-2">Share your video</h3>
                       <p className="text-gray-300">Download your video or share it instantly via QR code for easy mobile access and social sharing.</p>
                     </div>
                   </motion.div>
                 </div>
               </div>
             </div>
-            </div>
           </div>
-        </motion.section>
+        </div>
+      </motion.section>
 
-        {/* FAQs Section */}
-        <motion.section variants={itemVariants} className="w-full">
-          <div className="relative overflow-hidden bg-gradient-to-br from-gray-50/95 via-white/90 to-slate-50/95 backdrop-blur-xl shadow-2xl">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-              {/* Section Header */}
+      {/* FAQs Section */}
+      <motion.section variants={itemVariants} className="w-full">
+        <div className="relative overflow-hidden bg-gradient-to-br from-gray-50/95 via-white/90 to-slate-50/95 backdrop-blur-xl shadow-2xl">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            {/* Section Header */}
             <div className="text-center mb-8">
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3">
                 FAQs
@@ -1358,7 +1210,7 @@ const Home = () => {
             {/* FAQ Items */}
             <div className="max-w-4xl mx-auto space-y-4">
               {faqData.map((faq, index) => (
-                <motion.div 
+                <motion.div
                   key={faq.id}
                   className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm"
                   initial={{ opacity: 0, y: 20 }}
@@ -1384,7 +1236,7 @@ const Home = () => {
                       </svg>
                     </motion.div>
                   </motion.button>
-                  
+
                   <AnimatePresence>
                     {expandedFAQ === faq.id && (
                       <motion.div
@@ -1405,18 +1257,23 @@ const Home = () => {
                 </motion.div>
               ))}
             </div>
-            </div>
           </div>
-        </motion.section>
+        </div>
+      </motion.section>
 
-        {/* Explore Related Posts Section */}
-        <motion.section variants={itemVariants} className="w-full">
-          <div className="relative overflow-hidden bg-gradient-to-br from-slate-50/95 via-white/90 to-gray-50/95 backdrop-blur-xl shadow-2xl">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-              {/* Section Header */}
+      {/* Explore Related Posts Section */}
+      <motion.section variants={itemVariants} className="w-full">
+        <div className="relative overflow-hidden bg-gradient-to-br from-slate-50/95 via-white/90 to-gray-50/95 backdrop-blur-xl shadow-2xl">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            {/* Section Header */}
             <div className="text-center mb-6">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 leading-tight">
-                Explore related posts
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 leading-tight">
+                <span className="bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
+                  Bring your idea
+                </span>{' '}
+                <span className="text-gray-900">
+                  to life with QWgenv
+                </span>
               </h2>
               <p className="text-sm text-gray-600 max-w-xl mx-auto">
                 Discover expert tips and strategies to enhance your video creation journey
@@ -1426,7 +1283,7 @@ const Home = () => {
             {/* Card Carousel */}
             <div className="relative">
               {/* Navigation Arrows */}
-              <button 
+              <button
                 className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hidden sm:flex"
                 onClick={() => {
                   const container = document.getElementById('posts-carousel');
@@ -1437,8 +1294,8 @@ const Home = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              
-              <button 
+
+              <button
                 className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/90 hover:bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hidden sm:flex"
                 onClick={() => {
                   const container = document.getElementById('posts-carousel');
@@ -1451,19 +1308,17 @@ const Home = () => {
               </button>
 
               {/* Scrollable Card Container */}
-              <div 
+              <div
                 id="posts-carousel"
                 className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-12"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 {/* Card 1: Pick Smarter Video Topics */}
                 <motion.div
-                  className="flex-shrink-0 w-72 sm:w-80 bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
-                  whileHover={{ y: -5 }}
-                  onClick={() => navigate('/blog#video-topics')}
+                  className="flex-shrink-0 w-72 sm:w-80 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 border border-blue-100"
                 >
-                  <div className="aspect-[4/3] bg-gradient-to-br from-blue-400 to-purple-500 p-6 flex items-center justify-center">
-                    <img 
+                  <div className="aspect-[4/3] bg-gradient-to-br from-blue-100 to-purple-100 p-6 flex items-center justify-center">
+                    <img
                       src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop&crop=center"
                       alt="Video topics strategy"
                       className="w-full h-full object-cover rounded-lg"
@@ -1473,41 +1328,17 @@ const Home = () => {
                     />
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-white mb-2">Pick Smarter Video Topics</h3>
-                    <p className="text-blue-100 text-sm">Learn strategies to choose engaging topics that resonate with your audience</p>
-                  </div>
-                </motion.div>
-
-                {/* Card 2: Video Editing Tips */}
-                <motion.div
-                  className="flex-shrink-0 w-72 sm:w-80 bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
-                  whileHover={{ y: -5 }}
-                  onClick={() => navigate('/blog#generate-edit')}
-                >
-                  <div className="aspect-[4/3] bg-gradient-to-br from-green-400 to-teal-500 p-6 flex items-center justify-center">
-                    <img 
-                      src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=300&fit=crop&crop=center"
-                      alt="Video editing workspace"
-                      className="w-full h-full object-cover rounded-lg"
-                      onError={(e) => {
-                        e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxyZWN0IHg9IjEwMCIgeT0iMTAwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzk5QTNBRSIvPgo8L3N2Zz4K";
-                      }}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-white mb-2">Video Editing Tips for Beginners</h3>
-                    <p className="text-green-100 text-sm">Master essential editing techniques to create professional-looking videos</p>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Pick Smarter Media Topics</h3>
+                    <p className="text-gray-900 text-sm leading-relaxed">Choose the right photos and videos for your slideshows. Learn how to select compelling visuals that tell your story and keep viewers engaged from start to finish.</p>
                   </div>
                 </motion.div>
 
                 {/* Card 3: Music Selection */}
                 <motion.div
-                  className="flex-shrink-0 w-72 sm:w-80 bg-gradient-to-br from-pink-500 via-rose-600 to-red-700 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
-                  whileHover={{ y: -5 }}
-                  onClick={() => navigate('/blog#audio-quality')}
+                  className="flex-shrink-0 w-72 sm:w-80 bg-gradient-to-br from-pink-50 via-rose-50 to-red-50 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 border border-pink-100"
                 >
-                  <div className="aspect-[4/3] bg-gradient-to-br from-pink-400 to-red-500 p-6 flex items-center justify-center">
-                    <img 
+                  <div className="aspect-[4/3] bg-gradient-to-br from-pink-100 to-red-100 p-6 flex items-center justify-center">
+                    <img
                       src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop&crop=center"
                       alt="Audio waveform and music"
                       className="w-full h-full object-cover rounded-lg"
@@ -1517,41 +1348,17 @@ const Home = () => {
                     />
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-white mb-2">Music Selection for Videos</h3>
-                    <p className="text-pink-100 text-sm">Choose the perfect soundtrack to enhance your video's emotional impact</p>
-                  </div>
-                </motion.div>
-
-                {/* Card 4: Thumbnail Creation */}
-                <motion.div
-                  className="flex-shrink-0 w-72 sm:w-80 bg-gradient-to-br from-orange-500 via-amber-600 to-yellow-700 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
-                  whileHover={{ y: -5 }}
-                  onClick={() => navigate('/blog#better-media')}
-                >
-                  <div className="aspect-[4/3] bg-gradient-to-br from-orange-400 to-yellow-500 p-6 flex items-center justify-center">
-                    <img 
-                      src="https://images.unsplash.com/photo-1586717799252-bd134ad00e26?w=400&h=300&fit=crop&crop=center"
-                      alt="Thumbnail design examples"
-                      className="w-full h-full object-cover rounded-lg"
-                      onError={(e) => {
-                        e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxyZWN0IHg9IjgwIiB5PSI4MCIgd2lkdGg9IjI0MCIgaGVpZ2h0PSIxNDAiIGZpbGw9IiM5OUEzQUUiLz4KPHN2Zz4K";
-                      }}
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-white mb-2">Creating Engaging Thumbnails</h3>
-                    <p className="text-orange-100 text-sm">Design eye-catching thumbnails that boost your video click-through rates</p>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Music Selection for Videos</h3>
+                    <p className="text-gray-900 text-sm leading-relaxed">Upload your own music or choose from our library to match your video's mood. Discover how the right soundtrack transforms your slideshow into an emotional experience.</p>
                   </div>
                 </motion.div>
 
                 {/* Card 5: Video Marketing */}
                 <motion.div
-                  className="flex-shrink-0 w-72 sm:w-80 bg-gradient-to-br from-indigo-500 via-blue-600 to-cyan-700 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
-                  whileHover={{ y: -5 }}
-                  onClick={() => navigate('/blog#share-promote')}
+                  className="flex-shrink-0 w-72 sm:w-80 bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 border border-indigo-100"
                 >
-                  <div className="aspect-[4/3] bg-gradient-to-br from-indigo-400 to-cyan-500 p-6 flex items-center justify-center">
-                    <img 
+                  <div className="aspect-[4/3] bg-gradient-to-br from-indigo-100 to-cyan-100 p-6 flex items-center justify-center">
+                    <img
                       src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop&crop=center"
                       alt="Marketing analytics dashboard"
                       className="w-full h-full object-cover rounded-lg"
@@ -1561,30 +1368,28 @@ const Home = () => {
                     />
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-white mb-2">Video Marketing Strategies</h3>
-                    <p className="text-indigo-100 text-sm">Proven tactics to promote your videos and grow your audience effectively</p>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Video Marketing Strategies</h3>
+                    <p className="text-gray-900 text-sm leading-relaxed">Export your videos in mobile-optimized format and share via QR code. Learn proven tactics to distribute your content across social platforms and reach wider audiences.</p>
                   </div>
                 </motion.div>
 
-                {/* Card 6: Social Media Formats */}
+                {/* Card 7: Animated Avatars */}
                 <motion.div
-                  className="flex-shrink-0 w-72 sm:w-80 bg-gradient-to-br from-violet-500 via-purple-600 to-fuchsia-700 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
-                  whileHover={{ y: -5 }}
-                  onClick={() => navigate('/blog#lighting-content')}
+                  className="flex-shrink-0 w-72 sm:w-80 bg-gradient-to-br from-cyan-50 via-sky-50 to-blue-50 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 border border-cyan-100"
                 >
-                  <div className="aspect-[4/3] bg-gradient-to-br from-violet-400 to-fuchsia-500 p-6 flex items-center justify-center">
-                    <img 
-                      src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=300&fit=crop&crop=center"
-                      alt="Social media platforms interface"
+                  <div className="aspect-[4/3] bg-gradient-to-br from-cyan-100 to-blue-100 p-6 flex items-center justify-center">
+                    <img
+                      src="https://images.unsplash.com/photo-1535378620166-273708d44e4c?w=400&h=300&fit=crop&crop=center"
+                      alt="Animated avatars and AI characters"
                       className="w-full h-full object-cover rounded-lg"
                       onError={(e) => {
-                        e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxyZWN0IHg9IjUwIiB5PSI1MCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiM5OUEzQUUiLz4KPHJlY3QgeD0iMjUwIiB5PSI1MCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiM5OUEzQUUiLz4KPHJlY3QgeD0iMTUwIiB5PSIxNTAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjOTlBM0FFIi8+CjxjaXJjbGUgY3g9IjIwMCIgY3k9IjIwMCIgcj0iMjAiIGZpbGw9IiM5OUEzQUUiLz4KPHN2Zz4K";
+                        e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjIwMCIgY3k9IjE1MCIgcj0iNTAiIGZpbGw9IiM5OUEzQUUiLz4KPGNpcmNsZSBjeD0iMTgwIiBjeT0iMTQwIiByPSI1IiBmaWxsPSJ3aGl0ZSIvPgo8Y2lyY2xlIGN4PSIyMjAiIGN5PSIxNDAiIHI9IjUiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xODAgMTcwIFEyMDAgMTgwIDIyMCAxNzAiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMyIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K";
                       }}
                     />
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-white mb-2">Social Media Video Formats</h3>
-                    <p className="text-violet-100 text-sm">Optimize your videos for different social platforms and audiences</p>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Using Animated Avatars in Videos</h3>
+                    <p className="text-gray-900 text-sm leading-relaxed">Add animated avatars to your photo slideshows. Position characters anywhere on your slides to create engaging, dynamic content with personality and movement.</p>
                   </div>
                 </motion.div>
               </div>
@@ -1598,24 +1403,111 @@ const Home = () => {
                 <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
               </div>
             </div>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* Start Creating Videos for Free Section */}
+      <motion.section variants={itemVariants} className="w-full">
+        <div className="relative overflow-hidden bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 backdrop-blur-xl shadow-2xl">
+          {/* Animated background elements */}
+          <div className="absolute inset-0 opacity-20">
+            <motion.div
+              className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-400/30 rounded-full blur-3xl"
+              animate={{
+                x: [0, 100, 0],
+                y: [0, -50, 0],
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+            <motion.div
+              className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-purple-400/30 rounded-full blur-3xl"
+              animate={{
+                x: [0, -80, 0],
+                y: [0, 60, 0],
+                scale: [1, 1.3, 1],
+              }}
+              transition={{
+                duration: 10,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+            <motion.div
+              className="absolute top-1/2 left-1/2 w-48 h-48 bg-pink-400/20 rounded-full blur-2xl"
+              animate={{
+                rotate: [0, 360],
+                scale: [1, 1.5, 1],
+              }}
+              transition={{
+                duration: 12,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+          </div>
+
+          <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
+            {/* Content Container */}
+            <div className="text-center">
+              {/* Main Title with Gradient */}
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight mb-6"
+              >
+                <span className="bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
+                  Start creating videos
+                </span>{' '}
+                <span className="text-white">
+                  for free
+                </span>
+              </motion.h2>
+
+              {/* Subtitle */}
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-xl sm:text-2xl lg:text-3xl text-gray-200 mb-10 sm:mb-12 max-w-3xl mx-auto leading-relaxed"
+              >
+                Experience powerful generator and create your video today.
+              </motion.p>
+
+              {/* CTA Button */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <a
+                  href="/generator"
+                  onClick={handleNavigateToGenerator}
+                  className="inline-flex items-center px-10 sm:px-12 py-4 sm:py-5 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 hover:from-cyan-500 hover:via-blue-600 hover:to-purple-700 text-white font-bold text-lg sm:text-xl rounded-full transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-cyan-500/50 cursor-pointer group"
+                >
+                  <span className="mr-3 text-2xl group-hover:rotate-12 transition-transform duration-300">🚀</span>
+                  Try for Free
+                  <motion.span
+                    className="ml-3 text-2xl"
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    →
+                  </motion.span>
+                </a>
+              </motion.div>
             </div>
           </div>
-        </motion.section>
+        </div>
+      </motion.section>
 
-      <motion.main
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-
-        {/* Comments/Feedback Section */}
-        <motion.section variants={itemVariants} className="mb-16">
-          <UserComments sessionId={sessionId} />
-        </motion.section>
-      </motion.main>
-
-{/* Footer */}
+      {/* Footer */}
       <motion.footer
         className="bg-white/5 backdrop-blur-sm border-t border-white/10 py-12"
         variants={itemVariants}
@@ -1628,29 +1520,29 @@ const Home = () => {
               onClick={() => setActiveModal('about')}
               className="hover:text-white transition-colors cursor-pointer mb-2"
             >
-              {t('aboutUs')}
+              About Us
             </button>
             <button
               onClick={() => setActiveModal('contact')}
               className="hover:text-white transition-colors cursor-pointer mb-2"
             >
-              {t('contactUs')}
+              Contact Us
             </button>
             <button
               onClick={() => setActiveModal('privacy')}
               className="hover:text-white transition-colors cursor-pointer mb-2"
             >
-              {t('privacyPolicy')}
+              Privacy Policy
             </button>
             <button
               onClick={() => setActiveModal('terms')}
               className="hover:text-white transition-colors cursor-pointer mb-2"
             >
-              {t('termsOfService')}
+              Terms of Service
             </button>
           </div>
           <div className="text-center mt-8 text-gray-400">
-            <p>&copy; 2025 QWGenv. {t('allRightsReserved')}.</p>
+            <p>&copy; 2025 QWGenv. All rights reserved.</p>
           </div>
         </div>
       </motion.footer>
@@ -1659,7 +1551,7 @@ const Home = () => {
       <Modal
         isOpen={activeModal === 'about'}
         onClose={() => setActiveModal(null)}
-        title={t('aboutUs')}
+        title="About Us"
       >
         {modalContent.about}
       </Modal>
@@ -1667,7 +1559,7 @@ const Home = () => {
       <Modal
         isOpen={activeModal === 'contact'}
         onClose={() => setActiveModal(null)}
-        title={t('contactUs')}
+        title="Contact Us"
       >
         {modalContent.contact}
       </Modal>
@@ -1675,7 +1567,7 @@ const Home = () => {
       <Modal
         isOpen={activeModal === 'privacy'}
         onClose={() => setActiveModal(null)}
-        title={t('privacyPolicy')}
+        title="Privacy Policy"
       >
         {modalContent.privacy}
       </Modal>
@@ -1683,58 +1575,10 @@ const Home = () => {
       <Modal
         isOpen={activeModal === 'terms'}
         onClose={() => setActiveModal(null)}
-        title={t('termsOfService')}
+        title="Terms of Service"
       >
         {modalContent.terms}
       </Modal>
-
-      {/* Image Dialog */}
-      <AnimatePresence>
-        {hoveredImage !== null && (() => {
-          const imageNames = ['upload photo.png', 'select music.png', 'generate video.png'];
-          return (
-            <motion.div
-              className="fixed z-50 pointer-events-none"
-              style={{
-                left: imageDialogPosition.x,
-                top: imageDialogPosition.y,
-                transform: 'translate(-50%, -50%)'
-              }}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="relative inline-block">
-                {/* Photo container that sizes to content */}
-                <div className="relative inline-block">
-                  <img
-                    src={`/local-img/${imageNames[hoveredImage]}`}
-                    alt={stepImages[hoveredImage].step}
-                    className="max-w-96 max-h-96 w-auto h-auto rounded-2xl shadow-2xl"
-                  />
-
-                  {/* Decorative frame overlay that matches image size */}
-                  <div className="absolute inset-0 rounded-2xl border-4 border-emerald-300/60 pointer-events-none"></div>
-
-                  {/* Larger decorative frame behind */}
-                  <div className="absolute -inset-4 bg-gradient-to-br from-emerald-400/30 via-cyan-400/20 to-teal-400/30 rounded-3xl blur-sm -z-10"></div>
-                  <div className="absolute -inset-3 bg-gradient-to-br from-white/20 to-white/10 rounded-2xl -z-10"></div>
-
-                  {/* Inner frame border */}
-                  <div className="absolute inset-3 border-2 border-white/30 rounded-xl pointer-events-none"></div>
-
-                  {/* Corner decorations */}
-                  <div className="absolute top-3 left-3 w-4 h-4 border-l-4 border-t-4 border-emerald-400/80 rounded-tl"></div>
-                  <div className="absolute top-3 right-3 w-4 h-4 border-r-4 border-t-4 border-emerald-400/80 rounded-tr"></div>
-                  <div className="absolute bottom-3 left-3 w-4 h-4 border-l-4 border-b-4 border-emerald-400/80 rounded-bl"></div>
-                  <div className="absolute bottom-3 right-3 w-4 h-4 border-r-4 border-b-4 border-emerald-400/80 rounded-br"></div>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })()}
-      </AnimatePresence>
 
     </>
   )

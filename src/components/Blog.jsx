@@ -275,11 +275,11 @@ const Blog = () => {
                 <span className="sm:hidden font-bold">TOOL</span>
               </Link>
               <Link
-                to="/blog"
+                to="/help"
                 className="text-white font-medium border-b-2 border-purple-400 pb-1 text-sm sm:text-base"
               >
-                <span className="hidden sm:inline">Blog</span>
-                <span className="sm:hidden font-bold">BLOG</span>
+                <span className="hidden sm:inline">Help</span>
+                <span className="sm:hidden font-bold">HELP</span>
               </Link>
               <LanguageSelector />
             </nav>
@@ -535,22 +535,11 @@ const Blog = () => {
               </p>
 
               {/* Tips Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {section.tips.map((tip, tipIndex) => (
                   <TipCard key={tipIndex} tip={tip} index={tipIndex} />
                 ))}
               </div>
-
-              {/* YouTube Video Tutorial - Only for topic 1 */}
-              {section.id === 'video-topics' && (
-                <YouTubeVideo
-                  videoId="bzWsIvRu1ME"
-                  title={`Search The Topic You Love`}
-                />
-              )}
-
-              {/* Case Study */}
-              <CaseStudy caseStudy={section.caseStudy} />
             </div>
           </motion.section>
         ))}
@@ -565,7 +554,7 @@ const Blog = () => {
         >
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Ready to Create Amazing Videos?</h2>
           <p className="text-gray-300 text-base sm:text-lg leading-relaxed mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
-            With QWGenv's easy upload-music-generate process, you're equipped to create short videos that shine on any platform. Start small, experiment with these tips and case studies, and share your creations!
+            With QWGenv's easy upload-music-generate process, you're equipped to create short videos that shine on any platform. Start small, experiment with these tips, and share your creations!
           </p>
           <Link
             to="/generator"

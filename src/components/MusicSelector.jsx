@@ -307,8 +307,25 @@ function MusicSelector() {
               </div>
             ) : localMusic.length > 0 ? (
               <div className="space-y-4">
+                {/* Music Player Controller - Positioned at Top */}
+                {showGlobalPlayer && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative z-10"
+                  >
+                    <GlobalMusicPlayer
+                      currentTrack={currentPlayingTrack}
+                      isVisible={showGlobalPlayer}
+                      inline={true}
+                    />
+                  </motion.div>
+                )}
+
                 {/* Modern Music Table (Similar to Spotify) */}
-                <div className={`bg-gray-900/60 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden ${showGlobalPlayer ? 'mb-4' : ''}`}>
+                <div className="bg-gray-900/60 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden">
                   {/* Table Title Header */}
                   <div className="px-4 py-3 border-b border-white/10 bg-gray-800/40">
                     <h4 className="text-lg font-semibold text-white flex items-center">
@@ -470,22 +487,6 @@ function MusicSelector() {
                     })}
                   </div>
                 </div>
-                
-                {showGlobalPlayer && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="mt-3 relative z-10"
-                  >
-                    <GlobalMusicPlayer
-                      currentTrack={currentPlayingTrack}
-                      isVisible={showGlobalPlayer}
-                      inline={true}
-                    />
-                  </motion.div>
-                )}
               </div>
             ) : (
               <div className="text-center py-12">

@@ -125,8 +125,8 @@ function GlobalMusicPlayer({ currentTrack, isVisible, inline = false }) {
         className={inline ? "relative" : "fixed bottom-0 left-0 right-0 z-50"}
       >
         {/* Single row Context7-inspired player with animated background */}
-        <div className="max-w-4xl mx-auto p-4">
-          <div className="bg-black border border-gray-800 rounded-xl p-3 shadow-2xl relative overflow-hidden">
+        <div className="max-w-4xl mx-auto p-1">
+          <div className="bg-black border border-gray-800 rounded-xl p-0.5 shadow-2xl relative overflow-hidden">
             <audio ref={audioRef} src={currentTrack?.url} preload="metadata" />
             
             {/* Animated gradient background */}
