@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { LogoIcon } from './AnimatedIcons'
+import SearchBar from './SearchBar'
 import TipCard from './TipCard'
 import { getTopicById, categories } from '../data/helpTopicsData'
 
@@ -38,7 +39,7 @@ const TopicDetail = () => {
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+          <div className="flex justify-between items-center py-4 gap-4">
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
@@ -50,6 +51,11 @@ const TopicDetail = () => {
                 QWGenv
               </h1>
             </motion.div>
+
+            {/* Search Bar - Hidden on small screens */}
+            <div className="hidden md:block flex-1 max-w-md">
+              <SearchBar />
+            </div>
 
             <nav className="flex items-center space-x-2 sm:space-x-4 md:space-x-6">
               <Link

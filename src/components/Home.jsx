@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { LogoIcon } from './AnimatedIcons'
 import AnimatedTitle from './AnimatedTitle'
 import Modal from './Modal'
+import SearchBar from './SearchBar'
 import { useAppContext } from '../context/AppContext'
 
 const containerVariants = {
@@ -143,7 +144,7 @@ const Home = () => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Navigation */}
-          <div className="flex justify-between items-center py-4">
+          <div className="flex justify-between items-center py-4 gap-4">
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
@@ -155,6 +156,11 @@ const Home = () => {
                 QWGenv
               </h1>
             </motion.div>
+
+            {/* Search Bar - Hidden on small screens */}
+            <div className="hidden md:block flex-1 max-w-md">
+              <SearchBar />
+            </div>
 
             <nav className="flex items-center space-x-2 sm:space-x-4 md:space-x-6">
               <a
@@ -770,7 +776,7 @@ const Home = () => {
                   transition={{ duration: 0.6, delay: 0.6 }}
                 >
                   <h3 className="text-xl sm:text-2xl font-bold text-black mb-3 leading-tight">
-                    Edit videos with prefer musics
+                    Edit videos with prefer meterial
                   </h3>
                   <p className="text-sm sm:text-base text-black leading-relaxed">
                     Edit your video with the magic box on QWGenv. Give simple options like change the photos,
@@ -835,7 +841,7 @@ const Home = () => {
                   transition={{ duration: 0.6, delay: 0.6 }}
                 >
                   <h3 className="text-3xl xl:text-4xl font-bold text-black mb-6 leading-tight">
-                    Edit videos with prefer musics
+                    Edit videos with prefer meterial
                   </h3>
                   <p className="text-lg text-black mb-6 leading-relaxed">
                     Edit your video with the magic box on QWGenv. Give simple options like change the photos,

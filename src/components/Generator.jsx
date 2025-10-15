@@ -8,6 +8,7 @@ import { useAppContext } from '../context/AppContext'
 import PreviewFrame from './PreviewFrame'
 import BottomButtonBar from './BottomButtonBar'
 import BottomSheetDrawer from './BottomSheetDrawer'
+import SearchBar from './SearchBar'
 
 // Import existing components (will be used in two-column layout)
 import UploadPhotos from './UploadPhotos'
@@ -234,7 +235,7 @@ const Generator = () => {
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+          <div className="flex justify-between items-center py-4 gap-4">
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
@@ -246,6 +247,11 @@ const Generator = () => {
                 QWGenv
               </h1>
             </motion.div>
+
+            {/* Search Bar - Hidden on small screens */}
+            <div className="hidden md:block flex-1 max-w-md">
+              <SearchBar />
+            </div>
 
             <nav className="flex items-center space-x-2 sm:space-x-4 md:space-x-6">
               <a

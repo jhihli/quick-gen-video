@@ -63,23 +63,248 @@
       }
     },
     {
-      "id": "chef-dancing-webm",
-      "name": "3D Chef Dancing",
+      "id": "baby-girl-webm",
+      "name": "Baby Girl",
       "category": "Animated Avatar",
-      "description": "Animated chef dancing",
+      "description": "Cute baby girl animation",
       "type": "webm",
-      "source": "/avatars/cheering-robot/3D Chef Dancing.webm",
+      "source": "/avatars/cheering-robot/baby girl.webm",
       "animations": {
-        "idle": "/avatars/cheering-robot/3D Chef Dancing.webm",
-        "dance": "/avatars/cheering-robot/3D Chef Dancing.webm",
-        "clap": "/avatars/cheering-robot/3D Chef Dancing.webm",
-        "lipsync": "/avatars/cheering-robot/3D Chef Dancing.webm"
+        "idle": "/avatars/cheering-robot/baby girl.webm",
+        "dance": "/avatars/cheering-robot/baby girl.webm",
+        "clap": "/avatars/cheering-robot/baby girl.webm",
+        "lipsync": "/avatars/cheering-robot/baby girl.webm"
       },
       "defaultAnimation": "dance",
-      "syncAnimations": ["dance"],
+      "syncAnimations": ["dance", "clap"],
+      "color": "#ec4899",
+      "metadata": {
+        "name": "Baby Girl",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "bunnies-webm",
+      "name": "Bunnies",
+      "category": "Animated Avatar",
+      "description": "Adorable bunny animation",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/bunnies.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/bunnies.webm",
+        "dance": "/avatars/cheering-robot/bunnies.webm",
+        "clap": "/avatars/cheering-robot/bunnies.webm",
+        "lipsync": "/avatars/cheering-robot/bunnies.webm"
+      },
+      "defaultAnimation": "dance",
+      "syncAnimations": ["dance", "clap"],
       "color": "#f59e0b",
       "metadata": {
-        "name": "3D Chef Dancing",
+        "name": "Bunnies",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "cute-doggie-webm",
+      "name": "Cute Doggie",
+      "category": "Animated Avatar",
+      "description": "Sweet and cute dog character",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/Cute Doggie.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/Cute Doggie.webm",
+        "dance": "/avatars/cheering-robot/Cute Doggie.webm",
+        "clap": "/avatars/cheering-robot/Cute Doggie.webm",
+        "lipsync": "/avatars/cheering-robot/Cute Doggie.webm"
+      },
+      "defaultAnimation": "idle",
+      "syncAnimations": ["dance"],
+      "color": "#06b6d4",
+      "metadata": {
+        "name": "Cute Doggie",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "lipstick-webm",
+      "name": "Lipstick",
+      "category": "Animated Avatar",
+      "description": "Stylish lipstick animation",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/lipstick.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/lipstick.webm",
+        "dance": "/avatars/cheering-robot/lipstick.webm",
+        "clap": "/avatars/cheering-robot/lipstick.webm",
+        "lipsync": "/avatars/cheering-robot/lipstick.webm"
+      },
+      "defaultAnimation": "dance",
+      "syncAnimations": ["dance", "clap"],
+      "color": "#ec4899",
+      "metadata": {
+        "name": "Lipstick",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "naruto-webm",
+      "name": "Naruto",
+      "category": "Animated Avatar",
+      "description": "Naruto anime character animation",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/Naruto.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/Naruto.webm",
+        "dance": "/avatars/cheering-robot/Naruto.webm",
+        "clap": "/avatars/cheering-robot/Naruto.webm",
+        "lipsync": "/avatars/cheering-robot/Naruto.webm"
+      },
+      "defaultAnimation": "dance",
+      "syncAnimations": ["dance", "clap"],
+      "color": "#f59e0b",
+      "metadata": {
+        "name": "Naruto",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "shiba-happy-webm",
+      "name": "Shiba Happy",
+      "category": "Animated Avatar",
+      "description": "Happy Shiba Inu dog animation",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/Shiba Happy.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/Shiba Happy.webm",
+        "dance": "/avatars/cheering-robot/Shiba Happy.webm",
+        "clap": "/avatars/cheering-robot/Shiba Happy.webm",
+        "lipsync": "/avatars/cheering-robot/Shiba Happy.webm"
+      },
+      "defaultAnimation": "dance",
+      "syncAnimations": ["dance", "clap"],
+      "color": "#f59e0b",
+      "metadata": {
+        "name": "Shiba Happy",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "snoopy-webm",
+      "name": "Snoopy",
+      "category": "Animated Avatar",
+      "description": "Classic Snoopy character animation",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/Snoopy.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/Snoopy.webm",
+        "dance": "/avatars/cheering-robot/Snoopy.webm",
+        "clap": "/avatars/cheering-robot/Snoopy.webm",
+        "lipsync": "/avatars/cheering-robot/Snoopy.webm"
+      },
+      "defaultAnimation": "dance",
+      "syncAnimations": ["dance", "clap"],
+      "color": "#06b6d4",
+      "metadata": {
+        "name": "Snoopy",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "useColorkey": false,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "ufo-webm",
+      "name": "UFO",
+      "category": "Animated Avatar",
+      "description": "Flying UFO alien spacecraft",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/Ufo.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/Ufo.webm",
+        "dance": "/avatars/cheering-robot/Ufo.webm",
+        "clap": "/avatars/cheering-robot/Ufo.webm",
+        "lipsync": "/avatars/cheering-robot/Ufo.webm"
+      },
+      "defaultAnimation": "dance",
+      "syncAnimations": ["dance", "clap"],
+      "color": "#8b5cf6",
+      "metadata": {
+        "name": "UFO",
+        "type": "webm",
+        "duration": 10,
+        "fps": 30,
+        "resolution": "512x512",
+        "hasTransparency": true,
+        "isLooped": true,
+        "beatSynchronized": true,
+        "baselineBPM": 120
+      }
+    },
+    {
+      "id": "winter-tenten-webm",
+      "name": "Winter TenTen",
+      "category": "Animated Avatar",
+      "description": "Winter-themed TenTen character",
+      "type": "webm",
+      "source": "/avatars/cheering-robot/Winter TenTen.webm",
+      "animations": {
+        "idle": "/avatars/cheering-robot/Winter TenTen.webm",
+        "dance": "/avatars/cheering-robot/Winter TenTen.webm",
+        "clap": "/avatars/cheering-robot/Winter TenTen.webm",
+        "lipsync": "/avatars/cheering-robot/Winter TenTen.webm"
+      },
+      "defaultAnimation": "dance",
+      "syncAnimations": ["dance", "clap"],
+      "color": "#06b6d4",
+      "metadata": {
+        "name": "Winter TenTen",
         "type": "webm",
         "duration": 10,
         "fps": 30,
