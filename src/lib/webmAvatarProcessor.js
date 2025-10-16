@@ -73,6 +73,37 @@ export const calculateTempoAdjustment = (musicBPM, baselineBPM = 120) => {
 
 
 /**
+ * Detect WebM codec (VP8 or VP9) using ffprobe
+ * @param {string} webmPath - Path to WebM file
+ * @returns {Promise<string>} - Codec name ('vp8' or 'vp9')
+ */
+const detectWebMCodec = async (webmPath) => {
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(webmPath, (err, metadata) => {
+      if (err) {
+        console.error('❌ FFprobe error:', err);
+        reject(err);
+        return;
+      }
+
+      try {
+        const videoStream = metadata.streams.find(stream => stream.codec_type === 'video');
+        if (!videoStream) {
+          reject(new Error('No video stream found in WebM file'));
+          return;
+        }
+
+        const codecName = videoStream.codec_name; // 'vp8' or 'vp9'
+        console.log(`🔍 Detected WebM codec: ${codecName}`);
+        resolve(codecName);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  });
+};
+
+/**
  * Apply WebM avatar overlay to main video
  * @param {Object} options - Overlay options
  * @returns {Promise<string>} - Path to final video with avatar
@@ -91,7 +122,7 @@ const applyWebMAvatarToVideo = async ({
   photoMetadata = null, // Optional: original photo dimensions for letterboxing calculation
   slideNumber = null // Optional: slide number for logging
 }) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
 
     // Safety checks
     if (!fs.existsSync(mainVideoPath)) {
@@ -107,6 +138,24 @@ const applyWebMAvatarToVideo = async ({
       reject(new Error(error));
       return;
     }
+
+    // Detect WebM codec automatically
+    let codecName;
+    try {
+      codecName = await detectWebMCodec(webmPath);
+    } catch (error) {
+      console.error('❌ Failed to detect WebM codec:', error);
+      reject(new Error(`Codec detection failed: ${error.message}`));
+      return;
+    }
+
+    // Map codec name to FFmpeg decoder
+    const decoderMap = {
+      'vp8': 'libvpx',
+      'vp9': 'libvpx-vp9'
+    };
+    const decoder = decoderMap[codecName] || 'libvpx-vp9'; // Default to VP9 if unknown
+    console.log(`🎬 Using decoder: ${decoder} for codec: ${codecName}`);
 
     // Match AvatarPreview sizing calculation EXACTLY
     const frameWidth = 1080; // Video frame width
@@ -141,7 +190,7 @@ const applyWebMAvatarToVideo = async ({
         .input(mainVideoPath)
         .inputOptions([])
         .input(webmPath)
-        .inputOptions(['-stream_loop', '-1', '-c:v', 'libvpx-vp9'])
+        .inputOptions(['-stream_loop', '-1', '-c:v', decoder])
         .outputOptions([
           '-filter_complex', overlayFilter,
           '-map', '[v]',
@@ -162,7 +211,7 @@ const applyWebMAvatarToVideo = async ({
         .input(mainVideoPath)
         .inputOptions([])
         .input(webmPath)
-        .inputOptions(['-stream_loop', '-1', '-c:v', 'libvpx-vp9'])
+        .inputOptions(['-stream_loop', '-1', '-c:v', decoder])
         .input(musicPath)
         .inputOptions(['-stream_loop', '-1'])
         .outputOptions([
