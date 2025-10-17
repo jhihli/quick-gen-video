@@ -70,7 +70,7 @@ const BottomSheetDrawer = ({
                       ? "w-80 max-w-80"
                       : modalWidth === "medium"
                         ? "max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl"
-                        : "max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl"
+                        : "max-w-md md:max-w-md lg:max-w-lg xl:max-w-xl"
                     }`}
                   onClick={(e) => e.stopPropagation()}
                 >

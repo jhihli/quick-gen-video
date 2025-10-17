@@ -1222,18 +1222,40 @@ const Home = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
+                  whileHover={{
+                    scale: 1.02,
+                    boxShadow: "0 10px 30px -10px rgba(59, 130, 246, 0.3)",
+                    borderColor: "rgba(59, 130, 246, 0.3)",
+                    transition: { duration: 0.3 }
+                  }}
                 >
                   <motion.button
-                    className="w-full text-left p-6 flex items-center justify-between hover:bg-gray-50 transition-colors duration-200"
-                    whileHover={{ backgroundColor: "#f9fafb" }}
+                    className="w-full text-left p-6 flex items-center justify-between transition-colors duration-300"
+                    whileHover={{
+                      backgroundColor: "rgba(239, 246, 255, 0.8)",
+                      transition: { duration: 0.3 }
+                    }}
                     onClick={() => toggleFAQ(faq.id)}
                   >
-                    <span className="text-lg font-semibold text-black pr-4">
+                    <motion.span
+                      className="text-lg font-semibold text-black pr-4"
+                      whileHover={{
+                        color: "#3b82f6",
+                        x: 5,
+                        transition: { duration: 0.3 }
+                      }}
+                    >
                       {faq.question}
-                    </span>
+                    </motion.span>
                     <motion.div
                       className="w-6 h-6 flex items-center justify-center bg-blue-100 text-blue-600 rounded-full flex-shrink-0"
-                      whileHover={{ scale: 1.1 }}
+                      whileHover={{
+                        scale: 1.2,
+                        backgroundColor: "#3b82f6",
+                        color: "#ffffff",
+                        rotate: 90,
+                        transition: { duration: 0.3 }
+                      }}
                       animate={{ rotate: expandedFAQ === faq.id ? 45 : 0 }}
                       transition={{ duration: 0.2 }}
                     >

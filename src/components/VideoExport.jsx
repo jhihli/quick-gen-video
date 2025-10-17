@@ -873,20 +873,6 @@ function VideoExport({ onNewVideo }) {
                 <span>{t('createNewVideo')}</span>
               </motion.button>
 
-              {/* Feedback Button */}
-              <motion.button
-                onClick={() => {
-                  navigate('/', { state: { scrollToFeedback: true } })
-                }}
-                className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center space-x-2"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/>
-                </svg>
-                <span>Feedback</span>
-              </motion.button>
             </motion.div>
           </motion.div>
         )}

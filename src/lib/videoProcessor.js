@@ -242,149 +242,181 @@ export async function createReliableSlideshow(options) {
   // For multiple images, use two-step process for reliability
   if (images.length > 1) {
     const timePerImage = perSlideDuration;
-    
+
     return new Promise(async (resolve, reject) => {
       const tempDir = path.join(path.dirname(outputPath), 'temp_videos');
       const tempVideoFiles = [];
-      
+      let listFile = null;
+
+      // Comprehensive cleanup function with file lock checks
+      const cleanupTempFiles = () => {
+        try {
+          // Clean up individual clip files
+          tempVideoFiles.forEach(file => {
+            try {
+              if (fs.existsSync(file)) {
+                fs.unlinkSync(file);
+                console.log(`🗑️  Cleaned up temp clip: ${path.basename(file)}`);
+              }
+            } catch (err) {
+              // File might be locked or already deleted
+              console.warn(`⚠️  Could not delete ${path.basename(file)}: ${err.message}`);
+            }
+          });
+
+          // Clean up concat list file
+          if (listFile) {
+            try {
+              if (fs.existsSync(listFile)) {
+                fs.unlinkSync(listFile);
+                console.log(`🗑️  Cleaned up concat list file`);
+              }
+            } catch (err) {
+              console.warn(`⚠️  Could not delete list file: ${err.message}`);
+            }
+          }
+
+          // Clean up temp directory (only if empty)
+          try {
+            if (fs.existsSync(tempDir)) {
+              const remainingFiles = fs.readdirSync(tempDir);
+              if (remainingFiles.length === 0) {
+                fs.rmdirSync(tempDir);
+                console.log(`🗑️  Cleaned up temp directory`);
+              } else {
+                console.log(`⚠️  Temp directory not empty, skipping removal`);
+              }
+            }
+          } catch (err) {
+            console.warn(`⚠️  Could not remove temp directory: ${err.message}`);
+          }
+        } catch (cleanupErr) {
+          console.error('Cleanup error:', cleanupErr);
+        }
+      };
+
       try {
         // Create temp directory
         if (!fs.existsSync(tempDir)) {
           fs.mkdirSync(tempDir, { recursive: true });
         }
-        
-        
+
+
         // Step 1: Create individual video clips from each image
         for (let i = 0; i < images.length; i++) {
           const imagePath = images[i];
           const tempVideoPath = path.join(tempDir, `clip_${i}.mp4`);
           tempVideoFiles.push(tempVideoPath);
-          
-          
-          await new Promise((resolveClip, rejectClip) => {
-            // Check if this is a video file
-            const isVideo = isVideoFile(imagePath);
 
-            // Use simplified FFmpeg command for better compatibility
-            let ffmpegCommand = ffmpeg(imagePath);
+          try {
+            await new Promise((resolveClip, rejectClip) => {
+              // Check if this is a video file
+              const isVideo = isVideoFile(imagePath);
 
-            if (isVideo) {
-              // For video files, don't use loop, just trim to desired duration
-              ffmpegCommand = ffmpegCommand.duration(timePerImage);
-            } else {
-              // For image files, use loop
-              ffmpegCommand = ffmpegCommand.loop(timePerImage);
-            }
+              // Use simplified FFmpeg command for better compatibility
+              let ffmpegCommand = ffmpeg(imagePath);
 
-            ffmpegCommand = ffmpegCommand
-              .videoFilter('scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black')
-              .outputOptions([
-                '-c:v', 'libx264',
-                '-preset', 'fast', // Faster preset for reliability
-                '-crf', '23', // Good quality, more compatible
-                '-pix_fmt', 'yuv420p'
-              ])
-              .format('mp4')
-              .on('start', (commandLine) => {
-              })
-              .on('error', (err) => {
-                console.error(`❌ Error creating clip ${i + 1}:`, err.message);
-                console.error('Full error:', err);
-                rejectClip(new Error(`Failed to create clip ${i + 1}: ${err.message}`));
-              })
-              .on('progress', (progress) => {
-                // Simplified progress reporting - only report meaningful progress updates
-                const clipBaseProgress = Math.round((i / images.length) * 50);
-                const clipProgressContribution = Math.round((progress.percent || 0) * (50 / images.length) / 100);
-                const totalProgress = clipBaseProgress + clipProgressContribution;
+              if (isVideo) {
+                // For video files, don't use loop, just trim to desired duration
+                ffmpegCommand = ffmpegCommand.duration(timePerImage);
+              } else {
+                // For image files, use loop
+                ffmpegCommand = ffmpegCommand.loop(timePerImage);
+              }
 
-                // Only report if progress is meaningful and doesn't go backwards
-                if (totalProgress > 0 && totalProgress <= 50) {
-                  onProgress({ percent: totalProgress });
-                }
-              })
-              .on('end', () => {
-                // Report completion of this clip (only if it's progress forward)
-                const clipProgress = Math.round(((i + 1) / images.length) * 50);
-                onProgress({ percent: Math.min(50, clipProgress) });
-                resolveClip();
-              })
-              .save(tempVideoPath);
-          });
+              ffmpegCommand = ffmpegCommand
+                .videoFilter('scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black')
+                .outputOptions([
+                  '-c:v', 'libx264',
+                  '-preset', 'fast', // Faster preset for reliability
+                  '-crf', '23', // Good quality, more compatible
+                  '-pix_fmt', 'yuv420p'
+                ])
+                .format('mp4')
+                .on('start', (commandLine) => {
+                })
+                .on('error', (err) => {
+                  console.error(`❌ Error creating clip ${i + 1}:`, err.message);
+                  console.error('Full error:', err);
+                  rejectClip(new Error(`Failed to create clip ${i + 1}: ${err.message}`));
+                })
+                .on('progress', (progress) => {
+                  // Simplified progress reporting - only report meaningful progress updates
+                  const clipBaseProgress = Math.round((i / images.length) * 50);
+                  const clipProgressContribution = Math.round((progress.percent || 0) * (50 / images.length) / 100);
+                  const totalProgress = clipBaseProgress + clipProgressContribution;
+
+                  // Only report if progress is meaningful and doesn't go backwards
+                  if (totalProgress > 0 && totalProgress <= 50) {
+                    onProgress({ percent: totalProgress });
+                  }
+                })
+                .on('end', () => {
+                  // Report completion of this clip (only if it's progress forward)
+                  const clipProgress = Math.round(((i + 1) / images.length) * 50);
+                  onProgress({ percent: Math.min(50, clipProgress) });
+                  resolveClip();
+                })
+                .save(tempVideoPath);
+            });
+          } catch (clipError) {
+            // Cleanup partial files on clip creation failure
+            console.error(`❌ Failed to create clip ${i + 1}, starting cleanup...`);
+            throw clipError; // Re-throw to outer catch
+          }
         }
-        
-        
+
+
         // Report 50% progress before starting final concatenation
         onProgress({ percent: 50 });
-        
+
         // Step 2: Create concat list file and combine with audio
-        const listFile = path.join(tempDir, 'list.txt');
+        listFile = path.join(tempDir, 'list.txt');
         const listContent = tempVideoFiles.map(file => `file '${file.replace(/\\/g, '/')}'`).join('\n');
         fs.writeFileSync(listFile, listContent);
-        
+
         // Concatenate videos and add audio
-        ffmpeg()
-          .input(listFile)
-          .inputOptions(['-f', 'concat', '-safe', '0'])
-          .input(audioPath)
-          .outputOptions([
-            '-c:v', 'copy', // Copy video without re-encoding
-            '-c:a', 'aac',
-            '-b:a', '192k', // Higher audio quality for mobile
-            '-movflags', '+faststart',
-            '-t', finalDuration.toString()
-          ])
-          .format('mp4')
-          .on('start', (commandLine) => {
-          })
-          .on('progress', (progress) => {
-            // Final concatenation represents 50-100% of total progress
-            const finalProgress = Math.round(50 + (progress.percent || 0) * 0.5);
-            onProgress({ percent: Math.min(100, finalProgress) });
-          })
-          .on('error', (err) => {
-            console.error('Final concatenation failed:', err);
-            // Clean up temp files
-            try {
-              tempVideoFiles.forEach(file => {
-                if (fs.existsSync(file)) fs.unlinkSync(file);
-              });
-              if (fs.existsSync(listFile)) fs.unlinkSync(listFile);
-              if (fs.existsSync(tempDir)) fs.rmdirSync(tempDir);
-            } catch (cleanupErr) {
-              console.error('Cleanup error:', cleanupErr);
-            }
-            reject(new Error(`Final concatenation failed: ${err.message}`));
-          })
-          .on('end', () => {
-            // Report 100% completion
-            onProgress({ percent: 100 });
-            // Clean up temp files
-            try {
-              tempVideoFiles.forEach(file => {
-                if (fs.existsSync(file)) fs.unlinkSync(file);
-              });
-              if (fs.existsSync(listFile)) fs.unlinkSync(listFile);
-              if (fs.existsSync(tempDir)) fs.rmdirSync(tempDir);
-            } catch (cleanupErr) {
-              console.error('Cleanup error:', cleanupErr);
-            }
-            resolve(outputPath);
-          })
-          .save(outputPath);
-          
+        await new Promise((resolveFinal, rejectFinal) => {
+          ffmpeg()
+            .input(listFile)
+            .inputOptions(['-f', 'concat', '-safe', '0'])
+            .input(audioPath)
+            .outputOptions([
+              '-c:v', 'copy', // Copy video without re-encoding
+              '-c:a', 'aac',
+              '-b:a', '192k', // Higher audio quality for mobile
+              '-movflags', '+faststart',
+              '-t', finalDuration.toString()
+            ])
+            .format('mp4')
+            .on('start', (commandLine) => {
+            })
+            .on('progress', (progress) => {
+              // Final concatenation represents 50-100% of total progress
+              const finalProgress = Math.round(50 + (progress.percent || 0) * 0.5);
+              onProgress({ percent: Math.min(100, finalProgress) });
+            })
+            .on('error', (err) => {
+              console.error('Final concatenation failed:', err);
+              rejectFinal(new Error(`Final concatenation failed: ${err.message}`));
+            })
+            .on('end', () => {
+              // Report 100% completion
+              onProgress({ percent: 100 });
+              resolveFinal(outputPath);
+            })
+            .save(outputPath);
+        });
+
+        // Success - resolve with output path
+        resolve(outputPath);
+
       } catch (error) {
         console.error('Error in two-step slideshow creation:', error);
-        // Clean up temp files
-        try {
-          tempVideoFiles.forEach(file => {
-            if (fs.existsSync(file)) fs.unlinkSync(file);
-          });
-          if (fs.existsSync(tempDir)) fs.rmdirSync(tempDir);
-        } catch (cleanupErr) {
-          console.error('Cleanup error:', cleanupErr);
-        }
         reject(error);
+      } finally {
+        // ALWAYS cleanup temp files (success or error)
+        cleanupTempFiles();
       }
     });
   }

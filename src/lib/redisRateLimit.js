@@ -390,10 +390,6 @@ export const rateLimiter = new RedisRateLimit();
  */
 export async function combinedRateLimit(req, res, next) {
   try {
-    // Always bypass rate limiting for now to debug
-    console.log('🔓 Rate limiting completely bypassed for debugging');
-    return next();
-
     const clientIP = getClientIP(req);
     const sessionId = req.body.sessionId || req.headers['x-session-id'];
 

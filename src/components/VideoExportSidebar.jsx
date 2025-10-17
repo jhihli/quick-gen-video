@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext'
 import { useSessionHeartbeat } from '../hooks/useSessionHeartbeat'
 import DownloadOptions from './DownloadOptions'
 
-function VideoExportSidebar({ onNewVideo, onFeedback }) {
+function VideoExportSidebar({ onNewVideo }) {
   const {
     photos,
     selectedMusic,
@@ -570,19 +570,6 @@ function VideoExportSidebar({ onNewVideo, onFeedback }) {
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
               <span className="text-sm">{t('createNewVideo')}</span>
-            </motion.button>
-            
-            {/* Feedback Button */}
-            <motion.button
-              onClick={onFeedback}
-              className="w-full bg-white/5 backdrop-blur-sm border border-white/10 text-white py-3 px-4 rounded-xl font-semibold hover:bg-white/10 hover:border-white/20 transition-all duration-200 flex items-center justify-center space-x-2"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-              </svg>
-              <span className="text-sm">{t('feedback')}</span>
             </motion.button>
           </motion.div>
         </motion.div>

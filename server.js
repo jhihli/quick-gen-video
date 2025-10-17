@@ -1250,7 +1250,17 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
         }
 
       } catch (ffmpegError) {
-        console.error('FFmpeg processing error:', ffmpegError);
+        console.error('❌ FFmpeg processing error:', ffmpegError);
+        console.error('Error context:', {
+          jobId,
+          sessionId,
+          clientIP,
+          photoCount: imagePaths.length,
+          hasAvatars,
+          outputPath
+        });
+
+        // Update progress tracker with error details
         progressTrackers.set(jobId, {
           progress: 0,
           status: 'error',
@@ -1258,14 +1268,33 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
           error: ffmpegError.message
         });
 
+        // Clean up temp files on error
+        const tempFilesToCleanup = [
+          outputPath,
+          outputPath.replace('.mp4', '-temp.mp4'),
+          ...Array.from({ length: 10 }, (_, i) => outputPath.replace('.mp4', `-avatar-${i}.mp4`))
+        ];
+
+        for (const tempFile of tempFilesToCleanup) {
+          try {
+            if (fs.existsSync(tempFile)) {
+              fs.unlinkSync(tempFile);
+              console.log(`🗑️  Cleaned up temp file on error: ${tempFile}`);
+            }
+          } catch (cleanupError) {
+            console.warn(`⚠️  Could not cleanup ${tempFile}:`, cleanupError.message);
+          }
+        }
+
         // Clean up tracker after error
         setTimeout(() => {
           progressTrackers.delete(jobId);
         }, 30000);
-
-        // Remove session from active generation jobs
+      } finally {
+        // ALWAYS remove session from active generation jobs (success or error)
         if (sessionId) {
           activeGenerationJobs.delete(sessionId);
+          console.log(`✅ Session ${sessionId} removed from active generation jobs`);
         }
       }
     })();

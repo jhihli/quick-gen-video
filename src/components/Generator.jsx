@@ -190,7 +190,6 @@ const Generator = () => {
                 cleanupAndReset()
                 handleDrawerClose()
               }}
-              onFeedback={handleNavigateToHome}
             />
           </Suspense>
         )
@@ -329,7 +328,6 @@ const Generator = () => {
                   cleanupAndReset()
                   handleDrawerClose()
                 }}
-                onFeedback={handleNavigateToHome}
               />
             </Suspense>
           </div>
