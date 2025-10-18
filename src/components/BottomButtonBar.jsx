@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useLanguage } from '../context/LanguageContext';
 
 const BottomButtonBar = ({
   onPhotosClick,
@@ -14,7 +13,6 @@ const BottomButtonBar = ({
   isGenerating = false,
   hasVideo = false
 }) => {
-  const { t } = useLanguage();
 
   const buttonVariants = {
     idle: { scale: 1, y: 0 },
@@ -185,7 +183,7 @@ const BottomButtonBar = ({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         <ActionButton
           icon="photos"
-          label={t('photosVideos')}
+          label="Photos/Videos"
           onClick={onPhotosClick}
           completed={hasPhotos}
           disabled={isGenerating} // Disable during generation
@@ -193,7 +191,7 @@ const BottomButtonBar = ({
 
         <ActionButton
           icon="music"
-          label={t('music')}
+          label="Music"
           onClick={onMusicClick}
           completed={hasMusic}
           disabled={isGenerating} // Disable during generation
@@ -201,7 +199,7 @@ const BottomButtonBar = ({
 
         <ActionButton
           icon="avatar"
-          label={t('avatar')}
+          label="Avatar"
           onClick={onAvatarClick}
           completed={hasAvatar}
           disabled={isGenerating || !hasPhotos || !hasMusic}
@@ -209,7 +207,7 @@ const BottomButtonBar = ({
 
         <ActionButton
           icon={hasVideo ? "download" : "generate"}
-          label={hasVideo ? t('download') : t('generate')}
+          label={hasVideo ? "Download" : "Generate"}
           onClick={onGenerateClick}
           disabled={!canGenerate && !hasVideo}
           primary={true}

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
-import { useLanguage } from '../context/LanguageContext';
 import { useAppContext } from '../context/AppContext';
 import AvatarPreview from './AvatarPreview';
 import { calculateLetterbox } from '../lib/letterboxUtils';
@@ -11,7 +10,6 @@ const PreviewFrame = ({
   videoData = null,
   selectedMusic = null
 }) => {
-  const { t } = useLanguage();
   const { selectedAvatar, currentSlideIndex, slideAvatars, setCurrentSlide, isProcessing, generationProgress } = useAppContext();
 
   // Slideshow state - moved to top level to follow Rules of Hooks
@@ -572,7 +570,7 @@ const PreviewFrame = ({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
-                  <p className="text-white/60 text-sm">{t('noPhotosSelected')}</p>
+                  <p className="text-white/60 text-sm">No photos selected</p>
                 </div>
               </div>
             )}
@@ -631,7 +629,7 @@ const PreviewFrame = ({
                     <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM15.657 6.343a1 1 0 011.414 0A9.972 9.972 0 0119 12a9.972 9.972 0 01-1.929 5.657 1 1 0 11-1.414-1.414A7.971 7.971 0 0017 12a7.971 7.971 0 00-1.343-4.243 1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
                   <span className="text-white/90 text-sm font-medium">
-                    {t('musicAdded')}: {selectedMusic.name || t('selectedTrack')}
+                    Music added: {selectedMusic.name || 'Selected track'}
                   </span>
                 </div>
               )}
@@ -732,7 +730,7 @@ const PreviewFrame = ({
             poster={photos.length > 0 && photos[0] instanceof File ? URL.createObjectURL(photos[0]) : undefined}
           >
             <source src={videoData.url} type="video/mp4" />
-            {t('yourBrowserDoesNotSupport')}
+            Your browser does not support the video tag
           </video>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-900">
@@ -742,7 +740,7 @@ const PreviewFrame = ({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
               </div>
-              <p className="text-white/60 text-sm">{t('videoGenerating')}</p>
+              <p className="text-white/60 text-sm">Video generating</p>
             </div>
           </div>
         )}

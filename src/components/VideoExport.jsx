@@ -2,13 +2,11 @@ import React, { useState, useContext, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
-import { useLanguage } from '../context/LanguageContext'
 import { useSessionHeartbeat } from '../hooks/useSessionHeartbeat'
 import DownloadOptions from './DownloadOptions'
 
 function VideoExport({ onNewVideo }) {
   const { photos, selectedMusic, cleanupAndReset, setVideo, generatedVideo } = useContext(AppContext)
-  const { t } = useLanguage()
   const { sessionId } = useSessionHeartbeat()
   const navigate = useNavigate()
   const [isProcessing, setIsProcessing] = useState(false)
@@ -112,7 +110,7 @@ function VideoExport({ onNewVideo }) {
 
   const generateVideo = async () => {
     if (!canGenerate) {
-      setError(t('pleaseFillRequirements'))
+      setError('Please fill all requirements')
       return
     }
 
@@ -220,13 +218,13 @@ function VideoExport({ onNewVideo }) {
                   await generateQrCodeForUrl(fullTempUrl, progressData.videoData.expiresAt)
                 }
               } else if (progressData.status === 'error') {
-                throw new Error(progressData.error || t('videoProcessingFailed'))
+                throw new Error(progressData.error || 'Video processing failed')
               } else if (progressData.status === 'processing' || progressData.status === 'initializing') {
                 // Continue polling
                 setTimeout(pollProgress, 1000) // Poll every second
               }
             } else {
-              throw new Error(progressData.error || t('failedToGetProgress'))
+              throw new Error(progressData.error || 'Failed to get progress')
             }
           } catch (pollError) {
             console.error('Progress polling error:', pollError)
@@ -239,7 +237,7 @@ function VideoExport({ onNewVideo }) {
         setTimeout(pollProgress, 500)
         
       } else {
-        throw new Error(data.error || t('unknownErrorOccurred'))
+        throw new Error(data.error || 'Unknown error occurred')
       }
 
     } catch (err) {
@@ -527,7 +525,7 @@ function VideoExport({ onNewVideo }) {
                 <span className="text-white text-xs">⚠</span>
               </motion.div>
               <p className="text-sm text-amber-200 font-medium">
-                {t('pleaseFillRequirements')}
+                Please fill all requirements
               </p>
             </div>
           </motion.div>
@@ -570,7 +568,7 @@ function VideoExport({ onNewVideo }) {
                   className="font-medium text-green-300 text-sm"
                   layout
                 >
-                  {isCompleted ? t('videoGeneratedSuccessfully') : t('slideshowReady')}
+                  {isCompleted ? 'Video generated successfully' : 'Slideshow ready'}
                 </motion.h4>
               </div>
               
@@ -596,7 +594,7 @@ function VideoExport({ onNewVideo }) {
                     transition={{ duration: 0.3 }}
                   >
                     <p className="text-sm text-green-200 mb-1">
-                      {t('yourVideoIsReady')}
+                      Your video is ready
                     </p>
                     <p className="text-xs text-green-400">
                       File: {videoData.filename} ({Math.round(videoData.size / 1024 / 1024 * 100) / 100} MB)
@@ -636,17 +634,17 @@ function VideoExport({ onNewVideo }) {
                     >
                       <span className="text-white text-xs">📊</span>
                     </motion.div>
-                    <p className="text-sm text-blue-300 font-medium">{t('generationLimits')}</p>
+                    <p className="text-sm text-blue-300 font-medium">Generation limits</p>
                   </div>
                   <div className="text-xs text-blue-200 space-y-1">
                     <div className="flex justify-between">
-                      <span>{t('hourly')}:</span>
+                      <span>Hourly:</span>
                       <span className={rateLimitStatus.hourlyAttempts >= rateLimitStatus.hourlyLimit ? 'text-red-400' : 'text-green-400'}>
                         {rateLimitStatus.hourlyAttempts}/{rateLimitStatus.hourlyLimit}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span>{t('daily')}:</span>
+                      <span>Daily:</span>
                       <span className={rateLimitStatus.dailyAttempts >= rateLimitStatus.dailyLimit ? 'text-red-400' : 'text-green-400'}>
                         {rateLimitStatus.dailyAttempts}/{rateLimitStatus.dailyLimit}
                       </span>
@@ -678,7 +676,7 @@ function VideoExport({ onNewVideo }) {
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                   />
                 )}
-                <span>{isProcessing ? t('generatingVideo') : t('generateVideo')}</span>
+                <span>{isProcessing ? 'Generating video' : 'Generate Video'}</span>
               </div>
             </motion.button>
 
@@ -703,11 +701,11 @@ function VideoExport({ onNewVideo }) {
                     animate={{ opacity: [0.7, 1, 0.7] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
-                    {progress === 0 && t('startingVideoGeneration')}
-                    {progress > 0 && progress <= 50 && photos.length > 1 && `${t('creatingClips')} (${progress}%)`}
-                    {progress > 0 && progress <= 50 && photos.length === 1 && `${t('processingYourPhoto')} (${progress}%)`}
-                    {progress > 50 && progress < 100 && `${t('combiningWithMusic')} (${progress}%)`}
-                    {progress === 100 && t('finishingTouches')}
+                    {progress === 0 && 'Starting video generation'}
+                    {progress > 0 && progress <= 50 && photos.length > 1 && `Creating clips (${progress}%)`}
+                    {progress > 0 && progress <= 50 && photos.length === 1 && `Processing your photo (${progress}%)`}
+                    {progress > 50 && progress < 100 && `Combining with music (${progress}%)`}
+                    {progress === 100 && 'Finishing touches'}
                   </motion.p>
                 </motion.div>
               )}
@@ -756,11 +754,11 @@ function VideoExport({ onNewVideo }) {
                         preload="metadata"
                         onError={(e) => {
                           console.error('Video playback error:', e);
-                          setError(t('unableToLoadVideo'));
+                          setError('Unable to load video');
                         }}
                       >
                         <source src={videoData.url} type="video/mp4" />
-                        {t('yourBrowserDoesNotSupport')}
+                        Your browser does not support the video tag
                       </video>
                     </div>
                   </div>
@@ -795,17 +793,17 @@ function VideoExport({ onNewVideo }) {
                       <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4z"/>
                       <path d="M15 19h2v2h-2zM19 19h2v2h-2zM17 17h2v2h-2zM15 15h2v2h-2zM17 21h2v2h-2z"/>
                     </svg>
-                    <h4 className="font-semibold text-white text-sm">{t('mobileQRCode')}</h4>
+                    <h4 className="font-semibold text-white text-sm">Mobile QR Code</h4>
                   </div>
                   <div className="bg-white rounded-lg p-2 inline-block">
                     <img 
-                      src={qrCodeData.qrCodeDataUrl} 
-                      alt={t('qrCodeForVideo')} 
+                      src={qrCodeData.qrCodeDataUrl}
+                      alt="QR code for video download"
                       className="w-32 h-32 mx-auto"
                     />
                   </div>
                   <p className="text-xs text-gray-400 mt-2">
-                    {t('expires')}: {new Date(qrCodeData.expiresAt).toLocaleString()}
+                    Expires: {new Date(qrCodeData.expiresAt).toLocaleString()}
                   </p>
                 </motion.div>
               )}
@@ -870,7 +868,7 @@ function VideoExport({ onNewVideo }) {
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
                 </svg>
-                <span>{t('createNewVideo')}</span>
+                <span>Create New Video</span>
               </motion.button>
 
             </motion.div>
@@ -886,7 +884,7 @@ function VideoExport({ onNewVideo }) {
       >
         {/* Removed: videoWillBeGenerated, processingMayTake, ready status texts */}
         {videoData && qrCodeData && (
-          <p>{t('qrCodeAvailable')}</p>
+          <p>QR code available for mobile download</p>
         )}
       </motion.div>
     </div>

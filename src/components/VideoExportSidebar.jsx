@@ -1,7 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AppContext } from '../context/AppContext'
-import { useLanguage } from '../context/LanguageContext'
 import { useSessionHeartbeat } from '../hooks/useSessionHeartbeat'
 import DownloadOptions from './DownloadOptions'
 
@@ -25,7 +24,6 @@ function VideoExportSidebar({ onNewVideo }) {
     slideAvatarSettings,
     hasAnyAvatars
   } = useContext(AppContext)
-  const { t } = useLanguage()
   const { sessionId } = useSessionHeartbeat()
   const [localVideoData, setLocalVideoData] = useState(generatedVideo)
   const [showError, setShowError] = useState(false)
@@ -53,14 +51,14 @@ function VideoExportSidebar({ onNewVideo }) {
               clearGenerationState()
               return
             }
-            throw new Error(t('failedToGetProgress'))
+            throw new Error('Failed to get progress')
           }
 
           const progressData = await progressResponse.json()
 
           if (progressData.status === 'error') {
             console.error('❌ Video processing error:', progressData.message)
-            setGenerationError(progressData.message || t('videoProcessingFailed'))
+            setGenerationError(progressData.message || 'Video processing failed')
             setIsProcessing(false)
             return
           }
@@ -86,7 +84,7 @@ function VideoExportSidebar({ onNewVideo }) {
         } catch (error) {
           console.error('Reconnection polling error:', error)
           setIsProcessing(false)
-          setGenerationError(error.message || t('unknownErrorOccurred'))
+          setGenerationError(error.message || 'Unknown error occurred')
           setInitialStateCheckComplete(true)
         }
       }
@@ -223,9 +221,9 @@ function VideoExportSidebar({ onNewVideo }) {
   }
 
   const handleGenerateVideo = async () => {
-    
+
     if (!photos?.length || !selectedMusic) {
-      showErrorMessage(t('pleaseFillRequirements'))
+      showErrorMessage('Please fill all requirements')
       return
     }
 
@@ -293,7 +291,7 @@ function VideoExportSidebar({ onNewVideo }) {
           return // Don't throw error for 429, just return gracefully
         }
 
-        throw new Error(errorData.message || errorData.error || t('generationFailed'))
+        throw new Error(errorData.message || errorData.error || 'Generation failed')
       }
 
       const data = await response.json()
@@ -306,17 +304,17 @@ function VideoExportSidebar({ onNewVideo }) {
       const pollProgress = async () => {
         try {
           const progressResponse = await fetch(`/api/video-progress/${jobId}`)
-          
+
           if (!progressResponse.ok) {
             console.error(`❌ Progress request failed: ${progressResponse.status}`)
-            throw new Error(t('failedToGetProgress'))
+            throw new Error('Failed to get progress')
           }
 
           const progressData = await progressResponse.json()
-          
+
           if (progressData.status === 'error') {
             console.error('❌ Video processing error:', progressData.message)
-            throw new Error(progressData.message || t('videoProcessingFailed'))
+            throw new Error(progressData.message || 'Video processing failed')
           }
           
           setGenerationProgress(progressData.progress || 0)
@@ -339,7 +337,7 @@ function VideoExportSidebar({ onNewVideo }) {
         } catch (error) {
           console.error('Progress polling error:', error)
           setIsProcessing(false)
-          showErrorMessage(error.message || t('unknownErrorOccurred'))
+          showErrorMessage(error.message || 'Unknown error occurred')
         }
       }
 
@@ -349,7 +347,7 @@ function VideoExportSidebar({ onNewVideo }) {
     } catch (error) {
       console.error('Video generation error:', error)
       setIsProcessing(false)
-      showErrorMessage(error.message || t('generationFailed'))
+      showErrorMessage(error.message || 'Generation failed')
     }
   }
 
@@ -383,7 +381,7 @@ function VideoExportSidebar({ onNewVideo }) {
               <svg className="w-4 h-4 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM15.657 6.343a1 1 0 011.414 0A9.972 9.972 0 0119 12a9.972 9.972 0 01-1.929 5.657 1 1 0 11-1.414-1.414A7.971 7.971 0 0017 12a7.971 7.971 0 00-1.343-4.243 1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
-              <span className="text-white/90 text-sm font-medium">{t('musicAdded')}</span>
+              <span className="text-white/90 text-sm font-medium">Music added</span>
             </motion.div>
           )}
 
@@ -398,7 +396,7 @@ function VideoExportSidebar({ onNewVideo }) {
               <svg className="w-4 h-4 text-blue-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
               </svg>
-              <span className="text-white/90 text-sm font-medium">{photos.length} {photos.length === 1 ? t('photo') : t('photos')}</span>
+              <span className="text-white/90 text-sm font-medium">{photos.length} {photos.length === 1 ? 'Photo' : 'Photos'}</span>
             </motion.div>
           )}
         </motion.div>
@@ -485,7 +483,7 @@ function VideoExportSidebar({ onNewVideo }) {
                   <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-green-300 font-medium">{t('videoGeneratedSuccessfully')}</span>
+                  <span className="text-green-300 font-medium">Video generated successfully</span>
                 </div>
               </motion.div>
             )}
@@ -554,7 +552,7 @@ function VideoExportSidebar({ onNewVideo }) {
                     <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4z"/>
                     <path d="M15 19h2v2h-2zM19 19h2v2h-2zM17 17h2v2h-2zM15 15h2v2h-2zM17 21h2v2h-2z"/>
                   </svg>
-                  <span className="text-sm">{showQrCode ? t('hideQR') : 'QR Code'}</span>
+                  <span className="text-sm">{showQrCode ? 'Hide QR' : 'QR Code'}</span>
                 </>
               )}
             </motion.button>
@@ -569,7 +567,7 @@ function VideoExportSidebar({ onNewVideo }) {
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
-              <span className="text-sm">{t('createNewVideo')}</span>
+              <span className="text-sm">Create New Video</span>
             </motion.button>
           </motion.div>
         </motion.div>
@@ -589,12 +587,12 @@ function VideoExportSidebar({ onNewVideo }) {
             disabled={!photos?.length || !selectedMusic}
             className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 disabled:from-gray-600 disabled:to-gray-700 text-white py-4 px-6 rounded-xl font-medium hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {t('generateVideo')}
+            Generate Video
           </motion.button>
 
           {(!photos?.length || !selectedMusic) && (
             <p className="text-white/50 text-sm text-center">
-              {t('pleaseFillRequirements')}
+              Please fill all requirements
             </p>
           )}
         </motion.div>

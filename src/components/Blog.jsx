@@ -7,10 +7,8 @@ import BlogNavigation from './BlogNavigation'
 import TipCard from './TipCard'
 import CaseStudy from './CaseStudy'
 import YouTubeVideo from './YouTubeVideo'
-import { useLanguage } from '../context/LanguageContext'
 
 const Blog = () => {
-  const { t } = useLanguage()
   const navigate = useNavigate()
   const [activeSection, setActiveSection] = useState('video-topics')
   const [readingProgress, setReadingProgress] = useState(0)

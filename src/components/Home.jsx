@@ -44,8 +44,8 @@ const Home = () => {
   const faqData = [
     {
       id: 1,
-      question: "What photo and video formats does QWGenv support?",
-      answer: "QWGenv supports popular image formats including JPEG, PNG, WebP, and video formats like MP4, AVI, MOV. Each file must be under 10MB, and you can upload up to 10 files per project."
+      question: "What photo and video formats does Quick Way support?",
+      answer: "Quick Way supports popular image formats including JPEG, PNG, WebP, and video formats like MP4, AVI, MOV. Each file must be under 10MB, and you can upload up to 10 files per project."
     },
     {
       id: 2,
@@ -69,13 +69,13 @@ const Home = () => {
     },
     {
       id: 6,
-      question: "Is QWGenv free to use?",
-      answer: "Yes! QWGenv is completely free to use. You can create unlimited videos, upload your own music, and download your creations without any cost or subscription fees."
+      question: "Is Quick Way free to use?",
+      answer: "Yes! Quick Way is completely free to use. You can create unlimited videos, upload your own music, and download your creations without any cost or subscription fees."
     },
     {
       id: 7,
       question: "Can I edit the video after it's generated?",
-      answer: "Currently, QWGenv generates videos in a single process. If you'd like changes, you can create a new video with different photos, music, or settings. We're working on editing features for future updates."
+      answer: "Currently, Quick Way generates videos in a single process. If you'd like changes, you can create a new video with different photos, music, or settings. We're working on editing features for future updates."
     },
     {
       id: 8,
@@ -118,11 +118,11 @@ const Home = () => {
   ]
 
   const modalContent = {
-    about: 'QWGenv is a powerful video creation tool that transforms your photos into stunning videos with custom music. Our mission is to make video creation accessible, fast, and enjoyable for everyone.',
+    about: 'Quick Way is a powerful image to video converter that transforms your photos into stunning videos with custom music. Our mission is to make video creation accessible, fast, and enjoyable for everyone.',
     contact: (
       <div>
         <p className="text-center text-gray-300 text-base mt-4 leading-relaxed">
-          If you have any questions, suggestions, or just want to share your experience with our video generator, please feel free to leave your feedback. Your thoughts are incredibly valuable to us and help us make QWGenv even better for everyone.
+          If you have any questions, suggestions, or just want to share your experience with our video generator, please feel free to leave your feedback. Your thoughts are incredibly valuable to us and help us make Quick Way even better for everyone.
         </p>
         <p className="text-center text-gray-200 text-lg mt-6 font-medium">
           ✨ We'd be delighted to hear from you! ✨
@@ -130,7 +130,7 @@ const Home = () => {
       </div>
     ),
     privacy: 'Your privacy is important to us. We do not store your photos or personal data permanently. All uploads are automatically deleted after processing to ensure your privacy and security.',
-    terms: 'By using QWGenv, you agree to our terms of service and acceptable use policy. Please use our service responsibly and do not upload copyrighted material without permission.'
+    terms: 'By using Quick Way, you agree to our terms of service and acceptable use policy. Please use our service responsibly and do not upload copyrighted material without permission.'
   }
 
   return (
@@ -142,19 +142,40 @@ const Home = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
           {/* Navigation */}
-          <div className="flex justify-between items-center py-4 gap-4">
+          <div className="flex justify-between items-center py-3 sm:py-4 gap-2 sm:gap-4">
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex items-center space-x-4"
+              className="flex items-center space-x-2 sm:space-x-4"
             >
               <LogoIcon size={8} className="hidden sm:block" />
-              <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
-                QWGenv
-              </h1>
+              <motion.h1
+                className="text-lg sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent cursor-pointer relative"
+                whileHover={{ scale: 1.05 }}
+                transition={{ scale: { duration: 0.3 } }}
+              >
+                <motion.span
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent bg-clip-text text-transparent"
+                  initial={{ backgroundPosition: "-200% 0" }}
+                  whileHover={{
+                    backgroundPosition: ["200% 0", "-200% 0"],
+                    transition: {
+                      duration: 1.2,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }
+                  }}
+                  style={{
+                    backgroundSize: "200% 100%"
+                  }}
+                >
+                  QWimgenv
+                </motion.span>
+                QWimgenv
+              </motion.h1>
             </motion.div>
 
             {/* Search Bar - Hidden on small screens */}
@@ -162,37 +183,69 @@ const Home = () => {
               <SearchBar />
             </div>
 
-            <nav className="flex items-center space-x-2 sm:space-x-4 md:space-x-6">
-              <a
+            <nav className="flex items-center space-x-0.5 sm:space-x-2">
+              <motion.a
                 href="/"
                 onClick={(e) => {
                   e.preventDefault()
                   // No confirmation needed - just stay on home page
                 }}
-                className="text-white font-medium border-b-2 border-purple-400 pb-1 text-sm sm:text-base cursor-pointer"
+                className="relative px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg overflow-hidden cursor-pointer group"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <span className="hidden sm:inline">Home</span>
-                <span className="sm:hidden font-bold">HOME</span>
-              </a>
-              <a
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <span className="relative text-xs sm:text-base font-medium text-white" style={{ fontFamily: 'Lexend, sans-serif' }}>
+                  <span className="hidden sm:inline">Home</span>
+                  <span className="sm:hidden">HOME</span>
+                </span>
+              </motion.a>
+
+              <motion.a
                 href="/generator"
                 onClick={handleNavigateToGenerator}
-                className="text-gray-300 hover:text-white transition-colors font-medium text-sm sm:text-base cursor-pointer"
+                className="relative px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg overflow-hidden cursor-pointer group"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <span className="hidden sm:inline">Generator</span>
-                <span className="sm:hidden font-bold">TOOL</span>
-              </a>
-              <a
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <span className="relative text-xs sm:text-base font-medium text-white" style={{ fontFamily: 'Lexend, sans-serif' }}>
+                  <span className="hidden sm:inline">Generator</span>
+                  <span className="sm:hidden">TOOL</span>
+                </span>
+              </motion.a>
+
+              <motion.a
                 href="/help"
                 onClick={(e) => {
                   e.preventDefault()
                   navigate('/help')
                 }}
-                className="text-gray-300 hover:text-white transition-colors font-medium text-sm sm:text-base cursor-pointer"
+                className="relative px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg overflow-hidden cursor-pointer group"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <span className="hidden sm:inline">Help</span>
-                <span className="sm:hidden font-bold">HELP</span>
-              </a>
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <span className="relative text-xs sm:text-base font-medium text-white" style={{ fontFamily: 'Lexend, sans-serif' }}>
+                  <span className="hidden sm:inline">Help</span>
+                  <span className="sm:hidden">HELP</span>
+                </span>
+              </motion.a>
             </nav>
           </div>
 
@@ -242,14 +295,14 @@ const Home = () => {
               <div className="text-center mb-8 sm:mb-12">
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-4">
                   <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                    Transform your photos
+                    Convert images to video
                   </span>{' '}
                   <span className="text-white">
-                    into stunning videos
+                    in minutes
                   </span>
                 </h2>
                 <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-                  Create professional slideshow videos with music and animated avatars. No editing experience required.
+                  Free online tool to create professional videos from your photos with music and animated avatars. No editing experience required.
                 </p>
               </div>
 
@@ -1117,7 +1170,7 @@ const Home = () => {
               <div className="flex-1 bg-gradient-to-br from-gray-900 via-slate-900 to-black p-8 sm:p-10 lg:p-12 rounded-l-3xl">
                 <div className="max-w-xl">
                   <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
-                    How to turn your <span className="text-blue-400 font-extrabold">photos</span>, <span className="text-green-400 font-extrabold">music</span> and <span className="text-purple-400 font-extrabold">avatars</span> into video with QWgenv
+                    How to turn your <span className="text-blue-400 font-extrabold">photos</span>, <span className="text-green-400 font-extrabold">music</span> and <span className="text-purple-400 font-extrabold">avatars</span> into video with Quick Way
                   </h2>
                   <p className="text-gray-300 text-lg mb-8 leading-relaxed">
                     Transform your photos, music and avatars into professional videos with our simple 4-step process. No technical skills required.
@@ -1300,7 +1353,7 @@ const Home = () => {
                   Bring your idea
                 </span>{' '}
                 <span className="text-gray-900">
-                  to life with QWgenv
+                  to life with Quick Way
                 </span>
               </h2>
               <p className="text-sm text-gray-600 max-w-xl mx-auto">
@@ -1570,7 +1623,7 @@ const Home = () => {
             </button>
           </div>
           <div className="text-center mt-8 text-gray-400">
-            <p>&copy; 2025 QWGenv. All rights reserved.</p>
+            <p>&copy; 2025 Quick Way. All rights reserved.</p>
           </div>
         </div>
       </motion.footer>

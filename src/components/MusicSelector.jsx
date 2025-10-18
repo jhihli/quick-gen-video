@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppContext } from '../context/AppContext'
-import { useLanguage } from '../context/LanguageContext'
 import GlobalMusicPlayer from './GlobalMusicPlayer'
 import ConfirmationDialog from './ConfirmationDialog'
 
 function MusicSelector() {
   const { selectedMusic, selectMusic, hasGeneratedVideo, cleanupAndReset, musicActiveTab, setMusicActiveTab, currentPlayingTrack, setCurrentPlayingTrack } = useAppContext()
-  const { t } = useLanguage()
   const activeTab = musicActiveTab
   const setActiveTab = setMusicActiveTab
   const [isUploading, setIsUploading] = useState(false)
@@ -241,7 +239,7 @@ function MusicSelector() {
 
   const tabs = [
     { id: 'local', label: 'Library', icon: '🎵' },
-    { id: 'upload', label: t('uploadMusic'), icon: '📁' }
+    { id: 'upload', label: 'Upload Music', icon: '📁' }
   ]
 
   return (
@@ -303,7 +301,7 @@ function MusicSelector() {
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                 />
-                <span className="ml-3 text-purple-300">{t('loadingMusicLibrary')}</span>
+                <span className="ml-3 text-purple-300">Loading music library</span>
               </div>
             ) : localMusic.length > 0 ? (
               <div className="space-y-4">
@@ -428,12 +426,12 @@ function MusicSelector() {
                                   ? 'bg-gradient-to-br from-green-400 via-green-500 to-emerald-600 shadow-lg shadow-green-500/30'
                                   : 'bg-gradient-to-br from-gray-700 via-gray-600 to-gray-500 hover:from-purple-600 hover:via-purple-500 hover:to-blue-500 shadow-md hover:shadow-lg hover:shadow-purple-500/20'
                               }`}
-                              whileHover={{ 
+                              whileHover={{
                                 scale: 1.1,
                                 rotate: isSelected ? 0 : 5
                               }}
                               whileTap={{ scale: 0.9 }}
-                              title={isSelected ? t('musicSelected') : t('selectMusic')}
+                              title={isSelected ? 'Music selected' : 'Select music'}
                             >
                               <AnimatePresence mode="wait">
                                 {isSelected ? (
@@ -491,8 +489,8 @@ function MusicSelector() {
             ) : (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">🎵</div>
-                <h4 className="text-lg font-semibold text-white mb-2">{t('noLocalMusicFound')}</h4>
-                <p className="text-gray-400">{t('addMusicFiles')}</p>
+                <h4 className="text-lg font-semibold text-white mb-2">No local music found</h4>
+                <p className="text-gray-400">Add music files to local-music folder</p>
               </div>
             )}
           </motion.div>
@@ -537,7 +535,7 @@ function MusicSelector() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    {t('remove')}
+                    Remove
                   </motion.button>
                 </div>
               </motion.div>
@@ -560,7 +558,7 @@ function MusicSelector() {
                     </svg>
                   </motion.div>
                   <h4 className="text-sm font-semibold text-white">
-                    {selectedMusic && selectedMusic.type === 'uploaded' ? t('uploadDifferentMusic') : t('uploadYourMusic')}
+                    {selectedMusic && selectedMusic.type === 'uploaded' ? 'Upload different music' : 'Upload your music'}
                   </h4>
                 </div>
                 
@@ -598,7 +596,7 @@ function MusicSelector() {
                         animate={{ opacity: [0.5, 1, 0.5] }}
                         transition={{ duration: 1.5, repeat: Infinity }}
                       >
-                        🎵 {t('uploadingTrack')}
+                        🎵 Uploading track
                       </motion.span>
                     </motion.p>
                   )}

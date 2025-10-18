@@ -1,9 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { useLanguage } from '../context/LanguageContext'
 
 function MusicPlayer({ track, onSelect, isSelected }) {
-  const { t } = useLanguage()
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -170,7 +168,7 @@ function MusicPlayer({ track, onSelect, isSelected }) {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          {isSelected ? t('remove') : t('select')}
+          {isSelected ? 'Remove' : 'Select'}
         </motion.button>
       </div>
     </motion.div>

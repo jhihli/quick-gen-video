@@ -1,12 +1,10 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppContext } from '../context/AppContext'
-import { useLanguage } from '../context/LanguageContext'
 import ConfirmationDialog from './ConfirmationDialog'
 
 function UploadPhotos() {
   const { photos, addPhotos, removePhoto: removePhotoFromContext, uploadMode, setUploadMode, hasGeneratedVideo, cleanupAndReset } = useAppContext()
-  const { t } = useLanguage()
   const [isUploading, setIsUploading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [showError, setShowError] = useState(false)
@@ -199,7 +197,7 @@ function UploadPhotos() {
     const mediaFiles = files.filter(file => file.type.startsWith('image/') || file.type.startsWith('video/'))
 
     if (mediaFiles.length === 0) {
-      showErrorMessage(uploadMode === 'photos' ? t('pleaseDropImageFilesOnly') : t('pleaseDropVideoFilesOnly'))
+      showErrorMessage(uploadMode === 'photos' ? 'Please drop image files only' : 'Please drop video files only')
       return
     }
 
@@ -288,7 +286,7 @@ function UploadPhotos() {
               : 'text-gray-400 hover:text-gray-300'
               }`}
           >
-            📸 {t('photos')}
+            📸 Photos
           </button>
           <button
             onClick={() => handleModeChange('videos')}
@@ -297,7 +295,7 @@ function UploadPhotos() {
               : 'text-gray-400 hover:text-gray-300'
               }`}
           >
-            🎥 {t('videos')}
+            🎥 Videos
           </button>
         </div>
       </motion.div>

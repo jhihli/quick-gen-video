@@ -1,9 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { useLanguage } from '../context/LanguageContext'
 
 function DownloadOptions({ videoData, tempUrl, qrCodeDataUrl, expiresAt, onDownload, onGenerateQR, loadingQR, showQR }) {
-  const { t } = useLanguage()
 
   if (!videoData) return null
 
@@ -60,8 +58,8 @@ function DownloadOptions({ videoData, tempUrl, qrCodeDataUrl, expiresAt, onDownl
                 <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4z"/>
                 <path d="M15 19h2v2h-2zM19 19h2v2h-2zM17 17h2v2h-2zM15 15h2v2h-2zM17 21h2v2h-2z"/>
               </svg>
-              <span className="hidden sm:inline">{showQR ? t('hideQR') : t('qrCode')}</span>
-              <span className="sm:hidden">{showQR ? t('hideQRCode') : t('showQRCode')}</span>
+              <span className="hidden sm:inline">{showQR ? 'Hide QR' : 'QR Code'}</span>
+              <span className="sm:hidden">{showQR ? 'Hide QR Code' : 'Show QR Code'}</span>
             </>
           )}
         </motion.button>

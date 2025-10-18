@@ -1,10 +1,8 @@
 import React, { Suspense } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AppProvider } from './context/AppContext'
-import { LanguageProvider } from './context/LanguageContext'
 import { useSessionHeartbeat } from './hooks/useSessionHeartbeat'
 import LoadingFallback from './components/LoadingFallback'
-import LanguageLoadingWrapper from './components/LanguageLoadingWrapper'
 
 // Lazy load route components for code splitting
 const Home = React.lazy(() => import('./components/Home'))
@@ -31,15 +29,11 @@ function AppWithHeartbeat() {
 
 function App() {
   return (
-    <LanguageProvider>
-      <LanguageLoadingWrapper>
-        <AppProvider>
-          <Router>
-            <AppWithHeartbeat />
-          </Router>
-        </AppProvider>
-      </LanguageLoadingWrapper>
-    </LanguageProvider>
+    <AppProvider>
+      <Router>
+        <AppWithHeartbeat />
+      </Router>
+    </AppProvider>
   )
 }
 

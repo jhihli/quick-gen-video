@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppContext } from '../context/AppContext'
-import { useLanguage } from '../context/LanguageContext'
 import ConfirmationDialog from './ConfirmationDialog'
 
 function AvatarSelector() {
@@ -15,7 +14,6 @@ function AvatarSelector() {
     currentSlideIndex,
     photos
   } = useAppContext()
-  const { t } = useLanguage()
 
   const [avatars, setAvatars] = useState([])
   const [isLoading, setIsLoading] = useState(true)

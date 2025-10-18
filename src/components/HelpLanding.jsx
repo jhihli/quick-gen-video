@@ -19,18 +19,39 @@ const HelpLanding = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4 gap-4">
+        <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-3 sm:py-4 gap-2 sm:gap-4">
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex items-center space-x-4"
+              className="flex items-center space-x-2 sm:space-x-4"
             >
               <LogoIcon size={8} className="hidden sm:block" />
-              <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
-                QWGenv
-              </h1>
+              <motion.h1
+                className="text-lg sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent cursor-pointer relative"
+                whileHover={{ scale: 1.05 }}
+                transition={{ scale: { duration: 0.3 } }}
+              >
+                <motion.span
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent bg-clip-text text-transparent"
+                  initial={{ backgroundPosition: "-200% 0" }}
+                  whileHover={{
+                    backgroundPosition: ["200% 0", "-200% 0"],
+                    transition: {
+                      duration: 1.2,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }
+                  }}
+                  style={{
+                    backgroundSize: "200% 100%"
+                  }}
+                >
+                  QWimgenv
+                </motion.span>
+                QWimgenv
+              </motion.h1>
             </motion.div>
 
             {/* Search Bar - Hidden on small screens */}
@@ -38,28 +59,68 @@ const HelpLanding = () => {
               <SearchBar />
             </div>
 
-            <nav className="flex items-center space-x-2 sm:space-x-4 md:space-x-6">
-              <Link
-                to="/"
-                className="text-gray-300 hover:text-white transition-colors font-medium text-sm sm:text-base"
+            <nav className="flex items-center space-x-0.5 sm:space-x-2">
+              <motion.a
+                href="/"
+                onClick={(e) => {
+                  e.preventDefault()
+                  window.location.href = '/'
+                }}
+                className="relative px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg overflow-hidden cursor-pointer group"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <span className="hidden sm:inline">Home</span>
-                <span className="sm:hidden font-bold">HOME</span>
-              </Link>
-              <Link
-                to="/generator"
-                className="text-gray-300 hover:text-white transition-colors font-medium text-sm sm:text-base"
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <span className="relative text-xs sm:text-base font-medium text-white" style={{ fontFamily: 'Lexend, sans-serif' }}>
+                  <span className="hidden sm:inline">Home</span>
+                  <span className="sm:hidden">HOME</span>
+                </span>
+              </motion.a>
+
+              <motion.a
+                href="/generator"
+                onClick={(e) => {
+                  e.preventDefault()
+                  window.location.href = '/generator'
+                }}
+                className="relative px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg overflow-hidden cursor-pointer group"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <span className="hidden sm:inline">Generator</span>
-                <span className="sm:hidden font-bold">TOOL</span>
-              </Link>
-              <Link
-                to="/help"
-                className="text-white font-medium border-b-2 border-purple-400 pb-1 text-sm sm:text-base"
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <span className="relative text-xs sm:text-base font-medium text-white" style={{ fontFamily: 'Lexend, sans-serif' }}>
+                  <span className="hidden sm:inline">Generator</span>
+                  <span className="sm:hidden">TOOL</span>
+                </span>
+              </motion.a>
+
+              <motion.a
+                href="/help"
+                className="relative px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg overflow-hidden cursor-pointer group"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <span className="hidden sm:inline">Help</span>
-                <span className="sm:hidden font-bold">HELP</span>
-              </Link>
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <span className="relative text-xs sm:text-base font-medium text-white" style={{ fontFamily: 'Lexend, sans-serif' }}>
+                  <span className="hidden sm:inline">Help</span>
+                  <span className="sm:hidden">HELP</span>
+                </span>
+              </motion.a>
             </nav>
           </div>
         </div>

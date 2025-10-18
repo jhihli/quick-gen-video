@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLanguage } from '../context/LanguageContext';
 
 export default function UserComments({ sessionId, onCommentSubmit }) {
-  const { t } = useLanguage();
   const [comment, setComment] = useState('');
   const [publicComments, setPublicComments] = useState([]);
   const [status, setStatus] = useState('typing'); // 'typing', 'submitting', 'cooldown', 'success', 'error'
@@ -238,9 +236,9 @@ export default function UserComments({ sessionId, onCommentSubmit }) {
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-lg sm:text-xl font-bold text-stone-800">
-                  {t('feedback')}
+                  Feedback
                 </h3>
-                <p className="text-stone-600 text-xs sm:text-sm">{t('yourFeedbackWillSupport')}</p>
+                <p className="text-stone-600 text-xs sm:text-sm">Your feedback will support improvements</p>
               </div>
             </div>
 
@@ -259,7 +257,7 @@ export default function UserComments({ sessionId, onCommentSubmit }) {
             <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3">
               <div className="space-y-1 sm:space-y-2">
                 <label htmlFor="comment-input" className="block text-xs font-semibold text-stone-700">
-                  ✨ {t('shareYourThoughtsMobile')}
+                  ✨ Share your thoughts
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-amber-200/30 to-stone-200/30 rounded-lg sm:rounded-xl blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity duration-300"></div>
@@ -268,7 +266,7 @@ export default function UserComments({ sessionId, onCommentSubmit }) {
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     disabled={status === 'submitting' || status === 'submitted' || hasSubmitted}
-                    placeholder={hasSubmitted ? t('thankYouForFeedback') : t('shareExperienceWithGenerator')}
+                    placeholder={hasSubmitted ? 'Thank you for your feedback' : 'Share your experience with the generator'}
                     className="relative w-full min-h-[70px] sm:min-h-[80px] rounded-md sm:rounded-lg border border-stone-300/50 bg-white/80 backdrop-blur-sm px-2 py-2 sm:px-3 sm:py-2 text-stone-800 placeholder:text-stone-500 focus:border-amber-400/70 focus:outline-none focus:ring-2 focus:ring-amber-400/20 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 resize-none text-xs sm:text-sm leading-relaxed"
                     maxLength={200}
                     rows={3}
@@ -340,10 +338,10 @@ export default function UserComments({ sessionId, onCommentSubmit }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="text-base sm:text-lg font-semibold text-green-200 mb-2">
-                    🎉 {t('typeFeedbackHere')}
+                    🎉 Type your feedback here
                   </h4>
                   <p className="text-green-300/80 text-sm sm:text-[15px] leading-relaxed">
-                    {t('yourExperienceShared')}
+                    Your experience has been shared with us. Thank you!
                   </p>
                 </div>
               </div>
@@ -367,7 +365,7 @@ export default function UserComments({ sessionId, onCommentSubmit }) {
                 </svg>
               </div>
               <h4 className="text-lg sm:text-xl font-bold text-stone-800">
-                {t('community')} ✨
+                Community ✨
               </h4>
             </div>
 

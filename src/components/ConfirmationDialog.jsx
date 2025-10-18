@@ -1,18 +1,16 @@
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useLanguage } from '../context/LanguageContext'
 
-function ConfirmationDialog({ 
-  isOpen, 
-  onConfirm, 
-  onCancel, 
-  title, 
-  message, 
-  confirmText, 
-  cancelText, 
+function ConfirmationDialog({
+  isOpen,
+  onConfirm,
+  onCancel,
+  title,
+  message,
+  confirmText,
+  cancelText,
   type = 'warning' // 'warning', 'danger', 'info'
 }) {
-  const { t } = useLanguage()
 
   const getTypeStyles = () => {
     switch (type) {
@@ -88,7 +86,7 @@ function ConfirmationDialog({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                {cancelText || t('cancel')}
+                {cancelText || 'Cancel'}
               </motion.button>
               <motion.button
                 onClick={onConfirm}
@@ -96,7 +94,7 @@ function ConfirmationDialog({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                {confirmText || t('confirm')}
+                {confirmText || 'Confirm'}
               </motion.button>
             </div>
           </div>
