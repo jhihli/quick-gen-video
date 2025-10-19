@@ -38,9 +38,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=5003
-      - BASE_URL=https://wgenv.com
-      - REACT_APP_BASE_URL=https://wgenv.com
-      - CORS_ORIGIN=https://wgenv.com
+      - BASE_URL=https://qwimgenv.com
+      - REACT_APP_BASE_URL=https://qwimgenv.com
+      - CORS_ORIGIN=https://qwimgenv.com
       - REDIS_URL=redis://redis:6379
       - REDIS_DISABLED=false
       - MAX_FILE_SIZE=10485760
@@ -95,7 +95,7 @@ services:
     environment:
       - NODE_ENV=production
       - DOCKER_ENV=true
-      - REACT_APP_BASE_URL=https://wgenv.com
+      - REACT_APP_BASE_URL=https://qwimgenv.com
     volumes:
       # SSL certificates (if using custom certificates)
       - ./ssl:/etc/nginx/ssl:ro

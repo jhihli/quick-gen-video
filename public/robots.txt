@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://wgenv.com/sitemap.xml
+Sitemap: https://qwimgenv.com/sitemap.xml
 
 # Allow access to static resources
 Allow: /local-img/
