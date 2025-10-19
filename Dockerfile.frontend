@@ -34,6 +34,9 @@ COPY package*.json ./
 # Install dependencies (use npm install to ensure all deps are installed)
 RUN npm install --production=false
 
+# Verify fuse.js is installed and list it
+RUN npm ls fuse.js || echo "fuse.js not found, installing explicitly..." && npm install fuse.js@^7.1.0
+
 # Copy source code
 COPY . .
 
