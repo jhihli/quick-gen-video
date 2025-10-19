@@ -36,15 +36,12 @@ export default defineConfig(({ mode }) => {
           manualChunks: {
             // Vendor chunk - React ecosystem
             'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-            
+
             // Animation libraries
             'vendor-animations': ['framer-motion'],
-            
+
             // Utility libraries
-            'vendor-utils': ['axios'],
-            
-            // Language translations (will be further optimized)
-            'translations': ['./src/context/LanguageContext.jsx']
+            'vendor-utils': ['axios', 'fuse.js']
           },
           // Optimize chunk naming
           chunkFileNames: (chunkInfo) => {
