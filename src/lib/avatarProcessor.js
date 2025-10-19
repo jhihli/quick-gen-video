@@ -382,9 +382,10 @@ export const processVideoWithAvatar = async ({
         onProgress: (progress) => updateProgress('apply', progress)
       });
 
-      // Move temp file to final output
+      // Move temp file to final output (use copy + delete for cross-filesystem compatibility)
       if (fs.existsSync(tempOutputPath)) {
-        fs.renameSync(tempOutputPath, outputPath);
+        fs.copyFileSync(tempOutputPath, outputPath);
+        fs.unlinkSync(tempOutputPath);
       }
 
       // Cleanup temporary files

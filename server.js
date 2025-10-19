@@ -1054,8 +1054,9 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
                 fs.unlinkSync(tempVideoPath);
               }
             } else {
-              // No avatar for this slide, just rename temp video
-              fs.renameSync(tempVideoPath, outputPath);
+              // No avatar for this slide, copy temp video (cross-filesystem compatible)
+              fs.copyFileSync(tempVideoPath, outputPath);
+              fs.unlinkSync(tempVideoPath);
             }
 
           } else {
@@ -1151,8 +1152,9 @@ app.post('/api/generate-video', combinedRateLimit, async (req, res) => {
 
               console.log(`✅ Successfully processed ${processedSlides} slide avatars`);
             } else {
-              // No avatars found, just rename temp video
-              fs.renameSync(tempVideoPath, outputPath);
+              // No avatars found, copy temp video (cross-filesystem compatible)
+              fs.copyFileSync(tempVideoPath, outputPath);
+              fs.unlinkSync(tempVideoPath);
             }
           }
 
