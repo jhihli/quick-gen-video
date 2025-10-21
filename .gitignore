@@ -151,3 +151,9 @@ docker-setup.md
 *kamatera*
 deploy-to-kamatera*
 *server*info*
+
+# Private notes and credentials (LOCAL ONLY - NEVER COMMIT)
+PRIVATE-NOTES.md
+PRIVATE-*.md
+*PRIVATE*
+*private*notes*

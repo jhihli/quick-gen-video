@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { LogoIcon } from './AnimatedIcons'
 import SearchBar from './SearchBar'
 import TopicCard from './TopicCard'
+import Footer from './Footer'
 import { helpTopics, categories } from '../data/helpTopicsData'
 
 const HelpLanding = () => {
@@ -218,15 +219,7 @@ const HelpLanding = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-slate-900/50 border-t border-white/10 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="text-center">
-            <p className="text-gray-400 text-sm">
-              © 2025 QWGenv. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

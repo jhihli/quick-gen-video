@@ -5,6 +5,7 @@ import { LogoIcon } from './AnimatedIcons'
 import AnimatedTitle from './AnimatedTitle'
 import Modal from './Modal'
 import SearchBar from './SearchBar'
+import Footer from './Footer'
 import { useAppContext } from '../context/AppContext'
 
 const containerVariants = {
@@ -1589,70 +1590,9 @@ const Home = () => {
       </motion.section>
 
       {/* Footer */}
-      <motion.footer
-        className="bg-white/5 backdrop-blur-sm border-t border-white/10 py-12"
-        variants={itemVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center space-x-8 text-gray-300">
-            <button
-              onClick={() => setActiveModal('about')}
-              className="hover:text-white transition-colors cursor-pointer mb-2"
-            >
-              About Us
-            </button>
-            <button
-              onClick={() => setActiveModal('contact')}
-              className="hover:text-white transition-colors cursor-pointer mb-2"
-            >
-              Contact Us
-            </button>
-            <button
-              onClick={() => setActiveModal('privacy')}
-              className="hover:text-white transition-colors cursor-pointer mb-2"
-            >
-              Privacy Policy
-            </button>
-            <button
-              onClick={() => setActiveModal('terms')}
-              className="hover:text-white transition-colors cursor-pointer mb-2"
-            >
-              Terms of Service
-            </button>
-          </div>
-          <div className="text-center mt-8 text-gray-400">
-            <p>&copy; 2025 Quick Way. All rights reserved.</p>
-          </div>
-        </div>
-      </motion.footer>
+      <Footer />
 
       {/* Modals */}
-      <Modal
-        isOpen={activeModal === 'about'}
-        onClose={() => setActiveModal(null)}
-        title="About Us"
-      >
-        {modalContent.about}
-      </Modal>
-
-      <Modal
-        isOpen={activeModal === 'contact'}
-        onClose={() => setActiveModal(null)}
-        title="Contact Us"
-      >
-        {modalContent.contact}
-      </Modal>
-
-      <Modal
-        isOpen={activeModal === 'privacy'}
-        onClose={() => setActiveModal(null)}
-        title="Privacy Policy"
-      >
-        {modalContent.privacy}
-      </Modal>
-
       <Modal
         isOpen={activeModal === 'terms'}
         onClose={() => setActiveModal(null)}

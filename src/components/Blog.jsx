@@ -7,6 +7,7 @@ import BlogNavigation from './BlogNavigation'
 import TipCard from './TipCard'
 import CaseStudy from './CaseStudy'
 import YouTubeVideo from './YouTubeVideo'
+import Footer from './Footer'
 
 const Blog = () => {
   const navigate = useNavigate()
@@ -566,15 +567,7 @@ const Blog = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-slate-900/50 border-t border-white/10 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="text-center">
-            <p className="text-gray-400 text-sm">
-              © 2025 QWGenv. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

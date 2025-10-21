@@ -8,6 +8,7 @@ import PreviewFrame from './PreviewFrame'
 import BottomButtonBar from './BottomButtonBar'
 import BottomSheetDrawer from './BottomSheetDrawer'
 import SearchBar from './SearchBar'
+import Footer from './Footer'
 
 // Import existing components (will be used in two-column layout)
 import UploadPhotos from './UploadPhotos'
@@ -399,6 +400,9 @@ const Generator = () => {
         </BottomSheetDrawer>
 
       </main>
+
+      {/* Footer */}
+      <Footer />
     </div>
   )
 }
