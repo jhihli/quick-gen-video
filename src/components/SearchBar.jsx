@@ -3,35 +3,97 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import Fuse from 'fuse.js'
 import { searchableContent } from '../data/searchableContent'
+import { fetchNews } from '../services/newsService'
 
 const SearchBar = () => {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [isOpen, setIsOpen] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
+  const [newsArticles, setNewsArticles] = useState([])
+  const [combinedContent, setCombinedContent] = useState(searchableContent)
   const searchRef = useRef(null)
   const inputRef = useRef(null)
   const navigate = useNavigate()
+  const fuseRef = useRef(null)
 
-  // Fuse.js configuration for fuzzy search
-  const fuse = useRef(
-    new Fuse(searchableContent, {
+  // Fetch news articles on mount
+  useEffect(() => {
+    const loadNewsArticles = async () => {
+      try {
+        const articles = await fetchNews()
+
+        // Transform news articles to searchable format
+        const searchableArticles = articles.map((article, index) => ({
+          id: `news-article-${index}`,
+          title: article.title,
+          description: article.description || '',
+          keywords: [
+            // Extract keywords from title and description
+            ...article.title.toLowerCase().split(' ').filter(word => word.length > 3),
+            ...(article.description || '').toLowerCase().split(' ').filter(word => word.length > 3)
+          ],
+          path: '/news',
+          category: 'article',
+          // Store additional article data for navigation
+          articleData: article
+        }))
+
+        setNewsArticles(searchableArticles)
+
+        // Combine static content with news articles
+        const combined = [...searchableContent, ...searchableArticles]
+        setCombinedContent(combined)
+
+        // Update Fuse instance with combined content
+        fuseRef.current = new Fuse(combined, {
+          keys: [
+            { name: 'title', weight: 3 },
+            { name: 'description', weight: 2 },
+            { name: 'keywords', weight: 1 }
+          ],
+          threshold: 0.2, // More strict: 0.0 = exact match, 1.0 = match anything
+          ignoreLocation: true,
+          minMatchCharLength: 2, // Require at least 2 characters to match
+          includeScore: true
+        })
+      } catch (error) {
+        console.error('Error loading news articles for search:', error)
+        // Initialize Fuse with static content only if news fetch fails
+        fuseRef.current = new Fuse(searchableContent, {
+          keys: [
+            { name: 'title', weight: 3 },
+            { name: 'description', weight: 2 },
+            { name: 'keywords', weight: 1 }
+          ],
+          threshold: 0.2,
+          ignoreLocation: true,
+          minMatchCharLength: 2,
+          includeScore: true
+        })
+      }
+    }
+
+    // Initialize Fuse with static content first
+    fuseRef.current = new Fuse(searchableContent, {
       keys: [
         { name: 'title', weight: 3 },
         { name: 'description', weight: 2 },
         { name: 'keywords', weight: 1 }
       ],
-      threshold: 0.4, // 0.0 = exact match, 1.0 = match anything
+      threshold: 0.2,
       ignoreLocation: true,
-      minMatchCharLength: 1,
+      minMatchCharLength: 2,
       includeScore: true
     })
-  ).current
+
+    loadNewsArticles()
+  }, [])
 
   // Handle search input
   useEffect(() => {
-    if (query.trim().length > 0) {
-      const searchResults = fuse.search(query)
+    if (query.trim().length > 0 && fuseRef.current) {
+      const searchResults = fuseRef.current.search(query)
       setResults(searchResults.slice(0, 8)) // Limit to 8 results
       setIsOpen(true)
       setSelectedIndex(-1)
@@ -85,7 +147,13 @@ const SearchBar = () => {
 
   // Handle result selection
   const handleResultClick = (item) => {
-    navigate(item.path)
+    if (item.category === 'article' && item.articleData) {
+      // For news articles, navigate to /news with article data in state
+      navigate(item.path, { state: { selectedArticle: item.articleData, openModal: true } })
+    } else {
+      // For static pages, normal navigation
+      navigate(item.path)
+    }
     setQuery('')
     setIsOpen(false)
     inputRef.current?.blur()
@@ -100,6 +168,8 @@ const SearchBar = () => {
         return 'from-purple-500 to-pink-500'
       case 'technical':
         return 'from-orange-500 to-red-500'
+      case 'article':
+        return 'from-green-500 to-emerald-500'
       default:
         return 'from-gray-500 to-gray-600'
     }

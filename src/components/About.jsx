@@ -68,31 +68,94 @@ const About = () => {
               </h1>
             </motion.div>
 
-            <nav className="flex items-center space-x-2">
-              <motion.button
-                onClick={() => navigate('/')}
-                className="px-4 py-2 text-white hover:bg-white/10 rounded-lg transition-all"
+            <nav className="flex items-center space-x-0.5 sm:space-x-2">
+              <motion.a
+                href="/"
+                onClick={(e) => {
+                  e.preventDefault()
+                  navigate('/')
+                }}
+                className="relative px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg overflow-hidden cursor-pointer group"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Home
-              </motion.button>
-              <motion.button
-                onClick={() => navigate('/generator')}
-                className="px-4 py-2 text-white hover:bg-white/10 rounded-lg transition-all"
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <span className="relative text-xs sm:text-base font-medium text-white" style={{ fontFamily: 'Lexend, sans-serif' }}>
+                  <span className="hidden sm:inline">Home</span>
+                  <span className="sm:hidden">HOME</span>
+                </span>
+              </motion.a>
+
+              <motion.a
+                href="/generator"
+                onClick={(e) => {
+                  e.preventDefault()
+                  navigate('/generator')
+                }}
+                className="relative px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg overflow-hidden cursor-pointer group"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Generator
-              </motion.button>
-              <motion.button
-                onClick={() => navigate('/help')}
-                className="px-4 py-2 text-white hover:bg-white/10 rounded-lg transition-all"
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <span className="relative text-xs sm:text-base font-medium text-white" style={{ fontFamily: 'Lexend, sans-serif' }}>
+                  <span className="hidden sm:inline">Generator</span>
+                  <span className="sm:hidden">TOOL</span>
+                </span>
+              </motion.a>
+
+              <motion.a
+                href="/help"
+                onClick={(e) => {
+                  e.preventDefault()
+                  navigate('/help')
+                }}
+                className="relative px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg overflow-hidden cursor-pointer group"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Help
-              </motion.button>
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <span className="relative text-xs sm:text-base font-medium text-white" style={{ fontFamily: 'Lexend, sans-serif' }}>
+                  <span className="hidden sm:inline">Help</span>
+                  <span className="sm:hidden">HELP</span>
+                </span>
+              </motion.a>
+
+              <motion.a
+                href="/news"
+                onClick={(e) => {
+                  e.preventDefault()
+                  navigate('/news')
+                }}
+                className="relative px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg overflow-hidden cursor-pointer group"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-red-500/20"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <span className="relative text-xs sm:text-base font-medium text-white" style={{ fontFamily: 'Lexend, sans-serif' }}>
+                  <span className="hidden sm:inline">News</span>
+                  <span className="sm:hidden">NEWS</span>
+                </span>
+              </motion.a>
             </nav>
           </div>
         </div>

@@ -144,17 +144,17 @@ const BottomSheetDrawer = ({
       >
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
-          <Drawer.Content className="bg-gray-900/95 backdrop-blur-xl border-t border-white/10 flex flex-col rounded-t-2xl h-fit fixed bottom-0 left-0 right-0 z-50">
+          <Drawer.Content className="bg-gray-900/95 backdrop-blur-xl border-t border-white/10 flex flex-col rounded-t-2xl fixed bottom-0 left-0 right-0 z-50 h-[98vh]">
             {/* Drag Handle */}
-            <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-white/30 mt-4" />
+            <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-white/30 mt-2" />
 
             {/* Header */}
-            <div className="flex items-center justify-between p-6 pb-4">
-              <Drawer.Title className="text-white text-xl font-semibold">{title}</Drawer.Title>
+            <div className="flex items-center justify-between p-3 pb-2">
+              <Drawer.Title className="text-white text-base font-semibold">{title}</Drawer.Title>
               {showCloseButton && (
                 <button
                   onClick={() => onOpenChange(false)}
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                  className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
                 >
                   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -169,7 +169,7 @@ const BottomSheetDrawer = ({
             </Drawer.Description>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto max-h-[70vh] px-6 pb-8">
+            <div className="flex-1 overflow-y-auto px-4 pb-4">
               {children}
             </div>
           </Drawer.Content>

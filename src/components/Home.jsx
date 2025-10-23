@@ -191,7 +191,7 @@ const Home = () => {
                   e.preventDefault()
                   // No confirmation needed - just stay on home page
                 }}
-                className="relative px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg overflow-hidden cursor-pointer group"
+                className="relative px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg overflow-hidden cursor-pointer group bg-white/20"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -245,6 +245,28 @@ const Home = () => {
                 <span className="relative text-xs sm:text-base font-medium text-white" style={{ fontFamily: 'Lexend, sans-serif' }}>
                   <span className="hidden sm:inline">Help</span>
                   <span className="sm:hidden">HELP</span>
+                </span>
+              </motion.a>
+
+              <motion.a
+                href="/news"
+                onClick={(e) => {
+                  e.preventDefault()
+                  navigate('/news')
+                }}
+                className="relative px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg overflow-hidden cursor-pointer group"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-red-500/20"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <span className="relative text-xs sm:text-base font-medium text-white" style={{ fontFamily: 'Lexend, sans-serif' }}>
+                  <span className="hidden sm:inline">News</span>
+                  <span className="sm:hidden">NEWS</span>
                 </span>
               </motion.a>
             </nav>

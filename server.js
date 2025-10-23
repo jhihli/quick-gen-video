@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import { body, validationResult } from 'express-validator';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -115,6 +116,9 @@ app.use(helmet({
 app.use(cors());
 app.use(express.json({ limit: '1mb' })); // Limit JSON payload size
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// Cookie parser middleware for AdSense and session management
+app.use(cookieParser());
 
 // Add CORS and security headers
 app.use((req, res, next) => {
@@ -653,6 +657,47 @@ app.post('/api/upload-music', upload.single('music'), async (req, res) => {
   } catch (error) {
     console.error('Music upload error:', error);
     res.status(500).json({ error: 'Failed to upload music' });
+  }
+});
+
+// Get news articles (server-side cached)
+// Uses dynamic import to ensure dotenv is loaded first
+app.get('/api/news', async (req, res) => {
+  try {
+    const { fetchNewsArticles } = await import('./src/services/serverNewsCache.js');
+    const result = await fetchNewsArticles();
+
+    res.json({
+      success: result.success,
+      articles: result.articles,
+      source: result.source, // 'cache', 'api', 'mock', 'stale-cache', or 'mock-fallback'
+      error: result.error || undefined
+    });
+  } catch (error) {
+    console.error('News API error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch news articles',
+      articles: []
+    });
+  }
+});
+
+// Get news cache statistics (for monitoring/debugging)
+app.get('/api/news/stats', async (req, res) => {
+  try {
+    const { getCacheStats } = await import('./src/services/serverNewsCache.js');
+    const stats = getCacheStats();
+    res.json({
+      success: true,
+      ...stats
+    });
+  } catch (error) {
+    console.error('News cache stats error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get cache stats'
+    });
   }
 });
 

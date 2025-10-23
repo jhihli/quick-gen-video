@@ -28,6 +28,16 @@ export const searchableContent = [
     category: 'page'
   },
 
+  // News Page
+  {
+    id: 'news',
+    title: 'Tech News',
+    description: 'Latest technology news about video editing, music production, and content creation tools',
+    keywords: ['news', 'tech', 'technology', 'video', 'editing', 'music', 'production', 'creator', 'content', 'software', 'tools', 'creative', 'industry', 'updates'],
+    path: '/news',
+    category: 'page'
+  },
+
   // Help Center Landing
   {
     id: 'help-center',
